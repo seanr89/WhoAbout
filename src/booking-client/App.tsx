@@ -114,10 +114,10 @@ const App: React.FC = () => {
       }
     }
   };
-  
+
   const handleClearFilters = () => {
     if (locations.length > 0) {
-        setSelectedLocationId(locations[0].id);
+      setSelectedLocationId(locations[0].id);
     }
     setSelectedDate(getTodayString());
     setSelectedSlot(BookingSlot.FULL_DAY);
@@ -135,7 +135,7 @@ const App: React.FC = () => {
             {/* Location Selector */}
             <div className="space-y-2">
               <label htmlFor="location-select" className="flex items-center text-sm font-medium text-slate-600">
-                <LocationIcon className="w-5 h-5 mr-2 text-slate-400"/>
+                <LocationIcon className="w-5 h-5 mr-2 text-slate-400" />
                 Location
               </label>
               <select
@@ -159,79 +159,79 @@ const App: React.FC = () => {
 
             {/* Date Picker */}
             <div className="space-y-2 relative" ref={calendarRef}>
-                <label htmlFor="date-picker-button" className="flex items-center text-sm font-medium text-slate-600">
-                    <CalendarIcon className="w-5 h-5 mr-2 text-slate-400"/>
-                    Date
-                </label>
-                <button
-                    id="date-picker-button"
-                    type="button"
-                    onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                    className="w-full text-left p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                >
-                    {new Date(selectedDate + 'T00:00:00').toLocaleDateString(undefined, {
-                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                    })}
-                </button>
-                {isCalendarOpen && (
-                    <div className="absolute top-full mt-2 z-10">
-                        <Calendar 
-                            selectedDate={selectedDate}
-                            onDateSelect={handleDateSelect}
-                            minDate={getTodayString()}
-                        />
-                    </div>
-                )}
+              <label htmlFor="date-picker-button" className="flex items-center text-sm font-medium text-slate-600">
+                <CalendarIcon className="w-5 h-5 mr-2 text-slate-400" />
+                Date
+              </label>
+              <button
+                id="date-picker-button"
+                type="button"
+                onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                className="w-full text-left p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              >
+                {new Date(selectedDate + 'T00:00:00').toLocaleDateString(undefined, {
+                  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                })}
+              </button>
+              {isCalendarOpen && (
+                <div className="absolute top-full mt-2 z-10">
+                  <Calendar
+                    selectedDate={selectedDate}
+                    onDateSelect={handleDateSelect}
+                    minDate={getTodayString()}
+                  />
+                </div>
+              )}
             </div>
-            
+
             {/* Slot Selector */}
             <div className="space-y-2">
-                <label htmlFor="slot-select" className="flex items-center text-sm font-medium text-slate-600">
-                    <ClockIcon className="w-5 h-5 mr-2 text-slate-400"/>
-                    Time Slot
-                </label>
-                <select
-                    id="slot-select"
-                    value={selectedSlot}
-                    onChange={(e) => setSelectedSlot(e.target.value as BookingSlot)}
-                    className="w-full p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                >
-                    {Object.values(BookingSlot).map(slot => (
-                        <option key={slot} value={slot}>{slot}</option>
-                    ))}
-                </select>
+              <label htmlFor="slot-select" className="flex items-center text-sm font-medium text-slate-600">
+                <ClockIcon className="w-5 h-5 mr-2 text-slate-400" />
+                Time Slot
+              </label>
+              <select
+                id="slot-select"
+                value={selectedSlot}
+                onChange={(e) => setSelectedSlot(e.target.value as BookingSlot)}
+                className="w-full p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              >
+                {Object.values(BookingSlot).map(slot => (
+                  <option key={slot} value={slot}>{slot}</option>
+                ))}
+              </select>
             </div>
 
             {/* Desk Type Filter */}
             <div className="space-y-2">
-                <label htmlFor="type-filter" className="flex items-center text-sm font-medium text-slate-600">
-                    <FilterIcon className="w-5 h-5 mr-2 text-slate-400"/>
-                    Desk Type
-                </label>
-                <select
-                    id="type-filter"
-                    value={deskTypeFilter}
-                    onChange={(e) => setDeskTypeFilter(e.target.value as DeskType | 'all')}
-                    className="w-full p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                >
-                    <option value="all">All Types</option>
-                    {Object.values(DeskType).map(type => (
-                        <option key={type} value={type}>{type}</option>
-                    ))}
-                </select>
+              <label htmlFor="type-filter" className="flex items-center text-sm font-medium text-slate-600">
+                <FilterIcon className="w-5 h-5 mr-2 text-slate-400" />
+                Desk Type
+              </label>
+              <select
+                id="type-filter"
+                value={deskTypeFilter}
+                onChange={(e) => setDeskTypeFilter(e.target.value as DeskType | 'all')}
+                className="w-full p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+              >
+                <option value="all">All Types</option>
+                {Object.values(DeskType).map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
             </div>
-            
+
             {/* Clear Filters Button */}
             <div className="space-y-2">
-                <label className="flex items-center text-sm font-medium text-slate-600 invisible" aria-hidden="true">Clear</label>
-                <button
-                    onClick={handleClearFilters}
-                    className="w-full flex items-center justify-center p-2 border border-slate-300 rounded-md bg-white text-slate-700 hover:bg-slate-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition font-medium"
-                    aria-label="Clear all filters"
-                >
-                    <RefreshCwIcon className="w-4 h-4 mr-2 text-slate-500"/>
-                    Clear Filters
-                </button>
+              <label className="flex items-center text-sm font-medium text-slate-600 invisible" aria-hidden="true">Clear</label>
+              <button
+                onClick={handleClearFilters}
+                className="w-full flex items-center justify-center p-2 border border-slate-300 rounded-md bg-white text-slate-700 hover:bg-slate-50 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition font-medium"
+                aria-label="Clear all filters"
+              >
+                <RefreshCwIcon className="w-4 h-4 mr-2 text-slate-500" />
+                Clear Filters
+              </button>
             </div>
           </div>
         </div>
@@ -248,7 +248,7 @@ const App: React.FC = () => {
           <div>
             <h2 className="text-2xl font-bold text-slate-800 mb-2">Available Desks</h2>
             <p className="text-slate-600 mb-6">
-                Showing desks for {selectedLocation?.name} on {new Date(selectedDate + 'T00:00:00').toDateString()} for {selectedSlot}.
+              Showing desks for {selectedLocation?.name} on {new Date(selectedDate + 'T00:00:00').toDateString()} for {selectedSlot}.
             </p>
             <DeskLayout
               desks={filteredDesks}

@@ -1,3 +1,4 @@
+using bookings_api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace bookings_api.Data;
@@ -8,5 +9,7 @@ public class AppDbContext : DbContext
     {
     }
 
-    // public DbSet<YourEntity> YourEntities { get; set; }
+    public DbSet<Office> Offices { get; set; }
+    public DbSet<Desk> Desks { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
 }
