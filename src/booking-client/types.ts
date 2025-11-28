@@ -1,0 +1,34 @@
+export interface Location {
+  id: number;
+  name: string;
+  city: string;
+}
+
+export enum DeskType {
+  STANDARD = 'Standard',
+  STANDING = 'Standing',
+  HIGH_SEAT = 'High Seat',
+  MEETING_ROOM = 'Meeting Room',
+}
+
+export interface Desk {
+  id: string;
+  locationId: number;
+  label: string;
+  type: DeskType;
+  isReserved?: boolean;
+}
+
+export enum BookingSlot {
+  MORNING = 'Morning',
+  AFTERNOON = 'Afternoon',
+  FULL_DAY = 'Full Day',
+}
+
+export interface Booking {
+  id: string;
+  deskId: string;
+  userId: string;
+  date: string; // YYYY-MM-DD
+  slot: BookingSlot;
+}

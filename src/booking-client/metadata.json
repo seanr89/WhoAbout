@@ -1,0 +1,5 @@
+{
+  "name": "Office Desk Booking System",
+  "description": "An elegant and modern desk booking system for companies with multiple office locations. Users can select a location, date, and time slot (morning, afternoon, or full day) to reserve a desk. The system also supports indefinitely reserved desks.",
+  "requestFramePermissions": []
+}
