@@ -1,7 +1,7 @@
 # Variables
 DOCKER_COMPOSE = docker compose
 
-.PHONY: all build up down logs postgres bookings-api clean help
+.PHONY: all build up down logs postgres bookings-api clean help db-migrate-add
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -29,3 +29,8 @@ compose-bookings-api: ## Start only the bookings-api service
 
 clean: ## Stop containers and remove volumes/images
 	$(DOCKER_COMPOSE) down -v --rmi local --remove-orphans
+
+db-migrate-add: ## Create a new EF Core migration (usage: make db-migrate-add NAME=MigrationName)
+	@if [ -z "$(NAME)" ]; then echo "Error: NAME is required. Usage: make db-migrate-add NAME=MigrationName"; exit 1; fi
+	dotnet ef migrations add $(NAME) --project src/bookings-api --startup-project src/bookings-api
+

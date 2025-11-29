@@ -1,5 +1,5 @@
 export interface Location {
-  id: number;
+  id: string;
   name: string;
   city: string;
 }
@@ -13,7 +13,7 @@ export enum DeskType {
 
 export interface Desk {
   id: string;
-  locationId: number;
+  locationId: string;
   label: string;
   type: DeskType;
   isReserved?: boolean;

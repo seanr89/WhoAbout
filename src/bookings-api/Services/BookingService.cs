@@ -48,8 +48,9 @@ public class BookingService
             return null;
         }
 
-        existingBooking.StartTime = booking.StartTime;
-        existingBooking.EndTime = booking.EndTime;
+        existingBooking.BookingDate = booking.BookingDate;
+        existingBooking.BookingType = booking.BookingType;
+        existingBooking.Status = booking.Status;
         existingBooking.DeskId = booking.DeskId;
         
         await _context.SaveChangesAsync();

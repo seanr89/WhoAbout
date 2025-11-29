@@ -5,20 +5,12 @@ import { bookingService } from './bookingService';
 const SIMULATED_DELAY = 500; // ms
 
 export const api = {
-  fetchLocations: (): Promise<Location[]> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(LOCATIONS);
-      }, SIMULATED_DELAY);
-    });
+  fetchLocations: async (): Promise<Location[]> => {
+    return await bookingService.getLocations();
   },
 
-  fetchDesks: (): Promise<Desk[]> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(DESKS);
-      }, SIMULATED_DELAY);
-    });
+  fetchDesks: async (): Promise<Desk[]> => {
+    return await bookingService.getDesks();
   },
 
   fetchBookings: async (): Promise<Booking[]> => {

@@ -28,7 +28,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedLocationId, setSelectedLocationId] = useState<number | null>(null);
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot>(BookingSlot.FULL_DAY);
   const [deskTypeFilter, setDeskTypeFilter] = useState<DeskType | 'all'>('all');
@@ -141,7 +141,7 @@ const App: React.FC = () => {
               <select
                 id="location-select"
                 value={selectedLocationId ?? ''}
-                onChange={(e) => setSelectedLocationId(Number(e.target.value))}
+                onChange={(e) => setSelectedLocationId(e.target.value)}
                 className="w-full p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                 disabled={isLoading || locations.length === 0}
               >

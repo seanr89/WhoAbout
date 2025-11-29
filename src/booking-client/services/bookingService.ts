@@ -1,16 +1,53 @@
-import { Booking, BookingSlot } from '../types';
+import { Booking, BookingSlot, Location, Desk, DeskType } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5191';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 interface ApiBooking {
     id: string;
-    startTime: string;
-    endTime: string;
+    bookingDate: string;
     bookingType: number;
+    status: number;
     deskId: string;
 }
 
+interface ApiOffice {
+    id: string;
+    name: string;
+    location: string;
+}
+
+interface ApiDesk {
+    id: string;
+    name: string;
+    type: number;
+    officeId: string;
+}
+
 export const bookingService = {
+    async getLocations(): Promise<Location[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/offices`);
+            if (!response.ok) throw new Error('Failed to fetch offices');
+            const data: ApiOffice[] = await response.json();
+            return data.map(mapApiOfficeToLocation);
+        } catch (error) {
+            console.error('Error fetching locations:', error);
+            return [];
+        }
+    },
+
+    async getDesks(): Promise<Desk[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/desks`);
+            if (!response.ok) throw new Error('Failed to fetch desks');
+            const data: ApiDesk[] = await response.json();
+            return data.map(mapApiDeskToDesk);
+        } catch (error) {
+            console.error('Error fetching desks:', error);
+            return [];
+        }
+    },
+
     async getAll(): Promise<Booking[]> {
         try {
             const response = await fetch(`${API_BASE_URL}/api/bookings`);
@@ -51,32 +88,16 @@ function mapApiBookingToClient(apiBooking: ApiBooking): Booking {
         id: apiBooking.id,
         deskId: apiBooking.deskId,
         userId: 'user-placeholder', // The API does not yet return the user ID
-        date: apiBooking.startTime.split('T')[0],
+        date: apiBooking.bookingDate.split('T')[0],
         slot: mapBookingTypeToSlot(apiBooking.bookingType),
     };
 }
 
 function mapClientBookingToApiRequest(booking: Omit<Booking, 'id'>) {
-    const date = new Date(booking.date);
-    let startTime = new Date(date);
-    let endTime = new Date(date);
-
-    // Default hours based on slot
-    if (booking.slot === BookingSlot.MORNING) {
-        startTime.setHours(9, 0, 0);
-        endTime.setHours(12, 0, 0);
-    } else if (booking.slot === BookingSlot.AFTERNOON) {
-        startTime.setHours(13, 0, 0);
-        endTime.setHours(17, 0, 0);
-    } else { // Full Day
-        startTime.setHours(9, 0, 0);
-        endTime.setHours(17, 0, 0);
-    }
-
     return {
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
+        bookingDate: new Date(booking.date).toISOString(),
         bookingType: mapSlotToBookingType(booking.slot),
+        status: 0, // Requested
         deskId: booking.deskId,
     };
 }
@@ -96,5 +117,32 @@ function mapSlotToBookingType(slot: BookingSlot): number {
         case BookingSlot.AFTERNOON: return 1;
         case BookingSlot.FULL_DAY: return 2;
         default: return 2;
+    }
+}
+
+function mapApiOfficeToLocation(apiOffice: ApiOffice): Location {
+    return {
+        id: apiOffice.id,
+        name: apiOffice.name,
+        city: apiOffice.location,
+    };
+}
+
+function mapApiDeskToDesk(apiDesk: ApiDesk): Desk {
+    return {
+        id: apiDesk.id,
+        locationId: apiDesk.officeId,
+        label: apiDesk.name,
+        type: mapIntToDeskType(apiDesk.type),
+    };
+}
+
+function mapIntToDeskType(type: number): DeskType {
+    switch (type) {
+        case 0: return DeskType.STANDARD;
+        case 1: return DeskType.STANDING;
+        case 2: return DeskType.HIGH_SEAT;
+        case 3: return DeskType.MEETING_ROOM;
+        default: return DeskType.STANDARD;
     }
 }

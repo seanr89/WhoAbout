@@ -97,25 +97,25 @@ public static class DbInitializer
             new Booking 
             { 
                 Id = Guid.NewGuid(), 
-                StartTime = DateTime.UtcNow.AddDays(1).Date.AddHours(9), 
-                EndTime = DateTime.UtcNow.AddDays(1).Date.AddHours(17), 
+                BookingDate = DateTime.UtcNow.AddDays(1).Date,
                 BookingType = BookingType.FullDay,
+                Status = BookingStatus.Accepted,
                 DeskId = desks[0].Id // DTO Desk
             },
             new Booking 
             { 
                 Id = Guid.NewGuid(), 
-                StartTime = DateTime.UtcNow.AddDays(2).Date.AddHours(9), 
-                EndTime = DateTime.UtcNow.AddDays(2).Date.AddHours(12), 
+                BookingDate = DateTime.UtcNow.AddDays(2).Date,
                 BookingType = BookingType.Morning,
+                Status = BookingStatus.Requested,
                 DeskId = desks[65].Id // HQ Desk
             },
              new Booking 
             { 
                 Id = Guid.NewGuid(), 
-                StartTime = DateTime.UtcNow.AddDays(1).Date.AddHours(10), 
-                EndTime = DateTime.UtcNow.AddDays(1).Date.AddHours(18), 
+                BookingDate = DateTime.UtcNow.AddDays(1).Date,
                 BookingType = BookingType.FullDay,
+                Status = BookingStatus.Accepted,
                 DeskId = desks[105].Id // INT Desk
             }
         };
