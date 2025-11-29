@@ -11,6 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+{
+    options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -29,18 +34,20 @@ if (app.Environment.IsDevelopment())
         options.WithTitle("Bookings API");
         options.WithTheme(ScalarTheme.DeepSpace);
         options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+        options.Servers = [new ScalarServer("http://localhost:8080")];
     });
 }
 
 app.UseHttpsRedirection();
 
-app.MapHealthChecks("/health");
+// app.MapHealthChecks("/health");
 
 app.MapGet("/healthcheck", () => Results.Ok("Healthy"))
     .WithName("GetHealthCheck");
 
 app.MapOfficeEndpoints();
 app.MapDeskEndpoints();
+app.MapBookingEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {

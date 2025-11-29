@@ -1,6 +1,46 @@
-@bookings_api_HostAddress = http://localhost:5191
+@bookings_api_HostAddress = http://localhost:8080
 
-GET {{bookings_api_HostAddress}}/weatherforecast/
+### Health Check
+GET {{bookings_api_HostAddress}}/healthcheck
 Accept: application/json
 
 ###
+
+### Get All Offices
+GET {{bookings_api_HostAddress}}/api/offices
+Accept: application/json
+
+###
+
+### Create Office
+POST {{bookings_api_HostAddress}}/api/offices
+Content-Type: application/json
+
+{
+  "name": "Headquarters",
+  "location": "New York, NY"
+}
+
+###
+
+### Get Office By ID (Replace with actual ID)
+@officeId = 3fa85f64-5717-4562-b3fc-2c963f66afa6
+GET {{bookings_api_HostAddress}}/api/offices/{{officeId}}
+Accept: application/json
+
+###
+
+### Update Office (Replace with actual ID)
+PUT {{bookings_api_HostAddress}}/api/offices/{{officeId}}
+Content-Type: application/json
+
+{
+  "name": "Headquarters Updated",
+  "location": "Manhattan, NY"
+}
+
+###
+
+### Delete Office (Replace with actual ID)
+DELETE {{bookings_api_HostAddress}}/api/offices/{{officeId}}
+Accept: application/json

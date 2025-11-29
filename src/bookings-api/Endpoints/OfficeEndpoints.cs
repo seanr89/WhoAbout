@@ -12,37 +12,62 @@ public static class OfficeEndpoints
             .WithTags("Offices")
             .WithOpenApi();
 
-        group.MapGet("/", async (OfficeService service) =>
+        group.MapGet("/", async (OfficeService service, ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("OfficeEndpoints");
+            logger.LogInformation("Getting all offices");
             return Results.Ok(await service.GetAllOfficesAsync());
         })
         .WithName("GetAllOffices");
 
-        group.MapGet("/{id}", async (Guid id, OfficeService service) =>
+        group.MapGet("/{id}", async (Guid id, OfficeService service, ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("OfficeEndpoints");
+            logger.LogInformation("Getting office with Id: {Id}", id);
             var office = await service.GetOfficeByIdAsync(id);
-            return office is not null ? Results.Ok(office) : Results.NotFound();
+            if (office is null)
+            {
+                logger.LogWarning("Office with Id: {Id} not found", id);
+                return Results.NotFound();
+            }
+            return Results.Ok(office);
         })
         .WithName("GetOfficeById");
 
-        group.MapPost("/", async ([FromBody] Office office, OfficeService service) =>
+        group.MapPost("/", async ([FromBody] Office office, OfficeService service, ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("OfficeEndpoints");
+            logger.LogInformation("Creating new office: {Name}", office.Name);
             var createdOffice = await service.CreateOfficeAsync(office);
             return Results.Created($"/api/offices/{createdOffice.Id}", createdOffice);
         })
         .WithName("CreateOffice");
 
-        group.MapPut("/{id}", async (Guid id, [FromBody] Office office, OfficeService service) =>
+        group.MapPut("/{id}", async (Guid id, [FromBody] Office office, OfficeService service, ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("OfficeEndpoints");
+            logger.LogInformation("Updating office with Id: {Id}", id);
             var updatedOffice = await service.UpdateOfficeAsync(id, office);
-            return updatedOffice is not null ? Results.Ok(updatedOffice) : Results.NotFound();
+            if (updatedOffice is null)
+            {
+                logger.LogWarning("Office with Id: {Id} not found for update", id);
+                return Results.NotFound();
+            }
+            return Results.Ok(updatedOffice);
         })
         .WithName("UpdateOffice");
 
-        group.MapDelete("/{id}", async (Guid id, OfficeService service) =>
+        group.MapDelete("/{id}", async (Guid id, OfficeService service, ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("OfficeEndpoints");
+            logger.LogInformation("Deleting office with Id: {Id}", id);
             var deleted = await service.DeleteOfficeAsync(id);
-            return deleted ? Results.NoContent() : Results.NotFound();
+            if (!deleted)
+            {
+                logger.LogWarning("Office with Id: {Id} not found for deletion", id);
+                return Results.NotFound();
+            }
+            return Results.NoContent();
         })
         .WithName("DeleteOffice");
     }

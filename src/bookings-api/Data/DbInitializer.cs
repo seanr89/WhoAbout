@@ -6,6 +6,7 @@ public static class DbInitializer
 {
     public static void Initialize(AppDbContext context)
     {
+        Console.WriteLine("Initializing database...");
         context.Database.EnsureCreated();
 
         // Look for any offices.
