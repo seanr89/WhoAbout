@@ -80,6 +80,18 @@ public static class DbInitializer
         context.Desks.AddRange(desks);
         context.SaveChanges();
 
+        var staffMembers = new StaffMember[]
+        {
+            new StaffMember { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com", IsActive = true },
+            new StaffMember { Id = Guid.NewGuid(), Name = "Jane Smith", Email = "jane.smith@example.com", IsActive = true },
+            new StaffMember { Id = Guid.NewGuid(), Name = "Alice Johnson", Email = "alice.johnson@example.com", IsActive = true },
+            new StaffMember { Id = Guid.NewGuid(), Name = "Bob Brown", Email = "bob.brown@example.com", IsActive = true },
+            new StaffMember { Id = Guid.NewGuid(), Name = "Charlie Davis", Email = "charlie.davis@example.com", IsActive = true }
+        };
+
+        context.StaffMembers.AddRange(staffMembers);
+        context.SaveChanges();
+
         var bookings = new Booking[]
         {
             new Booking 
@@ -87,6 +99,7 @@ public static class DbInitializer
                 Id = Guid.NewGuid(), 
                 StartTime = DateTime.UtcNow.AddDays(1).Date.AddHours(9), 
                 EndTime = DateTime.UtcNow.AddDays(1).Date.AddHours(17), 
+                BookingType = BookingType.FullDay,
                 DeskId = desks[0].Id // DTO Desk
             },
             new Booking 
@@ -94,6 +107,7 @@ public static class DbInitializer
                 Id = Guid.NewGuid(), 
                 StartTime = DateTime.UtcNow.AddDays(2).Date.AddHours(9), 
                 EndTime = DateTime.UtcNow.AddDays(2).Date.AddHours(12), 
+                BookingType = BookingType.Morning,
                 DeskId = desks[65].Id // HQ Desk
             },
              new Booking 
@@ -101,6 +115,7 @@ public static class DbInitializer
                 Id = Guid.NewGuid(), 
                 StartTime = DateTime.UtcNow.AddDays(1).Date.AddHours(10), 
                 EndTime = DateTime.UtcNow.AddDays(1).Date.AddHours(18), 
+                BookingType = BookingType.FullDay,
                 DeskId = desks[105].Id // INT Desk
             }
         };

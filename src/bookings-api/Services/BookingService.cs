@@ -31,6 +31,10 @@ public class BookingService
     {
         // Basic validation could go here (e.g. check for overlaps), 
         // but for now we'll stick to simple CRUD as requested.
+        if (booking.Id == Guid.Empty)
+        {
+            booking.Id = Guid.NewGuid();
+        }
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
         return booking;

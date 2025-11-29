@@ -131,7 +131,7 @@ const App: React.FC = () => {
       <Header />
       <main className="container mx-auto p-4 sm:p-6 lg:p-8">
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 items-end">
             {/* Location Selector */}
             <div className="space-y-2">
               <label htmlFor="location-select" className="flex items-center text-sm font-medium text-slate-600">
@@ -158,7 +158,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Date Picker */}
-            <div className="space-y-2 relative" ref={calendarRef}>
+            <div className="space-y-2 relative lg:col-span-2" ref={calendarRef}>
               <label htmlFor="date-picker-button" className="flex items-center text-sm font-medium text-slate-600">
                 <CalendarIcon className="w-5 h-5 mr-2 text-slate-400" />
                 Date
@@ -230,7 +230,7 @@ const App: React.FC = () => {
                 aria-label="Clear all filters"
               >
                 <RefreshCwIcon className="w-4 h-4 mr-2 text-slate-500" />
-                Clear Filters
+                Clear
               </button>
             </div>
           </div>
