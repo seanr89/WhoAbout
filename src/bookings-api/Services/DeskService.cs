@@ -44,6 +44,7 @@ public class DeskService
         }
 
         existingDesk.Name = desk.Name;
+        existingDesk.Type = desk.Type;
         existingDesk.OfficeId = desk.OfficeId;
         
         await _context.SaveChangesAsync();

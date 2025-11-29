@@ -22,6 +22,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<OfficeService>();
 builder.Services.AddScoped<DeskService>();
 builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<StaffMemberService>();
 
 var app = builder.Build();
 
@@ -48,6 +49,7 @@ app.MapGet("/healthcheck", () => Results.Ok("Healthy"))
 app.MapOfficeEndpoints();
 app.MapDeskEndpoints();
 app.MapBookingEndpoints();
+app.MapStaffMemberEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {

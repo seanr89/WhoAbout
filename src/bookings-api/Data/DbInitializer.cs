@@ -1,4 +1,6 @@
 using bookings_api.Models;
+using bookings_api.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace bookings_api.Data;
 
@@ -6,8 +8,8 @@ public static class DbInitializer
 {
     public static void Initialize(AppDbContext context)
     {
-        Console.WriteLine("Initializing database...");
-        context.Database.EnsureCreated();
+        Console.WriteLine("Applying migrations...");
+        context.Database.Migrate();
 
         // Look for any offices.
         if (context.Offices.Any())
@@ -17,9 +19,9 @@ public static class DbInitializer
 
         var offices = new Office[]
         {
-            new Office { Id = Guid.NewGuid(), Name = "Headquarters", Location = "New York" },
-            new Office { Id = Guid.NewGuid(), Name = "West Coast Hub", Location = "San Francisco" },
-            new Office { Id = Guid.NewGuid(), Name = "European Branch", Location = "London" }
+            new Office { Id = Guid.NewGuid(), Name = "DTO", Location = "Belfast" },
+            new Office { Id = Guid.NewGuid(), Name = "Headquarters", Location = "London" },
+            new Office { Id = Guid.NewGuid(), Name = "International Office", Location = "Dubai" }
         };
 
         foreach (var o in offices)
@@ -28,27 +30,54 @@ public static class DbInitializer
         }
         context.SaveChanges();
 
-        var desks = new Desk[]
-        {
-            // HQ Desks
-            new Desk { Id = Guid.NewGuid(), Name = "HQ-101", OfficeId = offices[0].Id },
-            new Desk { Id = Guid.NewGuid(), Name = "HQ-102", OfficeId = offices[0].Id },
-            new Desk { Id = Guid.NewGuid(), Name = "HQ-103", OfficeId = offices[0].Id },
-            
-            // SF Desks
-            new Desk { Id = Guid.NewGuid(), Name = "SF-201", OfficeId = offices[1].Id },
-            new Desk { Id = Guid.NewGuid(), Name = "SF-202", OfficeId = offices[1].Id },
+        var desks = new List<Desk>();
 
-            // London Desks
-            new Desk { Id = Guid.NewGuid(), Name = "LDN-301", OfficeId = offices[2].Id },
-            new Desk { Id = Guid.NewGuid(), Name = "LDN-302", OfficeId = offices[2].Id },
-            new Desk { Id = Guid.NewGuid(), Name = "LDN-303", OfficeId = offices[2].Id },
-        };
-
-        foreach (var d in desks)
+        // Helper to assign type based on index
+        DeskType GetDeskType(int index)
         {
-            context.Desks.Add(d);
+            if (index % 15 == 0) return DeskType.MeetingRoom;
+            if (index % 5 == 0) return DeskType.HighSeat;
+            if (index % 3 == 0) return DeskType.Standing;
+            return DeskType.Standard;
         }
+
+        // DTO Desks (Belfast) - 65
+        for (int i = 1; i <= 65; i++)
+        {
+            desks.Add(new Desk 
+            { 
+                Id = Guid.NewGuid(), 
+                Name = $"DTO-{i}", 
+                OfficeId = offices[0].Id,
+                Type = GetDeskType(i)
+            });
+        }
+
+        // HQ Desks (London) - 40
+        for (int i = 1; i <= 40; i++)
+        {
+            desks.Add(new Desk 
+            { 
+                Id = Guid.NewGuid(), 
+                Name = $"HQ-{i}", 
+                OfficeId = offices[1].Id,
+                Type = GetDeskType(i)
+            });
+        }
+
+        // International Desks (Dubai) - 20
+        for (int i = 1; i <= 20; i++)
+        {
+            desks.Add(new Desk 
+            { 
+                Id = Guid.NewGuid(), 
+                Name = $"INT-{i}", 
+                OfficeId = offices[2].Id,
+                Type = GetDeskType(i)
+            });
+        }
+
+        context.Desks.AddRange(desks);
         context.SaveChanges();
 
         var bookings = new Booking[]
@@ -58,21 +87,21 @@ public static class DbInitializer
                 Id = Guid.NewGuid(), 
                 StartTime = DateTime.UtcNow.AddDays(1).Date.AddHours(9), 
                 EndTime = DateTime.UtcNow.AddDays(1).Date.AddHours(17), 
-                DeskId = desks[0].Id 
+                DeskId = desks[0].Id // DTO Desk
             },
             new Booking 
             { 
                 Id = Guid.NewGuid(), 
                 StartTime = DateTime.UtcNow.AddDays(2).Date.AddHours(9), 
                 EndTime = DateTime.UtcNow.AddDays(2).Date.AddHours(12), 
-                DeskId = desks[1].Id 
+                DeskId = desks[65].Id // HQ Desk
             },
              new Booking 
             { 
                 Id = Guid.NewGuid(), 
                 StartTime = DateTime.UtcNow.AddDays(1).Date.AddHours(10), 
                 EndTime = DateTime.UtcNow.AddDays(1).Date.AddHours(18), 
-                DeskId = desks[3].Id 
+                DeskId = desks[105].Id // INT Desk
             }
         };
 
