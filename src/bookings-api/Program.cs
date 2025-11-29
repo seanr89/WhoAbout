@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using bookings_api.Data;
 using Scalar.AspNetCore;
 using bookings_api.Services;
+using bookings_api.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<OfficeService>();
+builder.Services.AddScoped<DeskService>();
+builder.Services.AddScoped<BookingService>();
 
 var app = builder.Build();
 
@@ -35,6 +38,9 @@ app.MapHealthChecks("/health");
 
 app.MapGet("/healthcheck", () => Results.Ok("Healthy"))
     .WithName("GetHealthCheck");
+
+app.MapOfficeEndpoints();
+app.MapDeskEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
