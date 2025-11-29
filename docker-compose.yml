@@ -5,8 +5,8 @@ services:
       context: .
       dockerfile: src/bookings-api/Dockerfile
     ports:
-      - "5000:8080"
-      - "5001:8081"
+      - "8080:8080"
+      - "8081:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=bookings;Username=postgres;Password=postgres
