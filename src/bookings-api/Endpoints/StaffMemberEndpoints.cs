@@ -8,7 +8,7 @@ public static class StaffMemberEndpoints
 {
     public static void MapStaffMemberEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/staff-members")
+        var group = app.MapGroup("/api/staffmembers")
             .WithTags("StaffMembers")
             .WithOpenApi();
 
@@ -39,7 +39,7 @@ public static class StaffMemberEndpoints
             var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
             logger.LogInformation("Creating new staff member: {Name}", staffMember.Name);
             var createdStaffMember = await service.CreateStaffMemberAsync(staffMember);
-            return Results.Created($"/api/staff-members/{createdStaffMember.Id}", createdStaffMember);
+            return Results.Created($"/api/staffmembers/{createdStaffMember.Id}", createdStaffMember);
         })
         .WithName("CreateStaffMember");
 

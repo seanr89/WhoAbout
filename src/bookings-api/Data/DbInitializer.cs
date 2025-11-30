@@ -100,7 +100,8 @@ public static class DbInitializer
                 BookingDate = DateTime.UtcNow.AddDays(1).Date,
                 BookingType = BookingType.FullDay,
                 Status = BookingStatus.Accepted,
-                DeskId = desks[0].Id // DTO Desk
+                DeskId = desks[0].Id, // DTO Desk
+                StaffMemberId = staffMembers[0].Id
             },
             new Booking 
             { 
@@ -108,7 +109,8 @@ public static class DbInitializer
                 BookingDate = DateTime.UtcNow.AddDays(2).Date,
                 BookingType = BookingType.Morning,
                 Status = BookingStatus.Requested,
-                DeskId = desks[65].Id // HQ Desk
+                DeskId = desks[65].Id, // HQ Desk
+                StaffMemberId = staffMembers[1].Id
             },
              new Booking 
             { 
@@ -116,7 +118,8 @@ public static class DbInitializer
                 BookingDate = DateTime.UtcNow.AddDays(1).Date,
                 BookingType = BookingType.FullDay,
                 Status = BookingStatus.Accepted,
-                DeskId = desks[105].Id // INT Desk
+                DeskId = desks[105].Id, // INT Desk
+                StaffMemberId = staffMembers[2].Id
             }
         };
 
