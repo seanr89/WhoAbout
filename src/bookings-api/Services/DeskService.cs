@@ -46,6 +46,7 @@ public class DeskService
         existingDesk.Name = desk.Name;
         existingDesk.Type = desk.Type;
         existingDesk.OfficeId = desk.OfficeId;
+        existingDesk.ReservedForStaffMemberId = desk.ReservedForStaffMemberId;
         
         await _context.SaveChangesAsync();
         return existingDesk;

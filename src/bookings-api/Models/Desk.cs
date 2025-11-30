@@ -12,4 +12,7 @@ public class Desk
     public Office? Office { get; set; }
     
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    public Guid? ReservedForStaffMemberId { get; set; }
+    public StaffMember? ReservedForStaffMember { get; set; }
 }

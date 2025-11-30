@@ -4,7 +4,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from './icons/ChevronIcons';
 interface CalendarProps {
   selectedDate: string; // YYYY-MM-DD
   onDateSelect: (date: string) => void;
-  minDate: string; // YYYY-MM-DD
+  minDate?: string; // YYYY-MM-DD
 }
 
 const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, minDate }) => {
@@ -62,7 +62,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, minDate
           const dayDate = new Date(year, month, day);
           const dayString = formatDateToString(dayDate);
           const isSelected = dayString === selectedDate;
-          const isDisabled = dayString < minDate;
+          const isDisabled = minDate ? dayString < minDate : false;
 
           const buttonClasses = [
             'w-9 h-9 flex items-center justify-center rounded-full text-sm transition-colors',

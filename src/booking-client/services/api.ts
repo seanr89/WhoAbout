@@ -33,4 +33,30 @@ export const api = {
       slot: slot
     });
   },
+
+  // Office Management
+  createLocation: async (location: Omit<Location, 'id'>): Promise<Location> => {
+    return await bookingService.createLocation(location);
+  },
+
+  updateLocation: async (location: Location): Promise<Location> => {
+    return await bookingService.updateLocation(location);
+  },
+
+  deleteLocation: async (id: string): Promise<boolean> => {
+    return await bookingService.deleteLocation(id);
+  },
+
+  // Staff Management
+  createStaffMember: async (staff: Omit<StaffMember, 'id'>): Promise<StaffMember> => {
+    return await bookingService.createStaffMember(staff);
+  },
+
+  updateStaffMember: async (staff: StaffMember): Promise<StaffMember> => {
+    return await bookingService.updateStaffMember(staff);
+  },
+
+  deleteStaffMember: async (id: string): Promise<boolean> => {
+    return await bookingService.deleteStaffMember(id);
+  },
 };

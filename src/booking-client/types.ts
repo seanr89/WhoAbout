@@ -17,6 +17,7 @@ export interface Desk {
   label: string;
   type: DeskType;
   isReserved?: boolean;
+  reservedForStaffMemberId?: string;
 }
 
 export enum BookingSlot {

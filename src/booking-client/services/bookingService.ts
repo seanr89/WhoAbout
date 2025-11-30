@@ -22,6 +22,7 @@ interface ApiDesk {
     name: string;
     type: number;
     officeId: string;
+    reservedForStaffMemberId?: string;
 }
 
 interface ApiStaffMember {
@@ -100,6 +101,94 @@ export const bookingService = {
 
         const newBooking: ApiBooking = await response.json();
         return mapApiBookingToClient(newBooking);
+    },
+
+    // Office (Location) Management
+    async createLocation(location: Omit<Location, 'id'>): Promise<Location> {
+        const apiOfficeRequest = {
+            name: location.name,
+            location: location.city
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/offices`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apiOfficeRequest),
+        });
+
+        if (!response.ok) throw new Error('Failed to create office');
+        const newOffice: ApiOffice = await response.json();
+        return mapApiOfficeToLocation(newOffice);
+    },
+
+    async updateLocation(location: Location): Promise<Location> {
+        const apiOfficeRequest = {
+            id: location.id,
+            name: location.name,
+            location: location.city
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/offices/${location.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apiOfficeRequest),
+        });
+
+        if (!response.ok) throw new Error('Failed to update office');
+        const updatedOffice: ApiOffice = await response.json();
+        return mapApiOfficeToLocation(updatedOffice);
+    },
+
+    async deleteLocation(id: string): Promise<boolean> {
+        const response = await fetch(`${API_BASE_URL}/api/offices/${id}`, {
+            method: 'DELETE',
+        });
+        return response.ok;
+    },
+
+    // Staff Management
+    async createStaffMember(staff: Omit<StaffMember, 'id'>): Promise<StaffMember> {
+        const apiStaffRequest = {
+            name: staff.name,
+            email: staff.email,
+            isActive: staff.isActive
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/staffmembers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apiStaffRequest),
+        });
+
+        if (!response.ok) throw new Error('Failed to create staff member');
+        const newStaff: ApiStaffMember = await response.json();
+        return mapApiStaffToStaff(newStaff);
+    },
+
+    async updateStaffMember(staff: StaffMember): Promise<StaffMember> {
+        const apiStaffRequest = {
+            id: staff.id,
+            name: staff.name,
+            email: staff.email,
+            isActive: staff.isActive
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/staffmembers/${staff.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apiStaffRequest),
+        });
+
+        if (!response.ok) throw new Error('Failed to update staff member');
+        const updatedStaff: ApiStaffMember = await response.json();
+        return mapApiStaffToStaff(updatedStaff);
+    },
+
+    async deleteStaffMember(id: string): Promise<boolean> {
+        const response = await fetch(`${API_BASE_URL}/api/staffmembers/${id}`, {
+            method: 'DELETE',
+        });
+        return response.ok;
     }
 };
 
@@ -156,6 +245,8 @@ function mapApiDeskToDesk(apiDesk: ApiDesk): Desk {
         locationId: apiDesk.officeId,
         label: apiDesk.name,
         type: mapIntToDeskType(apiDesk.type),
+        reservedForStaffMemberId: apiDesk.reservedForStaffMemberId,
+        isReserved: !!apiDesk.reservedForStaffMemberId,
     };
 }
 

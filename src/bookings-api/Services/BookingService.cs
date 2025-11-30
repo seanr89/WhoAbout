@@ -29,8 +29,18 @@ public class BookingService
 
     public async Task<Booking> CreateBookingAsync(Booking booking)
     {
-        // Basic validation could go here (e.g. check for overlaps), 
-        // but for now we'll stick to simple CRUD as requested.
+        // Check if desk exists and if it is reserved
+        var desk = await _context.Desks.FindAsync(booking.DeskId);
+        if (desk == null)
+        {
+             throw new Exception("Desk not found");
+        }
+
+        if (desk.ReservedForStaffMemberId.HasValue && desk.ReservedForStaffMemberId != booking.StaffMemberId)
+        {
+            throw new Exception("This desk is reserved for another staff member.");
+        }
+
         if (booking.Id == Guid.Empty)
         {
             booking.Id = Guid.NewGuid();
