@@ -11,4 +11,7 @@ public class Booking
     
     public Guid DeskId { get; set; }
     public Desk? Desk { get; set; }
+
+    public Guid StaffMemberId { get; set; }
+    public StaffMember? StaffMember { get; set; }
 }

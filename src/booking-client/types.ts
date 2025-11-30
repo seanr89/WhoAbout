@@ -25,10 +25,18 @@ export enum BookingSlot {
   FULL_DAY = 'Full Day',
 }
 
+export interface StaffMember {
+  id: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+}
+
 export interface Booking {
   id: string;
   deskId: string;
   userId: string;
+  staffMemberId: string;
   date: string; // YYYY-MM-DD
   slot: BookingSlot;
 }

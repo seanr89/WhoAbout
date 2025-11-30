@@ -1,4 +1,4 @@
-import { Booking, BookingSlot, Location, Desk, DeskType } from '../types';
+import { Booking, BookingSlot, Location, Desk, DeskType, StaffMember } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
@@ -8,6 +8,7 @@ interface ApiBooking {
     bookingType: number;
     status: number;
     deskId: string;
+    staffMemberId: string;
 }
 
 interface ApiOffice {
@@ -21,6 +22,13 @@ interface ApiDesk {
     name: string;
     type: number;
     officeId: string;
+}
+
+interface ApiStaffMember {
+    id: string;
+    name: string;
+    email: string;
+    isActive: boolean;
 }
 
 export const bookingService = {
@@ -44,6 +52,18 @@ export const bookingService = {
             return data.map(mapApiDeskToDesk);
         } catch (error) {
             console.error('Error fetching desks:', error);
+            return [];
+        }
+    },
+
+    async getStaffMembers(): Promise<StaffMember[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/staffmembers`);
+            if (!response.ok) throw new Error('Failed to fetch staff members');
+            const data: ApiStaffMember[] = await response.json();
+            return data.map(mapApiStaffToStaff);
+        } catch (error) {
+            console.error('Error fetching staff members:', error);
             return [];
         }
     },
@@ -88,6 +108,7 @@ function mapApiBookingToClient(apiBooking: ApiBooking): Booking {
         id: apiBooking.id,
         deskId: apiBooking.deskId,
         userId: 'user-placeholder', // The API does not yet return the user ID
+        staffMemberId: apiBooking.staffMemberId,
         date: apiBooking.bookingDate.split('T')[0],
         slot: mapBookingTypeToSlot(apiBooking.bookingType),
     };
@@ -99,6 +120,7 @@ function mapClientBookingToApiRequest(booking: Omit<Booking, 'id'>) {
         bookingType: mapSlotToBookingType(booking.slot),
         status: 0, // Requested
         deskId: booking.deskId,
+        staffMemberId: booking.staffMemberId,
     };
 }
 
@@ -145,4 +167,13 @@ function mapIntToDeskType(type: number): DeskType {
         case 3: return DeskType.MEETING_ROOM;
         default: return DeskType.STANDARD;
     }
+}
+
+function mapApiStaffToStaff(apiStaff: ApiStaffMember): StaffMember {
+    return {
+        id: apiStaff.id,
+        name: apiStaff.name,
+        email: apiStaff.email,
+        isActive: apiStaff.isActive,
+    };
 }
