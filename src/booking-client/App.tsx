@@ -1,7 +1,7 @@
 
 // Fix: Replaced placeholder text with a fully functional App component to serve as the application's root.
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Location, Desk, Booking, BookingSlot, DeskType } from './types';
+import { Location, Desk, Booking, BookingSlot, DeskType, StaffMember } from './types';
 import { api } from './services/api';
 import Header from './components/Header';
 import DeskLayout from './components/DeskLayout';
@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [desks, setDesks] = useState<Desk[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,10 +43,11 @@ const App: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const [locationsData, desksData, bookingsData] = await Promise.all([
+        const [locationsData, desksData, bookingsData, staffMembersData] = await Promise.all([
           api.fetchLocations(),
           api.fetchDesks(),
           api.fetchBookings(),
+          api.fetchStaffMembers(),
         ]);
         setLocations(locationsData);
         if (locationsData.length > 0) {
@@ -53,6 +55,7 @@ const App: React.FC = () => {
         }
         setDesks(desksData);
         setBookings(bookingsData);
+        setStaffMembers(staffMembersData);
       } catch (err) {
         setError('Failed to load data. Please try again later.');
         console.error(err);
@@ -99,10 +102,10 @@ const App: React.FC = () => {
     setIsCalendarOpen(false);
   };
 
-  const handleConfirmBooking = async (slotToBook: BookingSlot) => {
+  const handleConfirmBooking = async (slotToBook: BookingSlot, staffMemberId: string) => {
     if (!selectedDeskForBooking) return;
     try {
-      const newBooking = await api.createBooking(selectedDeskForBooking, selectedDate, slotToBook);
+      const newBooking = await api.createBooking(selectedDeskForBooking, selectedDate, slotToBook, staffMemberId);
       setBookings(prevBookings => [...prevBookings, newBooking]);
       handleCloseModal();
       // Optionally show a success message
@@ -265,6 +268,7 @@ const App: React.FC = () => {
         desk={selectedDeskForBooking}
         selectedDate={selectedDate}
         selectedSlot={selectedSlot}
+        staffMembers={staffMembers}
         onClose={handleCloseModal}
         onConfirm={handleConfirmBooking}
       />
