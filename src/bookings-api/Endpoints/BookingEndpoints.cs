@@ -1,4 +1,5 @@
 using bookings_api.Models;
+using bookings_api.Models.DTOs;
 using bookings_api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,16 @@ public static class BookingEndpoints
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
             logger.LogInformation("Getting all bookings");
-            return Results.Ok(await service.GetAllBookingsAsync());
+            var bookings = await service.GetAllBookingsAsync();
+            var dtos = bookings.Select(b => new BookingDto
+            {
+                Id = b.Id,
+                DeskId = b.DeskId,
+                StaffMemberId = b.StaffMemberId,
+                Date = DateOnly.FromDateTime(b.BookingDate),
+                Type = b.BookingType
+            });
+            return Results.Ok(dtos);
         })
         .WithName("GetAllBookings");
 

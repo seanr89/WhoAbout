@@ -1,4 +1,5 @@
 using bookings_api.Models;
+using bookings_api.Models.DTOs;
 using bookings_api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,7 +15,16 @@ public static class DeskEndpoints
 
         group.MapGet("/", async (DeskService service) =>
         {
-            return Results.Ok(await service.GetAllDesksAsync());
+            var desks = await service.GetAllDesksAsync();
+            var dtos = desks.Select(d => new DeskDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Type = d.Type,
+                OfficeId = d.OfficeId,
+                ReservedForStaffMemberId = d.ReservedForStaffMemberId
+            });
+            return Results.Ok(dtos);
         })
         .WithName("GetAllDesks");
 

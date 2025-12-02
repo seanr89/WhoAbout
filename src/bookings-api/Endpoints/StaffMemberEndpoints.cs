@@ -1,4 +1,5 @@
 using bookings_api.Models;
+using bookings_api.Models.DTOs;
 using bookings_api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,14 @@ public static class StaffMemberEndpoints
         {
             var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
             logger.LogInformation("Getting all staff members");
-            return Results.Ok(await service.GetAllStaffMembersAsync());
+            var staffMembers = await service.GetAllStaffMembersAsync();
+            var dtos = staffMembers.Select(s => new StaffMemberDto
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Email = s.Email
+            });
+            return Results.Ok(dtos);
         })
         .WithName("GetAllStaffMembers");
 

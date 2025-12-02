@@ -1,4 +1,5 @@
 using bookings_api.Models;
+using bookings_api.Models.DTOs;
 using bookings_api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,14 @@ public static class OfficeEndpoints
         {
             var logger = loggerFactory.CreateLogger("OfficeEndpoints");
             logger.LogInformation("Getting all offices");
-            return Results.Ok(await service.GetAllOfficesAsync());
+            var offices = await service.GetAllOfficesAsync();
+            var dtos = offices.Select(o => new OfficeDto
+            {
+                Id = o.Id,
+                Name = o.Name,
+                Location = o.Location
+            });
+            return Results.Ok(dtos);
         })
         .WithName("GetAllOffices");
 
