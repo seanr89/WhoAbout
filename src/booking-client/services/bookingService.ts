@@ -103,6 +103,13 @@ export const bookingService = {
         return mapApiBookingToClient(newBooking);
     },
 
+    async deleteBooking(id: string): Promise<boolean> {
+        const response = await fetch(`${API_BASE_URL}/api/bookings/${id}`, {
+            method: 'DELETE',
+        });
+        return response.ok;
+    },
+
     // Office (Location) Management
     async createLocation(location: Omit<Location, 'id'>): Promise<Location> {
         const apiOfficeRequest = {

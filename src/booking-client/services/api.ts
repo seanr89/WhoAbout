@@ -34,6 +34,10 @@ export const api = {
     });
   },
 
+  deleteBooking: async (id: string): Promise<boolean> => {
+    return await bookingService.deleteBooking(id);
+  },
+
   // Office Management
   createLocation: async (location: Omit<Location, 'id'>): Promise<Location> => {
     return await bookingService.createLocation(location);

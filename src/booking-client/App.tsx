@@ -14,6 +14,7 @@ import Calendar from './components/Calendar';
 import RefreshCwIcon from './components/icons/RefreshCwIcon';
 import HistoryScreen from './components/HistoryScreen';
 import AdminScreen from './components/AdminScreen';
+import CancellationScreen from './components/CancellationScreen';
 
 function getTodayString() {
   const today = new Date();
@@ -40,7 +41,7 @@ const App: React.FC = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  const [currentScreen, setCurrentScreen] = useState<'booking' | 'history' | 'admin'>('booking');
+  const [currentScreen, setCurrentScreen] = useState<'booking' | 'history' | 'admin' | 'cancellation'>('booking');
 
   const fetchData = async () => {
     try {
@@ -277,12 +278,20 @@ const App: React.FC = () => {
             desks={desks}
             staffMembers={staffMembers}
           />
-        ) : (
+        ) : currentScreen === 'admin' ? (
           <AdminScreen
             locations={locations}
             staffMembers={staffMembers}
             bookings={bookings}
             onDataRefresh={fetchData}
+          />
+        ) : (
+          <CancellationScreen
+            locations={locations}
+            bookings={bookings}
+            desks={desks}
+            staffMembers={staffMembers}
+            onRefresh={fetchData}
           />
         )}
       </main>

@@ -2,8 +2,8 @@ import React from 'react';
 import ChairIcon from './icons/ChairIcon';
 
 interface HeaderProps {
-  currentScreen: 'booking' | 'history' | 'admin';
-  onNavigate: (screen: 'booking' | 'history' | 'admin') => void;
+  currentScreen: 'booking' | 'history' | 'admin' | 'cancellation';
+  onNavigate: (screen: 'booking' | 'history' | 'admin' | 'cancellation') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate }) => {
@@ -23,8 +23,8 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate }) => {
               <button
                 onClick={() => onNavigate('booking')}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'booking'
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-indigo-50 text-indigo-700'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
               >
                 Book a Desk
@@ -32,17 +32,26 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate }) => {
               <button
                 onClick={() => onNavigate('history')}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'history'
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-indigo-50 text-indigo-700'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
               >
                 History
               </button>
               <button
+                onClick={() => onNavigate('cancellation')}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'cancellation'
+                  ? 'bg-indigo-50 text-indigo-700'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
+              >
+                Cancellations
+              </button>
+              <button
                 onClick={() => onNavigate('admin')}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'admin'
-                    ? 'bg-indigo-50 text-indigo-700'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-indigo-50 text-indigo-700'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
               >
                 Admin
@@ -64,6 +73,12 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate }) => {
                 className={`p-2 rounded-md ${currentScreen === 'history' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
               >
                 History
+              </button>
+              <button
+                onClick={() => onNavigate('cancellation')}
+                className={`p-2 rounded-md ${currentScreen === 'cancellation' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
+              >
+                Cancel
               </button>
               <button
                 onClick={() => onNavigate('admin')}
