@@ -63,4 +63,8 @@ export const api = {
   deleteStaffMember: async (id: string): Promise<boolean> => {
     return await bookingService.deleteStaffMember(id);
   },
+
+  fetchBookingStats: async (officeId: string, startDate?: string, endDate?: string): Promise<import('../types').DailyBookingCount[]> => {
+    return await bookingService.getBookingStats(officeId, startDate, endDate);
+  },
 };

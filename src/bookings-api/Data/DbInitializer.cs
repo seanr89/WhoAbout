@@ -19,9 +19,9 @@ public static class DbInitializer
 
         var offices = new Office[]
         {
-            new Office { Id = Guid.NewGuid(), Name = "DTO", Location = "Belfast" },
-            new Office { Id = Guid.NewGuid(), Name = "Headquarters", Location = "London" },
-            new Office { Id = Guid.NewGuid(), Name = "International Office", Location = "Dubai" }
+            new Office { Id = Guid.NewGuid(), Name = "Belfast", Location = "Belfast" },
+            new Office { Id = Guid.NewGuid(), Name = "London", Location = "London" },
+            new Office { Id = Guid.NewGuid(), Name = "Dubai", Location = "Dubai" }
         };
 
         foreach (var o in offices)

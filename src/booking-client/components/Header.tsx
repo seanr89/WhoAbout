@@ -2,8 +2,8 @@ import React from 'react';
 import ChairIcon from './icons/ChairIcon';
 
 interface HeaderProps {
-  currentScreen: 'booking' | 'history' | 'admin' | 'cancellation';
-  onNavigate: (screen: 'booking' | 'history' | 'admin' | 'cancellation') => void;
+  currentScreen: 'booking' | 'history' | 'admin';
+  onNavigate: (screen: 'booking' | 'history' | 'admin') => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate }) => {
@@ -39,15 +39,6 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate }) => {
                 History
               </button>
               <button
-                onClick={() => onNavigate('cancellation')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'cancellation'
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-              >
-                Cancellations
-              </button>
-              <button
                 onClick={() => onNavigate('admin')}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'admin'
                   ? 'bg-indigo-50 text-indigo-700'
@@ -73,12 +64,6 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate }) => {
                 className={`p-2 rounded-md ${currentScreen === 'history' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
               >
                 History
-              </button>
-              <button
-                onClick={() => onNavigate('cancellation')}
-                className={`p-2 rounded-md ${currentScreen === 'cancellation' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
-              >
-                Cancel
               </button>
               <button
                 onClick={() => onNavigate('admin')}

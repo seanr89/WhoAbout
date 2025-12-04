@@ -1,4 +1,4 @@
-import { Booking, BookingSlot, Location, Desk, DeskType, StaffMember } from '../types';
+import { Booking, BookingSlot, Location, Desk, DeskType, StaffMember, DailyBookingCount } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
@@ -196,6 +196,17 @@ export const bookingService = {
             method: 'DELETE',
         });
         return response.ok;
+    },
+
+    async getBookingStats(officeId: string, startDate?: string, endDate?: string): Promise<DailyBookingCount[]> {
+        const params = new URLSearchParams();
+        params.append('officeId', officeId);
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+
+        const response = await fetch(`${API_BASE_URL}/api/bookings/stats?${params.toString()}`);
+        if (!response.ok) throw new Error('Failed to fetch booking stats');
+        return await response.json();
     }
 };
 

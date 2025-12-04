@@ -3,22 +3,24 @@ import { Booking, Location, Desk, StaffMember, BookingSlot } from '../types';
 import LocationIcon from './icons/LocationIcon';
 import CalendarIcon from './icons/CalendarIcon';
 import Calendar from './Calendar';
+import TrashIcon from './icons/TrashIcon';
+import { api } from '../services/api';
 
 interface HistoryScreenProps {
     bookings: Booking[];
     locations: Location[];
     desks: Desk[];
     staffMembers: StaffMember[];
+    onRefresh: () => void;
 }
 
-const HistoryScreen: React.FC<HistoryScreenProps> = ({ bookings, locations, desks, staffMembers }) => {
+const HistoryScreen: React.FC<HistoryScreenProps> = ({ bookings, locations, desks, staffMembers, onRefresh }) => {
     const [selectedLocationId, setSelectedLocationId] = useState<string>(locations[0]?.id || '');
-    const [selectedDate, setSelectedDate] = useState<string>(''); // Empty means all dates? Or default to today? User said "select office and date". Let's default to today or allow clearing.
+    const [selectedDate, setSelectedDate] = useState<string>('');
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-    // Initialize selectedDate to today if not set, or maybe allow "All Time" if empty.
-    // The user request says "view historical bookings for a select office and date".
-    // Let's default to today for the date filter to be specific.
+    // Initialize selectedDate to today if not set
     if (!selectedDate) {
         const today = new Date();
         const year = today.getFullYear();
@@ -35,6 +37,21 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ bookings, locations, desk
         });
     }, [bookings, selectedLocationId, selectedDate, desks]);
 
+    const handleDeleteBooking = async (bookingId: string) => {
+        if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+
+        try {
+            setIsDeleting(bookingId);
+            await api.deleteBooking(bookingId);
+            onRefresh();
+        } catch (error) {
+            console.error('Failed to cancel booking:', error);
+            alert('Failed to cancel booking. Please try again.');
+        } finally {
+            setIsDeleting(null);
+        }
+    };
+
     const getDeskName = (deskId: string) => desks.find(d => d.id === deskId)?.label || 'Unknown Desk';
     const getStaffName = (staffId: string) => staffMembers.find(s => s.id === staffId)?.name || 'Unknown Staff';
     const getLocationName = (deskId: string) => {
@@ -45,7 +62,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ bookings, locations, desk
     return (
         <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-xl font-bold text-slate-800 mb-4">Booking History</h2>
+                <h2 className="text-xl font-bold text-slate-800 mb-4">Booking History & Management</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                     {/* Location Selector */}
                     <div className="space-y-2">
@@ -107,6 +124,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ bookings, locations, desk
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Location</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Desk</th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Staff Member</th>
+                                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-200">
@@ -133,11 +151,27 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ bookings, locations, desk
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                             {getStaffName(booking.staffMemberId)}
                                         </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button
+                                                onClick={() => handleDeleteBooking(booking.id)}
+                                                disabled={isDeleting === booking.id}
+                                                className="text-red-600 hover:text-red-900 disabled:opacity-50 inline-flex items-center"
+                                            >
+                                                {isDeleting === booking.id ? (
+                                                    'Cancelling...'
+                                                ) : (
+                                                    <>
+                                                        <TrashIcon className="w-4 h-4 mr-1" />
+                                                        Cancel
+                                                    </>
+                                                )}
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-10 text-center text-sm text-slate-500">
+                                    <td colSpan={6} className="px-6 py-10 text-center text-sm text-slate-500">
                                         No bookings found for the selected criteria.
                                     </td>
                                 </tr>
