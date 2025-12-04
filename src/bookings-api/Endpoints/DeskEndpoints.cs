@@ -28,7 +28,7 @@ public static class DeskEndpoints
         })
         .WithName("GetAllDesks");
 
-        group.MapGet("/{id}", async (Guid id, DeskService service) =>
+        group.MapGet("/{id}", async (int id, DeskService service) =>
         {
             var desk = await service.GetDeskByIdAsync(id);
             return desk is not null ? Results.Ok(desk) : Results.NotFound();
@@ -42,14 +42,14 @@ public static class DeskEndpoints
         })
         .WithName("CreateDesk");
 
-        group.MapPut("/{id}", async (Guid id, [FromBody] Desk desk, DeskService service) =>
+        group.MapPut("/{id}", async (int id, [FromBody] Desk desk, DeskService service) =>
         {
             var updatedDesk = await service.UpdateDeskAsync(id, desk);
             return updatedDesk is not null ? Results.Ok(updatedDesk) : Results.NotFound();
         })
         .WithName("UpdateDesk");
 
-        group.MapDelete("/{id}", async (Guid id, DeskService service) =>
+        group.MapDelete("/{id}", async (int id, DeskService service) =>
         {
             var deleted = await service.DeleteDeskAsync(id);
             return deleted ? Results.NoContent() : Results.NotFound();

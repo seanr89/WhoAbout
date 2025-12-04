@@ -46,7 +46,6 @@ public static class DbInitializer
         {
             desks.Add(new Desk 
             { 
-                Id = Guid.NewGuid(), 
                 Name = $"DTO-{i}", 
                 OfficeId = offices[0].Id,
                 Type = GetDeskType(i)
@@ -58,7 +57,6 @@ public static class DbInitializer
         {
             desks.Add(new Desk 
             { 
-                Id = Guid.NewGuid(), 
                 Name = $"HQ-{i}", 
                 OfficeId = offices[1].Id,
                 Type = GetDeskType(i)
@@ -70,7 +68,6 @@ public static class DbInitializer
         {
             desks.Add(new Desk 
             { 
-                Id = Guid.NewGuid(), 
                 Name = $"INT-{i}", 
                 OfficeId = offices[2].Id,
                 Type = GetDeskType(i)
@@ -152,7 +149,7 @@ public static class DbInitializer
         // Create 7 bookings per day for 5 days
         for (int day = 0; day < 5; day++)
         {
-            var currentDate = startMonday.AddDays(day);
+            var currentDate = startMonday.AddDays(day).AddHours(12);
             
             for (int i = 0; i < 7; i++)
             {
@@ -165,7 +162,6 @@ public static class DbInitializer
 
                 bookingList.Add(new Booking
                 {
-                    Id = Guid.NewGuid(),
                     BookingDate = currentDate,
                     BookingType = BookingType.FullDay,
                     Status = BookingStatus.Requested,

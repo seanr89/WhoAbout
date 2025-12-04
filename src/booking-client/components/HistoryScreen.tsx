@@ -18,7 +18,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ bookings, locations, desk
     const [selectedLocationId, setSelectedLocationId] = useState<string>(locations[0]?.id || '');
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [isDeleting, setIsDeleting] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
     // Initialize selectedDate to today if not set
     if (!selectedDate) {
@@ -37,7 +37,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ bookings, locations, desk
         });
     }, [bookings, selectedLocationId, selectedDate, desks]);
 
-    const handleDeleteBooking = async (bookingId: string) => {
+    const handleDeleteBooking = async (bookingId: number) => {
         if (!window.confirm('Are you sure you want to cancel this booking?')) return;
 
         try {
@@ -52,9 +52,9 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ bookings, locations, desk
         }
     };
 
-    const getDeskName = (deskId: string) => desks.find(d => d.id === deskId)?.label || 'Unknown Desk';
+    const getDeskName = (deskId: number) => desks.find(d => d.id === deskId)?.label || 'Unknown Desk';
     const getStaffName = (staffId: string) => staffMembers.find(s => s.id === staffId)?.name || 'Unknown Staff';
-    const getLocationName = (deskId: string) => {
+    const getLocationName = (deskId: number) => {
         const desk = desks.find(d => d.id === deskId);
         return locations.find(l => l.id === desk?.locationId)?.name || 'Unknown Location';
     };

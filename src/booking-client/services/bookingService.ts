@@ -3,11 +3,11 @@ import { Booking, BookingSlot, Location, Desk, DeskType, StaffMember, DailyBooki
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 interface ApiBooking {
-    id: string;
+    id: number;
     bookingDate: string;
     bookingType: number;
     status: number;
-    deskId: string;
+    deskId: number;
     staffMemberId: string;
 }
 
@@ -18,7 +18,7 @@ interface ApiOffice {
 }
 
 interface ApiDesk {
-    id: string;
+    id: number;
     name: string;
     type: number;
     officeId: string;
@@ -103,7 +103,7 @@ export const bookingService = {
         return mapApiBookingToClient(newBooking);
     },
 
-    async deleteBooking(id: string): Promise<boolean> {
+    async deleteBooking(id: number): Promise<boolean> {
         const response = await fetch(`${API_BASE_URL}/api/bookings/${id}`, {
             method: 'DELETE',
         });
@@ -207,6 +207,26 @@ export const bookingService = {
         const response = await fetch(`${API_BASE_URL}/api/bookings/stats?${params.toString()}`);
         if (!response.ok) throw new Error('Failed to fetch booking stats');
         return await response.json();
+    },
+
+    async updateDesk(desk: Desk): Promise<Desk> {
+        const apiDeskRequest = {
+            id: desk.id,
+            name: desk.label,
+            type: mapDeskTypeToInt(desk.type),
+            officeId: desk.locationId,
+            reservedForStaffMemberId: desk.reservedForStaffMemberId
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/desks/${desk.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(apiDeskRequest),
+        });
+
+        if (!response.ok) throw new Error('Failed to update desk');
+        const updatedDesk: ApiDesk = await response.json();
+        return mapApiDeskToDesk(updatedDesk);
     }
 };
 
@@ -275,6 +295,16 @@ function mapIntToDeskType(type: number): DeskType {
         case 2: return DeskType.HIGH_SEAT;
         case 3: return DeskType.MEETING_ROOM;
         default: return DeskType.STANDARD;
+    }
+}
+
+function mapDeskTypeToInt(type: DeskType): number {
+    switch (type) {
+        case DeskType.STANDARD: return 0;
+        case DeskType.STANDING: return 1;
+        case DeskType.HIGH_SEAT: return 2;
+        case DeskType.MEETING_ROOM: return 3;
+        default: return 0;
     }
 }
 

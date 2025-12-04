@@ -12,7 +12,7 @@ export enum DeskType {
 }
 
 export interface Desk {
-  id: string;
+  id: number;
   locationId: string;
   label: string;
   type: DeskType;
@@ -34,8 +34,8 @@ export interface StaffMember {
 }
 
 export interface Booking {
-  id: string;
-  deskId: string;
+  id: number;
+  deskId: number;
   userId: string;
   staffMemberId: string;
   date: string; // YYYY-MM-DD

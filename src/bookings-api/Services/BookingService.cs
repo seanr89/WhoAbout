@@ -20,7 +20,7 @@ public class BookingService
             .ToListAsync();
     }
 
-    public async Task<Booking?> GetBookingByIdAsync(Guid id)
+    public async Task<Booking?> GetBookingByIdAsync(int id)
     {
         return await _context.Bookings
             .Include(b => b.Desk)
@@ -41,16 +41,12 @@ public class BookingService
             throw new Exception("This desk is reserved for another staff member.");
         }
 
-        if (booking.Id == Guid.Empty)
-        {
-            booking.Id = Guid.NewGuid();
-        }
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync();
         return booking;
     }
 
-    public async Task<Booking?> UpdateBookingAsync(Guid id, Booking booking)
+    public async Task<Booking?> UpdateBookingAsync(int id, Booking booking)
     {
         var existingBooking = await _context.Bookings.FindAsync(id);
         if (existingBooking == null)
@@ -67,7 +63,7 @@ public class BookingService
         return existingBooking;
     }
 
-    public async Task<bool> DeleteBookingAsync(Guid id)
+    public async Task<bool> DeleteBookingAsync(int id)
     {
         var booking = await _context.Bookings.FindAsync(id);
         if (booking == null)

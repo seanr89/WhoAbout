@@ -23,14 +23,14 @@ public static class BookingEndpoints
                 Id = b.Id,
                 DeskId = b.DeskId,
                 StaffMemberId = b.StaffMemberId,
-                Date = DateOnly.FromDateTime(b.BookingDate),
+                Date = b.BookingDate,
                 Type = b.BookingType
             });
             return Results.Ok(dtos);
         })
         .WithName("GetAllBookings");
 
-        group.MapGet("/{id}", async (Guid id, BookingService service, ILoggerFactory loggerFactory) =>
+        group.MapGet("/{id}", async (int id, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
             logger.LogInformation("Getting booking with Id: {Id}", id);
@@ -53,7 +53,7 @@ public static class BookingEndpoints
         })
         .WithName("CreateBooking");
 
-        group.MapPut("/{id}", async (Guid id, [FromBody] Booking booking, BookingService service, ILoggerFactory loggerFactory) =>
+        group.MapPut("/{id}", async (int id, [FromBody] Booking booking, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
             logger.LogInformation("Updating booking with Id: {Id}", id);
@@ -67,7 +67,7 @@ public static class BookingEndpoints
         })
         .WithName("UpdateBooking");
 
-        group.MapDelete("/{id}", async (Guid id, BookingService service, ILoggerFactory loggerFactory) =>
+        group.MapDelete("/{id}", async (int id, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
             logger.LogInformation("Deleting booking with Id: {Id}", id);

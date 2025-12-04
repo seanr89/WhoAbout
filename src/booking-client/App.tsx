@@ -13,6 +13,7 @@ import FilterIcon from './components/icons/FilterIcon';
 import Calendar from './components/Calendar';
 import RefreshCwIcon from './components/icons/RefreshCwIcon';
 import HistoryScreen from './components/HistoryScreen';
+import ReservedScreen from './components/ReservedScreen';
 import AdminScreen from './components/AdminScreen';
 
 
@@ -41,7 +42,7 @@ const App: React.FC = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
 
-  const [currentScreen, setCurrentScreen] = useState<'booking' | 'history' | 'admin'>('booking');
+  const [currentScreen, setCurrentScreen] = useState<'booking' | 'history' | 'admin' | 'reserved'>('booking');
 
   const fetchData = async () => {
     try {
@@ -277,6 +278,10 @@ const App: React.FC = () => {
             locations={locations}
             desks={desks}
             staffMembers={staffMembers}
+            onRefresh={fetchData}
+          />
+        ) : currentScreen === 'reserved' ? (
+          <ReservedScreen
             onRefresh={fetchData}
           />
         ) : (

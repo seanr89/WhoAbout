@@ -22,7 +22,8 @@ public static class StaffMemberEndpoints
             {
                 Id = s.Id,
                 Name = s.Name,
-                Email = s.Email
+                Email = s.Email,
+                IsActive = s.IsActive
             });
             return Results.Ok(dtos);
         })

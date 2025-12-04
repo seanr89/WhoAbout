@@ -4,7 +4,7 @@ namespace bookings_api.Models;
 
 public class Desk
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public DeskType Type { get; set; } = DeskType.Standard;
     

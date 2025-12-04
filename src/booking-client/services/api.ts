@@ -34,7 +34,7 @@ export const api = {
     });
   },
 
-  deleteBooking: async (id: string): Promise<boolean> => {
+  deleteBooking: async (id: number): Promise<boolean> => {
     return await bookingService.deleteBooking(id);
   },
 
@@ -66,5 +66,9 @@ export const api = {
 
   fetchBookingStats: async (officeId: string, startDate?: string, endDate?: string): Promise<import('../types').DailyBookingCount[]> => {
     return await bookingService.getBookingStats(officeId, startDate, endDate);
+  },
+
+  updateDesk: async (desk: Desk): Promise<Desk> => {
+    return await bookingService.updateDesk(desk);
   },
 };

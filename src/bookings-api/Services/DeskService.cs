@@ -20,7 +20,7 @@ public class DeskService
             .ToListAsync();
     }
 
-    public async Task<Desk?> GetDeskByIdAsync(Guid id)
+    public async Task<Desk?> GetDeskByIdAsync(int id)
     {
         return await _context.Desks
             .Include(d => d.Office)
@@ -35,7 +35,7 @@ public class DeskService
         return desk;
     }
 
-    public async Task<Desk?> UpdateDeskAsync(Guid id, Desk desk)
+    public async Task<Desk?> UpdateDeskAsync(int id, Desk desk)
     {
         var existingDesk = await _context.Desks.FindAsync(id);
         if (existingDesk == null)
@@ -52,7 +52,7 @@ public class DeskService
         return existingDesk;
     }
 
-    public async Task<bool> DeleteDeskAsync(Guid id)
+    public async Task<bool> DeleteDeskAsync(int id)
     {
         var desk = await _context.Desks.FindAsync(id);
         if (desk == null)
