@@ -54,4 +54,4 @@ export const INITIAL_BOOKINGS: Booking[] = [
   { id: 'b3', deskId: 'NY-A2', userId: 'user4', date: todayString, slot: BookingSlot.AFTERNOON },
 ];
 
-export const CURRENT_USER_ID = 'user1';
+// export const CURRENT_USER_ID = 'user1'; // Deprecated: Current user is now managed in App.tsx state

@@ -15,6 +15,7 @@ import RefreshCwIcon from './components/icons/RefreshCwIcon';
 import HistoryScreen from './components/HistoryScreen';
 import ReservedScreen from './components/ReservedScreen';
 import AdminScreen from './components/AdminScreen';
+import ProfileScreen from './components/ProfileScreen';
 
 
 function getTodayString() {
@@ -30,6 +31,7 @@ const App: React.FC = () => {
   const [desks, setDesks] = useState<Desk[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+  const [currentUser, setCurrentUser] = useState<StaffMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +45,7 @@ const App: React.FC = () => {
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const [hideBookedDesks, setHideBookedDesks] = useState(false);
-  const [currentScreen, setCurrentScreen] = useState<'booking' | 'history' | 'admin' | 'reserved'>('booking');
+  const [currentScreen, setCurrentScreen] = useState<'booking' | 'history' | 'admin' | 'reserved' | 'profile'>('booking');
 
   const fetchData = async () => {
     try {
@@ -62,6 +64,12 @@ const App: React.FC = () => {
       setDesks(desksData);
       setBookings(bookingsData);
       setStaffMembers(staffMembersData);
+
+      // Simulate login as John Doe (Admin)
+      const adminUser = staffMembersData.find(u => u.name === 'John Doe');
+      if (adminUser) {
+        setCurrentUser(adminUser);
+      }
     } catch (err) {
       setError('Failed to load data. Please try again later.');
       console.error(err);
@@ -155,11 +163,17 @@ const App: React.FC = () => {
     setDeskTypeFilter('all');
   };
 
+  const handleUpdateUser = (updatedUser: StaffMember) => {
+    setCurrentUser(updatedUser);
+    setStaffMembers(prev => prev.map(s => s.id === updatedUser.id ? updatedUser : s));
+  };
+
+
   const selectedLocation = locations.find(l => l.id === selectedLocationId);
 
   return (
     <div className="bg-slate-100 min-h-screen font-sans">
-      <Header currentScreen={currentScreen} onNavigate={setCurrentScreen} />
+      <Header currentScreen={currentScreen} onNavigate={setCurrentScreen} currentUser={currentUser} />
       <main className="container mx-auto p-4 sm:p-6 lg:p-8">
         {currentScreen === 'booking' ? (
           <>
@@ -300,6 +314,7 @@ const App: React.FC = () => {
                   selectedDate={selectedDate}
                   selectedSlot={selectedSlot}
                   onSelectDesk={handleSelectDesk}
+                  currentUserId={currentUser?.id || ''}
                 />
               </div>
             )}
@@ -315,6 +330,11 @@ const App: React.FC = () => {
         ) : currentScreen === 'reserved' ? (
           <ReservedScreen
             onRefresh={fetchData}
+          />
+        ) : currentScreen === 'profile' ? (
+          <ProfileScreen
+            currentUser={currentUser}
+            onUpdateUser={handleUpdateUser}
           />
         ) : (
           <AdminScreen

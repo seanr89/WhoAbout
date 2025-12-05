@@ -1,12 +1,14 @@
 import React from 'react';
 import ChairIcon from './icons/ChairIcon';
+import { StaffMember } from '../types';
 
 interface HeaderProps {
-  currentScreen: 'booking' | 'history' | 'admin' | 'reserved';
-  onNavigate: (screen: 'booking' | 'history' | 'admin' | 'reserved') => void;
+  currentScreen: 'booking' | 'history' | 'admin' | 'reserved' | 'profile';
+  onNavigate: (screen: 'booking' | 'history' | 'admin' | 'reserved' | 'profile') => void;
+  currentUser: StaffMember | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate }) => {
+const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser }) => {
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -88,9 +90,16 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate }) => {
               </button>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <img src="https://picsum.photos/40/40" alt="User Avatar" className="h-10 w-10 rounded-full border-2 border-white shadow-sm" />
-              <span className="text-sm font-medium text-slate-600 hidden sm:block">Jane Doe</span>
+            <div
+              className="flex items-center space-x-2 cursor-pointer hover:bg-slate-50 p-2 rounded-md transition-colors"
+              onClick={() => onNavigate('profile')}
+            >
+              <div className="h-10 w-10 rounded-full border-2 border-white shadow-sm bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold overflow-hidden">
+                {currentUser ? currentUser.name.charAt(0).toUpperCase() : '?'}
+              </div>
+              <span className="text-sm font-medium text-slate-600 hidden sm:block">
+                {currentUser ? currentUser.name : 'Guest'}
+              </span>
             </div>
           </div>
         </div>
