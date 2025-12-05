@@ -54,7 +54,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, minDate
         </button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-center text-sm text-slate-500 mb-2">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => <div key={day}>{day}</div>)}
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => <div key={index}>{day}</div>)}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {leadingBlanks.map(blank => <div key={`blank-${blank}`}></div>)}

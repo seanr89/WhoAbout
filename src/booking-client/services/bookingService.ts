@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080
 
 interface ApiBooking {
     id: number;
-    bookingDate: string;
+    date: string;
     bookingType: number;
     status: number;
     deskId: number;
@@ -236,7 +236,7 @@ function mapApiBookingToClient(apiBooking: ApiBooking): Booking {
         deskId: apiBooking.deskId,
         userId: 'user-placeholder', // The API does not yet return the user ID
         staffMemberId: apiBooking.staffMemberId,
-        date: apiBooking.bookingDate.split('T')[0],
+        date: apiBooking.date.split('T')[0],
         slot: mapBookingTypeToSlot(apiBooking.bookingType),
     };
 }

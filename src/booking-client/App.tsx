@@ -42,6 +42,7 @@ const App: React.FC = () => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const calendarRef = useRef<HTMLDivElement>(null);
 
+  const [hideBookedDesks, setHideBookedDesks] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<'booking' | 'history' | 'admin' | 'reserved'>('booking');
 
   const fetchData = async () => {
@@ -92,9 +93,29 @@ const App: React.FC = () => {
     return desks.filter(desk => {
       const locationMatch = desk.locationId === selectedLocationId;
       const typeMatch = deskTypeFilter === 'all' || desk.type === deskTypeFilter;
-      return locationMatch && typeMatch;
+
+      if (!locationMatch || !typeMatch) return false;
+
+      if (hideBookedDesks) {
+        const deskBookings = bookings.filter(b => b.deskId === desk.id && b.date === selectedDate);
+        const isMorningBooked = deskBookings.some(b => b.slot === BookingSlot.MORNING || b.slot === BookingSlot.FULL_DAY);
+        const isAfternoonBooked = deskBookings.some(b => b.slot === BookingSlot.AFTERNOON || b.slot === BookingSlot.FULL_DAY);
+
+        if (selectedSlot === BookingSlot.FULL_DAY) {
+          if (isMorningBooked || isAfternoonBooked) return false;
+        } else if (selectedSlot === BookingSlot.MORNING) {
+          if (isMorningBooked) return false;
+        } else if (selectedSlot === BookingSlot.AFTERNOON) {
+          if (isAfternoonBooked) return false;
+        }
+
+        // Also filter out permanently reserved desks if they are reserved
+        if (desk.isReserved) return false;
+      }
+      return true;
     });
-  }, [desks, selectedLocationId, deskTypeFilter]);
+  }, [desks, selectedLocationId, deskTypeFilter, hideBookedDesks, bookings, selectedDate, selectedSlot]);
+
 
   const handleSelectDesk = (desk: Desk) => {
     setSelectedDeskForBooking(desk);
@@ -258,7 +279,18 @@ const App: React.FC = () => {
               </div>
             ) : (
               <div>
-                <h2 className="text-2xl font-bold text-slate-800 mb-2">Available Desks</h2>
+                <div className="flex justify-between items-center mb-2">
+                  <h2 className="text-2xl font-bold text-slate-800">Available Desks</h2>
+                  <label className="flex items-center space-x-2 cursor-pointer text-slate-600">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-5 w-5 text-indigo-600 rounded bg-gray-100 border-gray-300 focus:ring-indigo-500"
+                      checked={hideBookedDesks}
+                      onChange={(e) => setHideBookedDesks(e.target.checked)}
+                    />
+                    <span className="text-sm font-medium">Hide Booked</span>
+                  </label>
+                </div>
                 <p className="text-slate-600 mb-6">
                   Showing desks for {selectedLocation?.name} on {new Date(selectedDate + 'T00:00:00').toDateString()} for {selectedSlot}.
                 </p>

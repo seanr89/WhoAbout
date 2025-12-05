@@ -79,9 +79,9 @@ public static class DbInitializer
 
         var staffMembers = new StaffMember[]
         {
-            new StaffMember { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Jane Smith", Email = "jane.smith@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Alice Johnson", Email = "alice.johnson@example.com", IsActive = true },
+            new StaffMember { Id = Guid.NewGuid(), Name = "John Doe", Email = "john.doe@example.com", IsActive = true, Role = Role.Admin },
+            new StaffMember { Id = Guid.NewGuid(), Name = "Jane Smith", Email = "jane.smith@example.com", IsActive = true, Role = Role.Manager },
+            new StaffMember { Id = Guid.NewGuid(), Name = "Alice Johnson", Email = "alice.johnson@example.com", IsActive = true, Role = Role.Owner },
             new StaffMember { Id = Guid.NewGuid(), Name = "Bob Brown", Email = "bob.brown@example.com", IsActive = true },
             new StaffMember { Id = Guid.NewGuid(), Name = "Charlie Davis", Email = "charlie.davis@example.com", IsActive = true },
             new StaffMember { Id = Guid.NewGuid(), Name = "Diana Evans", Email = "diana.evans@example.com", IsActive = true },
