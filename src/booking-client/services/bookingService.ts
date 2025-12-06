@@ -2,14 +2,21 @@ import { Booking, BookingSlot, Location, Desk, DeskType, StaffMember, DailyBooki
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
+// Update ApiBooking interface to match potentially loose type
 interface ApiBooking {
     id: number;
     date: string;
-    bookingType: number;
+    bookingType: number | string; // Handle both just in case
     status: number;
     deskId: number;
     staffMemberId: string;
 }
+
+// ... existing interfaces ...
+
+// ... mapBookingTypeToSlot function ...
+
+
 
 interface ApiOffice {
     id: string;
@@ -251,8 +258,9 @@ function mapClientBookingToApiRequest(booking: Omit<Booking, 'id'>) {
     };
 }
 
-function mapBookingTypeToSlot(type: number): BookingSlot {
-    switch (type) {
+function mapBookingTypeToSlot(type: number | string): BookingSlot {
+    const typeNum = Number(type);
+    switch (typeNum) {
         case 0: return BookingSlot.MORNING;
         case 1: return BookingSlot.AFTERNOON;
         case 2: return BookingSlot.FULL_DAY;
@@ -314,5 +322,6 @@ function mapApiStaffToStaff(apiStaff: ApiStaffMember): StaffMember {
         name: apiStaff.name,
         email: apiStaff.email,
         isActive: apiStaff.isActive,
+        role: 0, // Placeholder role using 0 (Role.Employee)
     };
 }

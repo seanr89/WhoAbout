@@ -24,7 +24,7 @@ public static class BookingEndpoints
                 DeskId = b.DeskId,
                 StaffMemberId = b.StaffMemberId,
                 Date = b.BookingDate,
-                Type = b.BookingType
+                BookingType = (int)b.BookingType
             });
             return Results.Ok(dtos);
         })
@@ -40,7 +40,15 @@ public static class BookingEndpoints
                 logger.LogWarning("Booking with Id: {Id} not found", id);
                 return Results.NotFound();
             }
-            return Results.Ok(booking);
+            var dto = new BookingDto
+            {
+                Id = booking.Id,
+                DeskId = booking.DeskId,
+                StaffMemberId = booking.StaffMemberId,
+                Date = booking.BookingDate,
+                BookingType = (int)booking.BookingType
+            };
+            return Results.Ok(dto);
         })
         .WithName("GetBookingById");
 
@@ -49,7 +57,15 @@ public static class BookingEndpoints
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
             logger.LogInformation("Creating new booking for DeskId: {DeskId}", booking.DeskId);
             var createdBooking = await service.CreateBookingAsync(booking);
-            return Results.Created($"/api/bookings/{createdBooking.Id}", createdBooking);
+            var dto = new BookingDto
+            {
+                Id = createdBooking.Id,
+                DeskId = createdBooking.DeskId,
+                StaffMemberId = createdBooking.StaffMemberId,
+                Date = createdBooking.BookingDate,
+                BookingType = (int)createdBooking.BookingType
+            };
+            return Results.Created($"/api/bookings/{createdBooking.Id}", dto);
         })
         .WithName("CreateBooking");
 
@@ -63,7 +79,15 @@ public static class BookingEndpoints
                 logger.LogWarning("Booking with Id: {Id} not found for update", id);
                 return Results.NotFound();
             }
-            return Results.Ok(updatedBooking);
+            var dto = new BookingDto
+            {
+                Id = updatedBooking.Id,
+                DeskId = updatedBooking.DeskId,
+                StaffMemberId = updatedBooking.StaffMemberId,
+                Date = updatedBooking.BookingDate,
+                BookingType = (int)updatedBooking.BookingType
+            };
+            return Results.Ok(dto);
         })
         .WithName("UpdateBooking");
 

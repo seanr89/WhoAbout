@@ -8,5 +8,5 @@ public class BookingDto
     public int DeskId { get; set; }
     public Guid StaffMemberId { get; set; }
     public DateTime Date { get; set; }
-    public BookingType Type { get; set; }
+    public int BookingType { get; set; }
 }
