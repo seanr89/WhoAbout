@@ -2,7 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using bookings_api.Data;
 using Scalar.AspNetCore;
 using bookings_api.Services;
+using bookings_api.Services;
 using bookings_api.Endpoints;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +26,20 @@ builder.Services.AddScoped<OfficeService>();
 builder.Services.AddScoped<DeskService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<StaffMemberService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["Firebase:Authority"];
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Firebase:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Firebase:Audience"],
+            ValidateLifetime = true
+        };
+    });
 
 builder.Services.AddCors(options =>
 {
@@ -52,6 +69,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // app.MapHealthChecks("/health");
 

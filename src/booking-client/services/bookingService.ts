@@ -1,6 +1,19 @@
 import { Booking, BookingSlot, Location, Desk, DeskType, StaffMember, DailyBookingCount } from '../types';
 
+import { auth } from '../firebaseConfig';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
+async function getHeaders() {
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+    };
+    if (auth.currentUser) {
+        const token = await auth.currentUser.getIdToken();
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+}
 
 // Update ApiBooking interface to match potentially loose type
 interface ApiBooking {
@@ -42,7 +55,9 @@ interface ApiStaffMember {
 export const bookingService = {
     async getLocations(): Promise<Location[]> {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/offices`);
+            const response = await fetch(`${API_BASE_URL}/api/offices`, {
+                headers: await getHeaders()
+            });
             if (!response.ok) throw new Error('Failed to fetch offices');
             const data: ApiOffice[] = await response.json();
             return data.map(mapApiOfficeToLocation);
@@ -54,7 +69,9 @@ export const bookingService = {
 
     async getDesks(): Promise<Desk[]> {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/desks`);
+            const response = await fetch(`${API_BASE_URL}/api/desks`, {
+                headers: await getHeaders()
+            });
             if (!response.ok) throw new Error('Failed to fetch desks');
             const data: ApiDesk[] = await response.json();
             return data.map(mapApiDeskToDesk);
@@ -66,7 +83,9 @@ export const bookingService = {
 
     async getStaffMembers(): Promise<StaffMember[]> {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/staffmembers`);
+            const response = await fetch(`${API_BASE_URL}/api/staffmembers`, {
+                headers: await getHeaders()
+            });
             if (!response.ok) throw new Error('Failed to fetch staff members');
             const data: ApiStaffMember[] = await response.json();
             return data.map(mapApiStaffToStaff);
@@ -78,7 +97,9 @@ export const bookingService = {
 
     async getAll(): Promise<Booking[]> {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/bookings`);
+            const response = await fetch(`${API_BASE_URL}/api/bookings`, {
+                headers: await getHeaders()
+            });
             if (!response.ok) {
                 throw new Error('Failed to fetch bookings');
             }
@@ -96,9 +117,7 @@ export const bookingService = {
 
         const response = await fetch(`${API_BASE_URL}/api/bookings`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: await getHeaders(),
             body: JSON.stringify(apiBookingRequest),
         });
 
@@ -113,6 +132,7 @@ export const bookingService = {
     async deleteBooking(id: number): Promise<boolean> {
         const response = await fetch(`${API_BASE_URL}/api/bookings/${id}`, {
             method: 'DELETE',
+            headers: await getHeaders()
         });
         return response.ok;
     },
@@ -126,7 +146,7 @@ export const bookingService = {
 
         const response = await fetch(`${API_BASE_URL}/api/offices`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: await getHeaders(),
             body: JSON.stringify(apiOfficeRequest),
         });
 
@@ -144,7 +164,7 @@ export const bookingService = {
 
         const response = await fetch(`${API_BASE_URL}/api/offices/${location.id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: await getHeaders(),
             body: JSON.stringify(apiOfficeRequest),
         });
 
@@ -156,6 +176,7 @@ export const bookingService = {
     async deleteLocation(id: string): Promise<boolean> {
         const response = await fetch(`${API_BASE_URL}/api/offices/${id}`, {
             method: 'DELETE',
+            headers: await getHeaders()
         });
         return response.ok;
     },
@@ -170,7 +191,7 @@ export const bookingService = {
 
         const response = await fetch(`${API_BASE_URL}/api/staffmembers`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: await getHeaders(),
             body: JSON.stringify(apiStaffRequest),
         });
 
@@ -189,7 +210,7 @@ export const bookingService = {
 
         const response = await fetch(`${API_BASE_URL}/api/staffmembers/${staff.id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: await getHeaders(),
             body: JSON.stringify(apiStaffRequest),
         });
 
@@ -201,6 +222,7 @@ export const bookingService = {
     async deleteStaffMember(id: string): Promise<boolean> {
         const response = await fetch(`${API_BASE_URL}/api/staffmembers/${id}`, {
             method: 'DELETE',
+            headers: await getHeaders()
         });
         return response.ok;
     },
@@ -211,7 +233,9 @@ export const bookingService = {
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
 
-        const response = await fetch(`${API_BASE_URL}/api/bookings/stats?${params.toString()}`);
+        const response = await fetch(`${API_BASE_URL}/api/bookings/stats?${params.toString()}`, {
+            headers: await getHeaders()
+        });
         if (!response.ok) throw new Error('Failed to fetch booking stats');
         return await response.json();
     },
@@ -227,7 +251,7 @@ export const bookingService = {
 
         const response = await fetch(`${API_BASE_URL}/api/desks/${desk.id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: await getHeaders(),
             body: JSON.stringify(apiDeskRequest),
         });
 
