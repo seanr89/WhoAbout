@@ -105,6 +105,30 @@ public static class BookingEndpoints
         })
         .WithName("DeleteBooking");
 
+        group.MapGet("/by-date", async ([FromQuery] DateTime? date, BookingService service, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("BookingEndpoints");
+            var queryDate = date ?? DateTime.UtcNow.Date;
+
+             if (queryDate.Kind == DateTimeKind.Unspecified)
+                queryDate = DateTime.SpecifyKind(queryDate, DateTimeKind.Utc);
+            else if (queryDate.Kind == DateTimeKind.Local)
+                queryDate = queryDate.ToUniversalTime();
+
+            logger.LogInformation("Getting bookings for date: {Date}", queryDate);
+            var bookings = await service.GetBookingsByDateAsync(queryDate);
+            var dtos = bookings.Select(b => new BookingDto
+            {
+                Id = b.Id,
+                DeskId = b.DeskId,
+                StaffMemberId = b.StaffMemberId,
+                Date = b.BookingDate,
+                BookingType = (int)b.BookingType
+            });
+            return Results.Ok(dtos);
+        })
+        .WithName("GetBookingsByDate");
+
         group.MapGet("/stats", async ([FromQuery] Guid officeId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
