@@ -14,24 +14,17 @@ const RegisterScreen: React.FC = () => {
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+            await createUserWithEmailAndPassword(auth, email, password);
 
             // Create StaffMember in the backend
-            // Note: We might need to ensure the backend endpoint allows unauthenticated creation 
-            // or we use the newly created token.
-            // Usually, we'd use the token from `user.getIdToken()` to call the API.
+            // The getHeaders() in `api.ts` will pick up the new user's token.
 
-            const token = await user.getIdToken();
-
-            // We need a way to link this firebase user to our StaffMember.
-            // Ideally, the backend extracts the UID from the token.
-
-            // For now, let's assume we create a basic staff member.
-            // We might need to handle this in `api.ts` or here.
-
-            // TODO: Implement backend creation call properly.
-            // await api.createStaffMember({ name, email }); 
+            await api.createStaffMember({
+                name,
+                email,
+                isActive: true,
+                role: 0 // Role.Employee
+            });
 
             navigate('/');
         } catch (err: any) {
@@ -49,7 +42,7 @@ const RegisterScreen: React.FC = () => {
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleRegister}>
                     <input type="hidden" name="remember" value="true" />
-                    <div className="rounded-md shadow-sm -space-y-px">
+                    <div className="space-y-4">
                         <div>
                             <label htmlFor="name" className="sr-only">Full Name</label>
                             <input
@@ -57,7 +50,7 @@ const RegisterScreen: React.FC = () => {
                                 name="name"
                                 type="text"
                                 required
-                                className="appearance-none rounded-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm shadow-sm"
                                 placeholder="Full Name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
@@ -71,7 +64,7 @@ const RegisterScreen: React.FC = () => {
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm shadow-sm"
                                 placeholder="Email address"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -85,7 +78,7 @@ const RegisterScreen: React.FC = () => {
                                 type="password"
                                 autoComplete="new-password"
                                 required
-                                className="appearance-none rounded-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm shadow-sm"
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
