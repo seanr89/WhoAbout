@@ -29,6 +29,57 @@ public static class StaffMemberEndpoints
         })
         .WithName("GetAllStaffMembers");
 
+        group.MapGet("/me", async (HttpContext httpContext, StaffMemberService service, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
+            
+            // Extract user data from claims
+            var claims = httpContext.User.Claims.ToList();
+            var firebaseClaim = claims.FirstOrDefault(c => c.Type == "firebase")?.Value;
+            
+            var user = new AuthenticatedUser
+            {
+                UserId = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "",
+                Email = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "",
+                EmailVerified = bool.TryParse(claims.FirstOrDefault(c => c.Type == "email_verified")?.Value, out var verified) && verified,
+                Firebase = !string.IsNullOrEmpty(firebaseClaim) 
+                    ? System.Text.Json.JsonSerializer.Deserialize<FirebaseClaims>(firebaseClaim) 
+                    : null
+            };
+
+            logger.LogInformation("Authenticated User: {@User}", user);
+
+            if (string.IsNullOrEmpty(user.UserId))
+            {
+                logger.LogWarning("User ID not found in token");
+                return Results.Unauthorized();
+            }
+
+            logger.LogInformation("Getting staff member for User Id: {UserId}", user.UserId);
+            var staffMember = await service.GetStaffMemberByUserIdAsync(user.UserId);
+            var staffMemberByEmail = await service.GetStaffMemberByEmailAsync(user.Email);
+            
+            if (staffMember is null)
+            {
+                logger.LogWarning("Staff member with User Id: {UserId} not found", user.UserId);
+                // Optional: Return the authenticated user info even if profile not found, 
+                // so the client can decide to register.
+                // For now, adhering to previous behavior of 404.
+                return Results.NotFound();
+            }
+
+            //todo: check if staff member has the userid populated, if not, update it
+            if (staffMemberByEmail is not null && staffMember.UserId == null)
+            {
+                staffMember.UserId = user.UserId;
+                await service.UpdateStaffMemberAsync(staffMember.Id, staffMember);
+            }
+            
+            return Results.Ok(staffMember);
+        })
+        .RequireAuthorization()
+        .WithName("GetCurrentStaffMember");
+
         group.MapGet("/{id}", async (Guid id, StaffMemberService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");

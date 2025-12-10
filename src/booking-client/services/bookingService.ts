@@ -95,6 +95,21 @@ export const bookingService = {
         }
     },
 
+    async getMe(): Promise<StaffMember | null> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/staffmembers/me`, {
+                headers: await getHeaders()
+            });
+            if (response.status === 404) return null;
+            if (!response.ok) throw new Error('Failed to fetch current staff member');
+            const data: ApiStaffMember = await response.json();
+            return mapApiStaffToStaff(data);
+        } catch (error) {
+            console.error('Error fetching current staff member:', error);
+            return null;
+        }
+    },
+
     async getAll(): Promise<Booking[]> {
         try {
             const response = await fetch(`${API_BASE_URL}/api/bookings`, {

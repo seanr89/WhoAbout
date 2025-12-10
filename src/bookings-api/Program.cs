@@ -12,7 +12,6 @@ DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -31,6 +30,11 @@ builder.Services.AddScoped<DeskService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<StaffMemberService>();
 
+// Console.WriteLine($"Audience: {builder.Configuration["Firebase:Audience"]}");
+// Console.WriteLine($"Issuer: {builder.Configuration["Firebase:Issuer"]}");
+// Console.WriteLine($"Authority: {builder.Configuration["Firebase:Authority"]}");
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -44,6 +48,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true
         };
     });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
 {

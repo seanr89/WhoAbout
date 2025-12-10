@@ -10,13 +10,12 @@ const AuthenticatedLayout: React.FC = () => {
     const [desks, setDesks] = useState<Desk[]>([]);
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
-    const [currentUser, setCurrentUser] = useState<StaffMember | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const navigate = useNavigate();
     const location = useLocation();
-    const { currentUser: authUser } = useAuth(); // Firebase User
+    const { currentUser: authUser, staffMember: currentUser, logout } = useAuth(); // Firebase User & Staff Member Profile
 
     const fetchData = async () => {
         try {
@@ -32,14 +31,6 @@ const AuthenticatedLayout: React.FC = () => {
             setDesks(desksData);
             setBookings(bookingsData);
             setStaffMembers(staffMembersData);
-
-            // Basic mapping: find staff member by email from firebase auth
-            if (authUser && authUser.email) {
-                const matchedStaff = staffMembersData.find(s => s.email === authUser.email);
-                if (matchedStaff) {
-                    setCurrentUser(matchedStaff);
-                }
-            }
         } catch (err) {
             setError('Failed to load data. Please try again later.');
             console.error(err);
@@ -79,6 +70,7 @@ const AuthenticatedLayout: React.FC = () => {
                 currentScreen={getCurrentScreen()}
                 onNavigate={handleNavigate}
                 currentUser={currentUser}
+                onLogout={logout}
             />
             <main className="container mx-auto p-4 sm:p-6 lg:p-8">
                 <Outlet context={{
