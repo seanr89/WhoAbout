@@ -56,10 +56,10 @@ public static class StaffMemberEndpoints
             }
 
             logger.LogInformation("Getting staff member for User Id: {UserId}", user.UserId);
-            var staffMember = await service.GetStaffMemberByUserIdAsync(user.UserId);
+            //var staffMember = await service.GetStaffMemberByUserIdAsync(user.UserId);
             var staffMemberByEmail = await service.GetStaffMemberByEmailAsync(user.Email);
             
-            if (staffMember is null)
+            if (staffMemberByEmail is null)
             {
                 logger.LogWarning("Staff member with User Id: {UserId} not found", user.UserId);
                 // Optional: Return the authenticated user info even if profile not found, 
@@ -69,13 +69,13 @@ public static class StaffMemberEndpoints
             }
 
             //todo: check if staff member has the userid populated, if not, update it
-            if (staffMemberByEmail is not null && staffMember.UserId == null)
+            if (staffMemberByEmail is not null && staffMemberByEmail.UserId == null)
             {
-                staffMember.UserId = user.UserId;
-                await service.UpdateStaffMemberAsync(staffMember.Id, staffMember);
+                staffMemberByEmail.UserId = user.UserId;
+                await service.UpdateStaffMemberAsync(staffMemberByEmail.Id, staffMemberByEmail);
             }
             
-            return Results.Ok(staffMember);
+            return Results.Ok(staffMemberByEmail);
         })
         .RequireAuthorization()
         .WithName("GetCurrentStaffMember");
