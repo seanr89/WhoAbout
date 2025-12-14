@@ -3,8 +3,8 @@ import ChairIcon from './icons/ChairIcon';
 import { StaffMember } from '../types';
 
 interface HeaderProps {
-  currentScreen: 'booking' | 'history' | 'admin' | 'reserved' | 'profile';
-  onNavigate: (screen: 'booking' | 'history' | 'admin' | 'reserved' | 'profile') => void;
+  currentScreen: 'booking' | 'admin' | 'reserved' | 'profile';
+  onNavigate: (screen: 'booking' | 'admin' | 'reserved' | 'profile') => void;
   currentUser: StaffMember | null;
   onLogout: () => void;
 }
@@ -34,15 +34,7 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
               >
                 Book a Desk
               </button>
-              <button
-                onClick={() => onNavigate('history')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'history'
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-              >
-                History
-              </button>
+
               <button
                 onClick={() => onNavigate('reserved')}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'reserved'
@@ -73,12 +65,7 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
               >
                 Book
               </button>
-              <button
-                onClick={() => onNavigate('history')}
-                className={`p-2 rounded-md ${currentScreen === 'history' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
-              >
-                History
-              </button>
+
               <button
                 onClick={() => onNavigate('reserved')}
                 className={`p-2 rounded-md ${currentScreen === 'reserved' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}

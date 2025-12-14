@@ -47,17 +47,17 @@ const AuthenticatedLayout: React.FC = () => {
     const getCurrentScreen = () => {
         const path = location.pathname;
         if (path === '/') return 'booking';
-        if (path.startsWith('/history')) return 'history';
+
         if (path.startsWith('/admin')) return 'admin';
         if (path.startsWith('/reserved')) return 'reserved';
         if (path.startsWith('/profile')) return 'profile';
         return 'booking';
     };
 
-    const handleNavigate = (screen: 'booking' | 'history' | 'admin' | 'reserved' | 'profile') => {
+    const handleNavigate = (screen: 'booking' | 'admin' | 'reserved' | 'profile') => {
         switch (screen) {
             case 'booking': navigate('/'); break;
-            case 'history': navigate('/history'); break;
+
             case 'admin': navigate('/admin'); break;
             case 'reserved': navigate('/reserved'); break;
             case 'profile': navigate('/profile'); break;

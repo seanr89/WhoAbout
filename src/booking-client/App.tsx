@@ -6,7 +6,7 @@ import RegisterScreen from './components/RegisterScreen';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthenticatedLayout from './components/AuthenticatedLayout';
 import BookingScreen from './components/BookingScreen';
-import HistoryScreen from './components/HistoryScreen';
+
 import AdminScreen from './components/AdminScreen';
 import ReservedScreen from './components/ReservedScreen';
 import ProfileScreen from './components/ProfileScreen';
@@ -29,11 +29,7 @@ const BookingScreenWrapper = () => {
   return <BookingScreen {...context} />;
 }
 
-const HistoryScreenWrapper = () => {
-  const context = useOutletContext<AppContextType>();
-  return <HistoryScreen {...context} />;
-  // Note: HistoryScreen usage in original App passed: bookings, locations, desks, staffMembers, onRefresh
-}
+
 
 const AdminScreenWrapper = () => {
   const context = useOutletContext<AppContextType>();
@@ -41,6 +37,7 @@ const AdminScreenWrapper = () => {
     locations={context.locations}
     staffMembers={context.staffMembers}
     bookings={context.bookings}
+    desks={context.desks}
     onDataRefresh={context.onRefresh}
   />;
 }
@@ -76,7 +73,7 @@ const App: React.FC = () => {
           </ProtectedRoute>
         }>
           <Route index element={<BookingScreenWrapper />} />
-          <Route path="history" element={<HistoryScreenWrapper />} />
+
           <Route path="admin" element={<AdminScreenWrapper />} />
           <Route path="reserved" element={<ReservedScreenWrapper />} />
           <Route path="profile" element={<ProfileScreenWrapper />} />
