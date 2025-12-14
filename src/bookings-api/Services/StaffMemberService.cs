@@ -23,6 +23,16 @@ public class StaffMemberService
         return await _context.StaffMembers.FindAsync(id);
     }
 
+    public async Task<StaffMember?> GetStaffMemberByUserIdAsync(string userId)
+    {
+        return await _context.StaffMembers.FirstOrDefaultAsync(s => s.UserId == userId);
+    }
+
+    public async Task<StaffMember?> GetStaffMemberByEmailAsync(string email)
+    {
+        return await _context.StaffMembers.FirstOrDefaultAsync(s => s.Email == email);
+    }
+
     public async Task<StaffMember> CreateStaffMemberAsync(StaffMember staffMember)
     {
         _context.StaffMembers.Add(staffMember);

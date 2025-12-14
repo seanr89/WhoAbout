@@ -10,6 +10,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=bookings;Username=postgres;Password=postgres
+    env_file:
+      - src/bookings-api/.env
     depends_on:
       postgres:
         condition: service_healthy
