@@ -30,11 +30,6 @@ builder.Services.AddScoped<DeskService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<StaffMemberService>();
 
-// Console.WriteLine($"Audience: {builder.Configuration["Firebase:Audience"]}");
-// Console.WriteLine($"Issuer: {builder.Configuration["Firebase:Issuer"]}");
-// Console.WriteLine($"Authority: {builder.Configuration["Firebase:Authority"]}");
-
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
