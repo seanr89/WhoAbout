@@ -127,6 +127,22 @@ export const bookingService = {
         }
     },
 
+    async getMyBookings(): Promise<Booking[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/bookings/my`, {
+                headers: await getHeaders()
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch my bookings');
+            }
+            const data: ApiBooking[] = await response.json();
+            return data.map(mapApiBookingToClient);
+        } catch (error) {
+            console.error('Error fetching my bookings:', error);
+            return [];
+        }
+    },
+
     async create(booking: Omit<Booking, 'id'>): Promise<Booking> {
         const apiBookingRequest = mapClientBookingToApiRequest(booking);
 

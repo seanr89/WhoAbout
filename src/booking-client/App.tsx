@@ -10,6 +10,7 @@ import BookingScreen from './components/BookingScreen';
 import AdminScreen from './components/AdminScreen';
 import ReservedScreen from './components/ReservedScreen';
 import ProfileScreen from './components/ProfileScreen';
+import MyBookingsScreen from './components/MyBookingsScreen';
 import { Location, Desk, Booking, StaffMember } from './types';
 
 // Context interface for Outlet
@@ -60,6 +61,11 @@ const ProfileScreenWrapper = () => {
   return <ProfileScreen currentUser={context.currentUser} onUpdateUser={() => context.onRefresh()} />;
 }
 
+const MyBookingsScreenWrapper = () => {
+  // MyBookingsScreen fetches its own data, so we don't pass context data
+  return <MyBookingsScreen />;
+}
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -77,6 +83,7 @@ const App: React.FC = () => {
           <Route path="admin" element={<AdminScreenWrapper />} />
           <Route path="reserved" element={<ReservedScreenWrapper />} />
           <Route path="profile" element={<ProfileScreenWrapper />} />
+          <Route path="my-bookings" element={<MyBookingsScreenWrapper />} />
         </Route>
       </Routes>
     </AuthProvider>

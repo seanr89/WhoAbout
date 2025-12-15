@@ -3,8 +3,8 @@ import ChairIcon from './icons/ChairIcon';
 import { StaffMember } from '../types';
 
 interface HeaderProps {
-  currentScreen: 'booking' | 'admin' | 'reserved' | 'profile';
-  onNavigate: (screen: 'booking' | 'admin' | 'reserved' | 'profile') => void;
+  currentScreen: 'booking' | 'admin' | 'reserved' | 'profile' | 'my-bookings';
+  onNavigate: (screen: 'booking' | 'admin' | 'reserved' | 'profile' | 'my-bookings') => void;
   currentUser: StaffMember | null;
   onLogout: () => void;
 }
@@ -53,6 +53,15 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
               >
                 Admin
               </button>
+              <button
+                onClick={() => onNavigate('my-bookings')}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'my-bookings'
+                  ? 'bg-indigo-50 text-indigo-700'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
+              >
+                My Bookings
+              </button>
             </nav>
           </div>
 
@@ -77,6 +86,12 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
                 className={`p-2 rounded-md ${currentScreen === 'admin' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
               >
                 Admin
+              </button>
+              <button
+                onClick={() => onNavigate('my-bookings')}
+                className={`p-2 rounded-md ${currentScreen === 'my-bookings' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
+              >
+                My Bookings
               </button>
             </div>
 

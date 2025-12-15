@@ -117,4 +117,13 @@ public class BookingService
 
         return counts;
     }
+
+    public async Task<List<Booking>> GetBookingsByStaffMemberIdAsync(Guid staffMemberId)
+    {
+        return await _context.Bookings
+            .Include(b => b.Desk)
+            .Where(b => b.StaffMemberId == staffMemberId)
+            .OrderBy(b => b.BookingDate)
+            .ToListAsync();
+    }
 }

@@ -152,5 +152,48 @@ public static class BookingEndpoints
             return Results.Ok(stats);
         })
         .WithName("GetBookingStats");
+
+        group.MapGet("/my", async (HttpContext httpContext, BookingService service, StaffMemberService staffService, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("BookingEndpoints");
+            
+            // Extract user data from claims (similar to StaffMemberEndpoints)
+            var userId = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var email = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(userId) && string.IsNullOrEmpty(email))
+            {
+                logger.LogWarning("User ID and Email not found in token");
+                return Results.Unauthorized();
+            }
+
+            // Find the staff member
+            StaffMember? staffMember = null;
+            if (!string.IsNullOrEmpty(email))
+            {
+                staffMember = await staffService.GetStaffMemberByEmailAsync(email);
+            }
+            
+            if (staffMember == null)
+            {
+                 logger.LogWarning("Staff member not found for authenticated user");
+                 return Results.NotFound("Staff member profile not found.");
+            }
+
+            logger.LogInformation("Getting bookings for StaffMemberId: {StaffMemberId}", staffMember.Id);
+            var bookings = await service.GetBookingsByStaffMemberIdAsync(staffMember.Id);
+            
+            var dtos = bookings.Select(b => new BookingDto
+            {
+                Id = b.Id,
+                DeskId = b.DeskId,
+                StaffMemberId = b.StaffMemberId,
+                Date = b.BookingDate,
+                BookingType = (int)b.BookingType
+            });
+            return Results.Ok(dtos);
+        })
+        .RequireAuthorization()
+        .WithName("GetMyBookings");
     }
 }
