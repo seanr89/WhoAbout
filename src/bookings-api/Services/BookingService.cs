@@ -53,7 +53,18 @@ public class BookingService
 
         if (desk.ReservedForStaffMemberId.HasValue && desk.ReservedForStaffMemberId != booking.StaffMemberId)
         {
-            throw new Exception("This desk is reserved for another staff member.");
+             // Check if the desk is released for this day
+             var bookingDate = booking.BookingDate.Date;
+             if (bookingDate.Kind == DateTimeKind.Unspecified)
+                  bookingDate = DateTime.SpecifyKind(bookingDate, DateTimeKind.Utc);
+
+             var isreleased = await _context.DeskReleases
+                .AnyAsync(r => r.DeskId == desk.Id && r.Date == bookingDate);
+            
+             if (!isreleased)
+             {
+                throw new Exception("This desk is reserved for another staff member.");
+             }
         }
 
         _context.Bookings.Add(booking);

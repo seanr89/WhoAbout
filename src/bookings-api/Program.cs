@@ -29,6 +29,7 @@ builder.Services.AddScoped<OfficeService>();
 builder.Services.AddScoped<DeskService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<StaffMemberService>();
+builder.Services.AddScoped<DeskReleaseService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -87,6 +88,7 @@ app.MapOfficeEndpoints();
 app.MapDeskEndpoints();
 app.MapBookingEndpoints();
 app.MapStaffMemberEndpoints();
+app.MapDeskReleaseEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
