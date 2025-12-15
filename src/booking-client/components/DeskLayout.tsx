@@ -3,12 +3,14 @@ import { Desk, Booking, BookingSlot } from '../types';
 import ChairIcon from './icons/ChairIcon';
 import DeskTypeIcon from './icons/DeskTypeIcon';
 
+// ... (imports remain the same)
+
 interface DeskCardProps {
   desk: Desk;
   selectedSlot: BookingSlot;
   morningBooking?: Booking;
   afternoonBooking?: Booking;
-  onBook: (desk: Desk) => void;
+  onBook: (desk: Desk, slot?: BookingSlot) => void;
   currentUserId: string;
 }
 
@@ -32,27 +34,17 @@ const DeskCard: React.FC<DeskCardProps> = ({ desk, selectedSlot, morningBooking,
   const isMorningBookedByMe = morningBooking?.userId === currentUserId || morningBooking?.staffMemberId === currentUserId;
   const isAfternoonBookedByMe = afternoonBooking?.userId === currentUserId || afternoonBooking?.staffMemberId === currentUserId;
 
-  let isBookable = false;
-  switch (selectedSlot) {
-    case BookingSlot.FULL_DAY:
-      isBookable = !isMorningBooked && !isAfternoonBooked;
-      break;
-    case BookingSlot.MORNING:
-      isBookable = !isMorningBooked;
-      break;
-    case BookingSlot.AFTERNOON:
-      isBookable = !isAfternoonBooked;
-      break;
-  }
+  // Check if at least one slot is available for the card to be interactive
+  const isBookable = !isMorningBooked || !isAfternoonBooked;
 
   const cardClasses = isBookable
     ? 'bg-white shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer'
     : 'bg-slate-100 text-slate-400 cursor-not-allowed';
 
   const getSlotClasses = (booked: boolean, byMe: boolean): string => {
-    if (byMe) return 'bg-indigo-500 text-white';
-    if (booked) return 'bg-rose-500 text-white';
-    return 'bg-green-100 text-green-800';
+    if (byMe) return 'bg-indigo-500 text-white border-indigo-500';
+    if (booked) return 'bg-rose-500 text-white border-rose-500';
+    return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
   }
 
   let availabilityStatus: 'available' | 'partially' | 'booked';
@@ -75,10 +67,28 @@ const DeskCard: React.FC<DeskCardProps> = ({ desk, selectedSlot, morningBooking,
     booked: 'bg-rose-500',
   };
 
+  const handleCardClick = () => {
+    if (!isBookable) return;
+
+    // Determine the smart default slot if clicking the card body
+    let slotToBook = selectedSlot;
+
+    // If Full Day is selected but one slot is taken, default to the available one
+    if (selectedSlot === BookingSlot.FULL_DAY) {
+      if (isMorningBooked && !isAfternoonBooked) {
+        slotToBook = BookingSlot.AFTERNOON;
+      } else if (!isMorningBooked && isAfternoonBooked) {
+        slotToBook = BookingSlot.MORNING;
+      }
+    }
+
+    onBook(desk, slotToBook);
+  };
+
   return (
     <div
       className={`rounded-lg p-4 flex flex-col items-center justify-center border relative ${cardClasses}`}
-      onClick={() => isBookable && onBook(desk)}
+      onClick={handleCardClick}
     >
       <div
         className={`absolute top-2 right-2 w-3 h-3 rounded-full ${statusIndicatorClasses[availabilityStatus]}`}
@@ -92,8 +102,26 @@ const DeskCard: React.FC<DeskCardProps> = ({ desk, selectedSlot, morningBooking,
         <span>{desk.type}</span>
       </div>
       <div className="flex space-x-2 mt-3 text-xs font-semibold">
-        <span className={`px-2 py-1 rounded ${getSlotClasses(isMorningBooked, isMorningBookedByMe)}`}>AM</span>
-        <span className={`px-2 py-1 rounded ${getSlotClasses(isAfternoonBooked, isAfternoonBookedByMe)}`}>PM</span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isMorningBooked) onBook(desk, BookingSlot.MORNING);
+          }}
+          disabled={isMorningBooked}
+          className={`px-2 py-1 rounded border ${getSlotClasses(isMorningBooked, isMorningBookedByMe)} ${!isMorningBooked ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+        >
+          AM
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isAfternoonBooked) onBook(desk, BookingSlot.AFTERNOON);
+          }}
+          disabled={isAfternoonBooked}
+          className={`px-2 py-1 rounded border ${getSlotClasses(isAfternoonBooked, isAfternoonBookedByMe)} ${!isAfternoonBooked ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+        >
+          PM
+        </button>
       </div>
     </div>
   );
@@ -104,7 +132,7 @@ interface DeskLayoutProps {
   bookings: Booking[];
   selectedDate: string;
   selectedSlot: BookingSlot;
-  onSelectDesk: (desk: Desk) => void;
+  onSelectDesk: (desk: Desk, slot?: BookingSlot) => void;
   currentUserId: string;
 }
 

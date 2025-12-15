@@ -8,12 +8,13 @@ interface BookingModalProps {
   desk: Desk | null;
   selectedDate: string;
   selectedSlot: BookingSlot;
+  availableSlots: BookingSlot[];
   staffMembers: StaffMember[];
   onClose: () => void;
   onConfirm: (slotToBook: BookingSlot, staffMemberId: string) => void;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ desk, selectedDate, selectedSlot, staffMembers, onClose, onConfirm }) => {
+const BookingModal: React.FC<BookingModalProps> = ({ desk, selectedDate, selectedSlot, availableSlots, staffMembers, onClose, onConfirm }) => {
   if (!desk) return null;
 
   const [modalSlot, setModalSlot] = useState<BookingSlot>(selectedSlot);
@@ -70,7 +71,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ desk, selectedDate, selecte
               onChange={(e) => setModalSlot(e.target.value as BookingSlot)}
               className="bg-white w-full p-2 border border-slate-300 rounded-md font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
             >
-              {Object.values(BookingSlot).map(slot => (
+              {availableSlots.map(slot => (
                 <option key={slot} value={slot}>{slot}</option>
               ))}
             </select>

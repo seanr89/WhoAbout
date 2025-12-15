@@ -54,17 +54,43 @@ public class BookingService
         if (desk.ReservedForStaffMemberId.HasValue && desk.ReservedForStaffMemberId != booking.StaffMemberId)
         {
              // Check if the desk is released for this day
-             var bookingDate = booking.BookingDate.Date;
-             if (bookingDate.Kind == DateTimeKind.Unspecified)
-                  bookingDate = DateTime.SpecifyKind(bookingDate, DateTimeKind.Utc);
+             var bookingDateRaw = booking.BookingDate.Date;
+             if (bookingDateRaw.Kind == DateTimeKind.Unspecified)
+                  bookingDateRaw = DateTime.SpecifyKind(bookingDateRaw, DateTimeKind.Utc);
 
              var isreleased = await _context.DeskReleases
-                .AnyAsync(r => r.DeskId == desk.Id && r.Date == bookingDate);
+                .AnyAsync(r => r.DeskId == desk.Id && r.Date == bookingDateRaw);
             
              if (!isreleased)
              {
                 throw new Exception("This desk is reserved for another staff member.");
              }
+        }
+
+        // Check for double booking overlap
+        var startOfDay = booking.BookingDate.Date;
+        if (startOfDay.Kind == DateTimeKind.Unspecified) 
+            startOfDay = DateTime.SpecifyKind(startOfDay, DateTimeKind.Utc);
+        var endOfDay = startOfDay.AddDays(1);
+
+        var existingBookings = await _context.Bookings
+            .Where(b => b.DeskId == booking.DeskId 
+                     && b.BookingDate >= startOfDay 
+                     && b.BookingDate < endOfDay
+                     && b.Status != bookings_api.Enums.BookingStatus.Cancelled
+                     && b.Status != bookings_api.Enums.BookingStatus.Rejected)
+            .ToListAsync();
+
+        foreach (var existing in existingBookings)
+        {
+            bool overlap = false;
+            if (existing.BookingType == bookings_api.Enums.BookingType.FullDay || booking.BookingType == bookings_api.Enums.BookingType.FullDay) overlap = true;
+            else if (existing.BookingType == booking.BookingType) overlap = true;
+
+            if (overlap)
+            {
+                throw new Exception($"Desk is already booked for {existing.BookingType} on this date.");
+            }
         }
 
         _context.Bookings.Add(booking);
@@ -106,7 +132,7 @@ public class BookingService
     {
         var counts = await _context.Bookings
             .Include(b => b.Desk)
-            .Where(b => b.Desk.OfficeId == officeId && b.BookingDate >= startDate && b.BookingDate <= endDate)
+            .Where(b => b.Desk != null && b.Desk.OfficeId == officeId && b.BookingDate >= startDate && b.BookingDate <= endDate)
             .GroupBy(b => b.BookingDate.Date)
             .Select(g => new bookings_api.Models.DTOs.DailyBookingCountDto
             {

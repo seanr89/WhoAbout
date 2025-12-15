@@ -37,6 +37,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
     const [selectedSlot, setSelectedSlot] = useState<BookingSlot>(BookingSlot.FULL_DAY);
     const [deskTypeFilter, setDeskTypeFilter] = useState<DeskType | 'all'>('all');
     const [selectedDeskForBooking, setSelectedDeskForBooking] = useState<Desk | null>(null);
+    const [selectedSlotForBooking, setSelectedSlotForBooking] = useState<BookingSlot>(BookingSlot.FULL_DAY);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [hideBookedDesks, setHideBookedDesks] = useState(false);
     const calendarRef = useRef<HTMLDivElement>(null);
@@ -87,7 +88,10 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
         });
     }, [desks, selectedLocationId, deskTypeFilter, hideBookedDesks, bookings, selectedDate, selectedSlot]);
 
-    const handleSelectDesk = (desk: Desk) => setSelectedDeskForBooking(desk);
+    const handleSelectDesk = (desk: Desk, slot?: BookingSlot) => {
+        setSelectedDeskForBooking(desk);
+        setSelectedSlotForBooking(slot || selectedSlot);
+    };
     const handleCloseModal = () => setSelectedDeskForBooking(null);
 
     const handleDateSelect = (date: string) => {
@@ -114,6 +118,21 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
     };
 
     const selectedLocation = locations.find(l => l.id === selectedLocationId);
+
+    const availableSlotsForModal = useMemo(() => {
+        if (!selectedDeskForBooking) return [];
+        const deskBookings = bookings.filter(b => b.deskId === selectedDeskForBooking.id && b.date === selectedDate);
+
+        const isMorningBooked = deskBookings.some(b => b.slot === BookingSlot.MORNING || b.slot === BookingSlot.FULL_DAY);
+        const isAfternoonBooked = deskBookings.some(b => b.slot === BookingSlot.AFTERNOON || b.slot === BookingSlot.FULL_DAY);
+
+        const slots: BookingSlot[] = [];
+        if (!isMorningBooked) slots.push(BookingSlot.MORNING);
+        if (!isAfternoonBooked) slots.push(BookingSlot.AFTERNOON);
+        if (!isMorningBooked && !isAfternoonBooked) slots.push(BookingSlot.FULL_DAY);
+
+        return slots;
+    }, [selectedDeskForBooking, bookings, selectedDate]);
 
     return (
         <>
@@ -262,7 +281,8 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
             <BookingModal
                 desk={selectedDeskForBooking}
                 selectedDate={selectedDate}
-                selectedSlot={selectedSlot}
+                selectedSlot={selectedSlotForBooking}
+                availableSlots={availableSlotsForModal}
                 staffMembers={staffMembers}
                 onClose={handleCloseModal}
                 onConfirm={handleConfirmBooking}
