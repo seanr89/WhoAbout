@@ -13,6 +13,12 @@ public static class BookingEndpoints
             .WithTags("Bookings")
             .WithOpenApi();
 
+        /// <summary>
+        /// Gets all bookings
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapGet("/", async (BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -30,6 +36,13 @@ public static class BookingEndpoints
         })
         .WithName("GetAllBookings");
 
+        /// <summary>
+        /// Gets the booking with the specified Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="service"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapGet("/{id}", async (int id, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -69,6 +82,14 @@ public static class BookingEndpoints
         })
         .WithName("CreateBooking");
 
+        /// <summary>
+        /// Updates the booking with the specified Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="booking"></param>
+        /// <param name="service"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapPut("/{id}", async (int id, [FromBody] Booking booking, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -91,6 +112,13 @@ public static class BookingEndpoints
         })
         .WithName("UpdateBooking");
 
+        /// <summary>
+        /// Deletes the booking with the specified Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="service"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapDelete("/{id}", async (int id, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -105,6 +133,13 @@ public static class BookingEndpoints
         })
         .WithName("DeleteBooking");
 
+        /// <summary>
+        /// Gets the bookings for the specified date
+        /// </summary>
+        /// <param name="date"></param>
+        /// <param name="service"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapGet("/by-date", async ([FromQuery] DateTime? date, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -129,6 +164,14 @@ public static class BookingEndpoints
         })
         .WithName("GetBookingsByDate");
 
+        /// <summary>
+        /// Gets the booking stats for the authenticated user
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="service"></param>
+        /// <param name="staffService"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapGet("/stats", async ([FromQuery] Guid officeId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -153,6 +196,14 @@ public static class BookingEndpoints
         })
         .WithName("GetBookingStats");
 
+        /// <summary>
+        /// Gets the bookings for the authenticated user
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="service"></param>
+        /// <param name="staffService"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapGet("/my", async (HttpContext httpContext, BookingService service, StaffMemberService staffService, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");

@@ -42,7 +42,7 @@ public static class DbInitializer
         }
 
         // DTO Desks (Belfast) - 65
-        for (int i = 1; i <= 65; i++)
+        for (int i = 1; i <= 25; i++)
         {
             desks.Add(new Desk 
             { 
@@ -53,7 +53,7 @@ public static class DbInitializer
         }
 
         // HQ Desks (London) - 40
-        for (int i = 1; i <= 40; i++)
+        for (int i = 1; i <= 15; i++)
         {
             desks.Add(new Desk 
             { 
@@ -64,7 +64,7 @@ public static class DbInitializer
         }
 
         // International Desks (Dubai) - 20
-        for (int i = 1; i <= 20; i++)
+        for (int i = 1; i <= 10; i++)
         {
             desks.Add(new Desk 
             { 
