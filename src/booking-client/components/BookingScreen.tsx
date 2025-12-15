@@ -30,7 +30,7 @@ function getTodayString() {
 }
 
 const BookingScreen: React.FC<BookingScreenProps> = ({
-    locations, desks, bookings, staffMembers, currentUser, isLoading, error, onRefresh
+    locations, desks, staffMembers, currentUser, isLoading: globalLoading, error: globalError, onRefresh
 }) => {
     const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
@@ -40,6 +40,11 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
     const [selectedSlotForBooking, setSelectedSlotForBooking] = useState<BookingSlot>(BookingSlot.FULL_DAY);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [hideBookedDesks, setHideBookedDesks] = useState(false);
+
+    // Local state for filtered bookings
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [isBookingsLoading, setIsBookingsLoading] = useState(false);
+
     const calendarRef = useRef<HTMLDivElement>(null);
 
     // Initialize selected location
@@ -48,6 +53,26 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
             setSelectedLocationId(locations[0].id);
         }
     }, [locations, selectedLocationId]);
+
+    // Fetch bookings when filters change
+    const fetchFilteredBookings = async () => {
+        if (!selectedLocationId) return;
+
+        setIsBookingsLoading(true);
+        try {
+            const data = await api.fetchBookingsByDateAndLocation(selectedDate, selectedLocationId);
+            setBookings(data);
+        } catch (err) {
+            console.error("Failed to fetch filtered bookings", err);
+        } finally {
+            setIsBookingsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchFilteredBookings();
+    }, [selectedLocationId, selectedDate]);
+
 
     // Close calendar on outside click
     useEffect(() => {
@@ -103,7 +128,8 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
         if (!selectedDeskForBooking) return;
         try {
             await api.createBooking(selectedDeskForBooking, selectedDate, slotToBook, staffId);
-            onRefresh(); // Refresh parent data
+            // Refresh local bookings instead of global
+            await fetchFilteredBookings();
             handleCloseModal();
         } catch (err: any) {
             alert(err.message || 'An unknown error occurred.');
@@ -149,11 +175,11 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
                             value={selectedLocationId ?? ''}
                             onChange={(e) => setSelectedLocationId(e.target.value)}
                             className="w-full p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                            disabled={isLoading || locations.length === 0}
+                            disabled={globalLoading || isBookingsLoading || locations.length === 0}
                         >
                             {selectedLocationId === null ? (
                                 <option value="" disabled>
-                                    {isLoading ? 'Loading locations...' : 'No locations available'}
+                                    {(globalLoading || isBookingsLoading) ? 'Loading locations...' : 'No locations available'}
                                 </option>
                             ) : (
                                 locations.map(location => (
@@ -242,13 +268,13 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
                 </div>
             </div>
 
-            {isLoading ? (
+            {(globalLoading || isBookingsLoading) ? (
                 <div className="text-center py-16">
                     <p className="text-lg font-semibold text-slate-700">Loading desks...</p>
                 </div>
-            ) : error ? (
+            ) : globalError ? (
                 <div className="text-center py-16 bg-red-50 text-red-700 rounded-lg">
-                    <p className="font-semibold">{error}</p>
+                    <p className="font-semibold">{globalError}</p>
                 </div>
             ) : (
                 <div>

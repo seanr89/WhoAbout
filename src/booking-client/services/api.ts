@@ -21,6 +21,10 @@ export const api = {
     return await bookingService.getStaffMembers();
   },
 
+  fetchBookingsByDateAndLocation: async (date: string, locationId: string): Promise<Booking[]> => {
+    return await bookingService.getByDateAndLocation(date, locationId);
+  },
+
   createBooking: async (desk: Desk, date: string, slot: BookingSlot, staffMemberId: string): Promise<Booking> => {
     // We don't have the user ID here easily to pass to the service if it needed it,
     // but the service handles the mapping.

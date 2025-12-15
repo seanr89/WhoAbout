@@ -35,6 +35,21 @@ public class BookingService
             .ToListAsync();
     }
 
+    public async Task<List<Booking>> GetBookingsByDateAndLocationAsync(DateTime date, Guid officeId)
+    {
+        // Normalized to UTC date range
+        var startOfDay = date.Date;
+        if (startOfDay.Kind == DateTimeKind.Unspecified)
+             startOfDay = DateTime.SpecifyKind(startOfDay, DateTimeKind.Utc);
+        
+        var endOfDay = startOfDay.AddDays(1);
+
+        return await _context.Bookings
+            .Include(b => b.Desk)
+            .Where(b => b.BookingDate >= startOfDay && b.BookingDate < endOfDay && b.Desk != null && b.Desk.OfficeId == officeId)
+            .ToListAsync();
+    }
+
     public async Task<Booking?> GetBookingByIdAsync(int id)
     {
         return await _context.Bookings

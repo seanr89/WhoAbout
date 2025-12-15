@@ -143,6 +143,27 @@ export const bookingService = {
         }
     },
 
+    async getByDateAndLocation(date: string, locationId: string): Promise<Booking[]> {
+        try {
+            const params = new URLSearchParams();
+            params.append('date', date);
+            params.append('officeId', locationId);
+
+            const response = await fetch(`${API_BASE_URL}/api/bookings/query?${params.toString()}`, {
+                headers: await getHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch bookings for query');
+            }
+            const data: ApiBooking[] = await response.json();
+            return data.map(mapApiBookingToClient);
+        } catch (error) {
+            console.error('Error fetching filtered bookings:', error);
+            return [];
+        }
+    },
+
     async create(booking: Omit<Booking, 'id'>): Promise<Booking> {
         const apiBookingRequest = mapClientBookingToApiRequest(booking);
 
