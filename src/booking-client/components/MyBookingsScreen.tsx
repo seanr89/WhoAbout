@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Booking, Desk, StaffMember, BookingSlot, DeskType } from '../types';
+import { Booking, Desk, StaffMember, BookingSlot, DeskType, Location } from '../types';
 import { bookingService } from '../services/bookingService';
+import BookingDetailsModal from './BookingDetailsModal';
 import ChairIcon from './icons/ChairIcon';
 
 // Helper to get start of current week (Monday)
@@ -22,6 +23,9 @@ const MyBookingsScreen: React.FC = () => {
     const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
     const [myBookings, setMyBookings] = useState<Booking[]>([]);
     const [myReservedDesks, setMyReservedDesks] = useState<Desk[]>([]);
+    const [allDesks, setAllDesks] = useState<Desk[]>([]);
+    const [locations, setLocations] = useState<Location[]>([]);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -33,13 +37,16 @@ const MyBookingsScreen: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const [bookings, desks, me] = await Promise.all([
+            const [bookings, desks, me, locs] = await Promise.all([
                 bookingService.getMyBookings(),
                 bookingService.getDesks(),
-                bookingService.getMe()
+                bookingService.getMe(),
+                bookingService.getLocations()
             ]);
 
             setMyBookings(bookings);
+            setAllDesks(desks);
+            setLocations(locs);
 
             if (me) {
                 const reserved = desks.filter(d => d.reservedForStaffMemberId === me.id);
@@ -78,6 +85,25 @@ const MyBookingsScreen: React.FC = () => {
     const getBookingsForDate = (date: Date) => {
         const dateStr = formatDate(date);
         return myBookings.filter(b => b.date === dateStr);
+    };
+
+    const handleBookingClick = (booking: Booking) => {
+        setSelectedBooking(booking);
+    };
+
+    const handleCancelBooking = async (bookingId: number) => {
+        try {
+            const success = await bookingService.deleteBooking(bookingId);
+            if (success) {
+                // Refresh data
+                await fetchData();
+            } else {
+                throw new Error('Failed to delete booking');
+            }
+        } catch (err) {
+            console.error('Error cancelling booking:', err);
+            alert('Failed to cancel booking. Please try again.');
+        }
     };
 
     return (
@@ -161,19 +187,34 @@ const MyBookingsScreen: React.FC = () => {
                                     {dateBookings.length > 0 && (
                                         <div className="space-y-2 mt-4">
                                             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Booked</p>
-                                            {dateBookings.map(booking => (
-                                                <div key={booking.id} className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 relative group">
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <span className="font-bold text-indigo-800 text-sm block">Desk {booking.deskId}</span>
-                                                            {/* Note: In real app we might want to lookup desk name from ID if not available in booking */}
-                                                            <span className="text-xs text-indigo-600 font-medium inline-block bg-indigo-100 px-2 py-0.5 rounded-full mt-1">
-                                                                {booking.slot}
-                                                            </span>
+                                            {dateBookings.map(booking => {
+                                                const desk = allDesks.find(d => d.id === booking.deskId);
+                                                const location = desk ? locations.find(l => l.id === desk.locationId) : null;
+
+                                                return (
+                                                    <div
+                                                        key={booking.id}
+                                                        onClick={() => handleBookingClick(booking)}
+                                                        className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 relative group cursor-pointer hover:bg-indigo-100 transition-colors"
+                                                    >
+                                                        <div className="flex justify-between items-start">
+                                                            <div>
+                                                                <span className="font-bold text-indigo-800 text-sm block">
+                                                                    {desk ? desk.label : `Desk ${booking.deskId}`}
+                                                                </span>
+                                                                {location && (
+                                                                    <span className="text-xs text-indigo-600 block mb-1 font-medium">
+                                                                        {location.name}, {location.city}
+                                                                    </span>
+                                                                )}
+                                                                <span className="text-xs text-indigo-600 font-medium inline-block bg-indigo-100 px-2 py-0.5 rounded-full mt-1">
+                                                                    {booking.slot}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
 
@@ -187,6 +228,19 @@ const MyBookingsScreen: React.FC = () => {
                         );
                     })}
                 </div>
+            )}
+            {/* Booking Details Modal */}
+            {selectedBooking && (
+                <BookingDetailsModal
+                    booking={selectedBooking}
+                    desk={allDesks.find(d => d.id === selectedBooking.deskId) || null}
+                    location={(() => {
+                        const desk = allDesks.find(d => d.id === selectedBooking.deskId);
+                        return desk ? locations.find(l => l.id === desk.locationId) || null : null;
+                    })()}
+                    onClose={() => setSelectedBooking(null)}
+                    onCancel={handleCancelBooking}
+                />
             )}
         </div>
     );
