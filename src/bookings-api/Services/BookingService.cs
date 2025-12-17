@@ -88,6 +88,19 @@ public class BookingService
             startOfDay = DateTime.SpecifyKind(startOfDay, DateTimeKind.Utc);
         var endOfDay = startOfDay.AddDays(1);
 
+        // Check if staff member already has a booking for this date
+        var existingStaffBooking = await _context.Bookings
+            .AnyAsync(b => b.StaffMemberId == booking.StaffMemberId
+                        && b.BookingDate >= startOfDay
+                        && b.BookingDate < endOfDay
+                        && b.Status != bookings_api.Enums.BookingStatus.Cancelled
+                        && b.Status != bookings_api.Enums.BookingStatus.Rejected);
+
+        if (existingStaffBooking)
+        {
+            throw new Exception("Staff member already has a booking for this date.");
+        }
+
         var existingBookings = await _context.Bookings
             .Where(b => b.DeskId == booking.DeskId 
                      && b.BookingDate >= startOfDay 
