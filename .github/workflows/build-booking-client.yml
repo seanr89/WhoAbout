@@ -1,0 +1,35 @@
+name: Build Booking Client
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'src/booking-client/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'src/booking-client/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./src/booking-client
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: src/booking-client/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build
+      run: npm run build
