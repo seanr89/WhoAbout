@@ -30,6 +30,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, book
     const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
     const [newStaffName, setNewStaffName] = useState('');
     const [newStaffEmail, setNewStaffEmail] = useState('');
+    const [newStaffRole, setNewStaffRole] = useState<Role>(Role.Employee);
     const [isAddingStaff, setIsAddingStaff] = useState(false);
 
     // Stats State
@@ -175,9 +176,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, book
         e.preventDefault();
         try {
             setIsLoading(true);
-            await api.createStaffMember({ name: newStaffName, email: newStaffEmail, isActive: true, role: Role.Employee });
+            await api.createStaffMember({ name: newStaffName, email: newStaffEmail, isActive: true, role: newStaffRole });
             setNewStaffName('');
             setNewStaffEmail('');
+            setNewStaffRole(Role.Employee);
             setIsAddingStaff(false);
             onDataRefresh();
         } catch (err) {
@@ -585,7 +587,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, book
                     {isAddingStaff && (
                         <form onSubmit={handleCreateStaff} className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
                             <h4 className="text-sm font-bold text-slate-700 mb-3">New Staff Member</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <input
                                     type="text"
                                     placeholder="Full Name"
@@ -602,6 +604,16 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, book
                                     className="p-2 border border-slate-300 rounded-md"
                                     required
                                 />
+                                <select
+                                    value={newStaffRole}
+                                    onChange={e => setNewStaffRole(Number(e.target.value) as Role)}
+                                    className="p-2 border border-slate-300 rounded-md"
+                                >
+                                    <option value={Role.Employee}>Employee</option>
+                                    <option value={Role.Manager}>Manager</option>
+                                    <option value={Role.Admin}>Admin</option>
+                                    <option value={Role.Owner}>Owner</option>
+                                </select>
                             </div>
                             <div className="flex justify-end space-x-2">
                                 <button
@@ -628,6 +640,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, book
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Role</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                                 </tr>
@@ -657,6 +670,22 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, book
                                                 />
                                             ) : (
                                                 staff.email
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            {editingStaff?.id === staff.id ? (
+                                                <select
+                                                    value={editingStaff.role}
+                                                    onChange={e => setEditingStaff({ ...editingStaff, role: Number(e.target.value) as Role })}
+                                                    className="p-1 border border-slate-300 rounded w-full"
+                                                >
+                                                    <option value={Role.Employee}>Employee</option>
+                                                    <option value={Role.Manager}>Manager</option>
+                                                    <option value={Role.Admin}>Admin</option>
+                                                    <option value={Role.Owner}>Owner</option>
+                                                </select>
+                                            ) : (
+                                                Role[staff.role]
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">

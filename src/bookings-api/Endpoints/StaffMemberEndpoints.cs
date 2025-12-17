@@ -2,6 +2,7 @@ using bookings_api.Models;
 using bookings_api.Models.DTOs;
 using bookings_api.Services;
 using Microsoft.AspNetCore.Mvc;
+using bookings_api.Enums;
 
 namespace bookings_api.Endpoints;
 
@@ -17,6 +18,20 @@ public static class StaffMemberEndpoints
             .WithTags("StaffMembers")
             .WithOpenApi();
 
+        // GET: /api/staffmembers/roles
+        group.MapGet("/roles", (ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
+            logger.LogInformation("Getting all staff roles");
+            var roles = Enum.GetValues<Role>()
+                            .Select(r => new { Id = (int)r, Name = r.ToString() })
+                            .ToList();
+            return Results.Ok(roles);
+        })
+        .WithName("GetStaffRoles")
+        .WithSummary("Get all staff roles")
+        .WithDescription("Retrieves a list of all possible staff roles.");
+
         // GET: /api/staffmembers
         group.MapGet("/", async (StaffMemberService service, ILoggerFactory loggerFactory) =>
         {
@@ -28,7 +43,9 @@ public static class StaffMemberEndpoints
                 Id = s.Id,
                 Name = s.Name,
                 Email = s.Email,
-                IsActive = s.IsActive
+
+                IsActive = s.IsActive,
+                Role = s.Role
             });
             return Results.Ok(dtos);
         })

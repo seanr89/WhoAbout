@@ -57,6 +57,11 @@ public class BookingService
             .FirstOrDefaultAsync(b => b.Id == id);
     }
 
+    /// <summary>
+    /// Creates a new booking.
+    /// </summary>
+    /// <param name="booking">The booking to create.</param>
+    /// <returns>The created booking.</returns>
     public async Task<Booking> CreateBookingAsync(Booking booking)
     {
         // Check if desk exists and if it is reserved
@@ -88,6 +93,19 @@ public class BookingService
             startOfDay = DateTime.SpecifyKind(startOfDay, DateTimeKind.Utc);
         var endOfDay = startOfDay.AddDays(1);
 
+        // Check if staff member already has a booking for this date
+        var existingStaffBooking = await _context.Bookings
+            .AnyAsync(b => b.StaffMemberId == booking.StaffMemberId
+                        && b.BookingDate >= startOfDay
+                        && b.BookingDate < endOfDay
+                        && b.Status != bookings_api.Enums.BookingStatus.Cancelled
+                        && b.Status != bookings_api.Enums.BookingStatus.Rejected);
+
+        if (existingStaffBooking)
+        {
+            throw new Exception("Staff member already has a booking for this date.");
+        }
+
         var existingBookings = await _context.Bookings
             .Where(b => b.DeskId == booking.DeskId 
                      && b.BookingDate >= startOfDay 
@@ -99,7 +117,8 @@ public class BookingService
         foreach (var existing in existingBookings)
         {
             bool overlap = false;
-            if (existing.BookingType == bookings_api.Enums.BookingType.FullDay || booking.BookingType == bookings_api.Enums.BookingType.FullDay) overlap = true;
+            if (existing.BookingType == bookings_api.Enums.BookingType.FullDay 
+                || booking.BookingType == bookings_api.Enums.BookingType.FullDay) overlap = true;
             else if (existing.BookingType == booking.BookingType) overlap = true;
 
             if (overlap)

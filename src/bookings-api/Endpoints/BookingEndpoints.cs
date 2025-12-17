@@ -7,18 +7,17 @@ namespace bookings_api.Endpoints;
 
 public static class BookingEndpoints
 {
+    /// <summary>
+    /// Maps the endpoints for managing bookings.
+    /// </summary>
+    /// <param name="app">The endpoint route builder.</param>
     public static void MapBookingEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/bookings")
             .WithTags("Bookings")
             .WithOpenApi();
 
-        /// <summary>
-        /// Gets all bookings
-        /// </summary>
-        /// <param name="service"></param>
-        /// <param name="loggerFactory"></param>
-        /// <returns></returns>
+        // GET: /api/bookings
         group.MapGet("/", async (BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -34,15 +33,11 @@ public static class BookingEndpoints
             });
             return Results.Ok(dtos);
         })
-        .WithName("GetAllBookings");
+        .WithName("GetAllBookings")
+        .WithSummary("Get all bookings")
+        .WithDescription("Retrieves a list of all existing bookings.");
 
-        /// <summary>
-        /// Gets the booking with the specified Id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="service"></param>
-        /// <param name="loggerFactory"></param>
-        /// <returns></returns>
+        // GET: /api/bookings/{id}
         group.MapGet("/{id}", async (int id, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -63,8 +58,11 @@ public static class BookingEndpoints
             };
             return Results.Ok(dto);
         })
-        .WithName("GetBookingById");
+        .WithName("GetBookingById")
+        .WithSummary("Get booking by ID")
+        .WithDescription("Retrieves a specific booking by its unique ID.");
 
+        // POST: /api/bookings
         group.MapPost("/", async ([FromBody] Booking booking, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -80,16 +78,11 @@ public static class BookingEndpoints
             };
             return Results.Created($"/api/bookings/{createdBooking.Id}", dto);
         })
-        .WithName("CreateBooking");
+        .WithName("CreateBooking")
+        .WithSummary("Create booking")
+        .WithDescription("Creates a new booking record.");
 
-        /// <summary>
-        /// Updates the booking with the specified Id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="booking"></param>
-        /// <param name="service"></param>
-        /// <param name="loggerFactory"></param>
-        /// <returns></returns>
+        // PUT: /api/bookings/{id}
         group.MapPut("/{id}", async (int id, [FromBody] Booking booking, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -110,15 +103,11 @@ public static class BookingEndpoints
             };
             return Results.Ok(dto);
         })
-        .WithName("UpdateBooking");
+        .WithName("UpdateBooking")
+        .WithSummary("Update booking")
+        .WithDescription("Updates an existing booking's details.");
 
-        /// <summary>
-        /// Deletes the booking with the specified Id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="service"></param>
-        /// <param name="loggerFactory"></param>
-        /// <returns></returns>
+        // DELETE: /api/bookings/{id}
         group.MapDelete("/{id}", async (int id, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -131,16 +120,11 @@ public static class BookingEndpoints
             }
             return Results.NoContent();
         })
-        .WithName("DeleteBooking");
+        .WithName("DeleteBooking")
+        .WithSummary("Delete booking")
+        .WithDescription("Deletes a booking by its unique ID.");
 
-        /// <summary>
-        /// Gets the bookings for the specified date and location
-        /// </summary>
-        /// <param name="date"></param>
-        /// <param name="officeId"></param>
-        /// <param name="service"></param>
-        /// <param name="loggerFactory"></param>
-        /// <returns></returns>
+        // GET: /api/bookings/query
         group.MapGet("/query", async ([FromQuery] DateTime date, [FromQuery] Guid officeId, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -163,15 +147,11 @@ public static class BookingEndpoints
             });
             return Results.Ok(dtos);
         })
-        .WithName("GetBookingsByDateAndLocation");
+        .WithName("GetBookingsByDateAndLocation")
+        .WithSummary("Get bookings by date and location")
+        .WithDescription("Retrieves bookings filtered by specific date and office location.");
 
-        /// <summary>
-        /// Gets the bookings for the specified date
-        /// </summary>
-        /// <param name="date"></param>
-        /// <param name="service"></param>
-        /// <param name="loggerFactory"></param>
-        /// <returns></returns>
+        // GET: /api/bookings/by-date
         group.MapGet("/by-date", async ([FromQuery] DateTime? date, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -194,16 +174,11 @@ public static class BookingEndpoints
             });
             return Results.Ok(dtos);
         })
-        .WithName("GetBookingsByDate");
+        .WithName("GetBookingsByDate")
+        .WithSummary("Get bookings by date")
+        .WithDescription("Retrieves all bookings for a specific date.");
 
-        /// <summary>
-        /// Gets the booking stats for the authenticated user
-        /// </summary>
-        /// <param name="httpContext"></param>
-        /// <param name="service"></param>
-        /// <param name="staffService"></param>
-        /// <param name="loggerFactory"></param>
-        /// <returns></returns>
+        // GET: /api/bookings/stats
         group.MapGet("/stats", async ([FromQuery] Guid officeId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -226,16 +201,11 @@ public static class BookingEndpoints
             var stats = await service.GetDailyBookingCountsAsync(officeId, start, end);
             return Results.Ok(stats);
         })
-        .WithName("GetBookingStats");
+        .WithName("GetBookingStats")
+        .WithSummary("Get booking statistics")
+        .WithDescription("Retrieves booking statistics for a specific office location within a date range.");
 
-        /// <summary>
-        /// Gets the bookings for the authenticated user
-        /// </summary>
-        /// <param name="httpContext"></param>
-        /// <param name="service"></param>
-        /// <param name="staffService"></param>
-        /// <param name="loggerFactory"></param>
-        /// <returns></returns>
+        // GET: /api/bookings/my
         group.MapGet("/my", async (HttpContext httpContext, BookingService service, StaffMemberService staffService, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
@@ -277,6 +247,8 @@ public static class BookingEndpoints
             return Results.Ok(dtos);
         })
         .RequireAuthorization()
-        .WithName("GetMyBookings");
+        .WithName("GetMyBookings")
+        .WithSummary("Get my bookings")
+        .WithDescription("Retrieves all future bookings for the currently authenticated staff member.");
     }
 }
