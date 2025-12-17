@@ -35,6 +35,23 @@ public static class DeskEndpoints
         })
         .WithName("GetDeskById");
 
+        group.MapGet("/available", async ([FromQuery] DateTime date, [FromQuery] Guid officeId, DeskService service) =>
+        {
+            var desks = await service.GetAvailableDesksAsync(officeId, date);
+            var dtos = desks.Select(d => new DeskDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Type = d.Type,
+                OfficeId = d.OfficeId,
+                ReservedForStaffMemberId = d.ReservedForStaffMemberId
+            });
+            return Results.Ok(dtos);
+        })
+        .WithName("GetAvailableDesks")
+        .WithSummary("Get available desks")
+        .WithDescription("Retrieves a list of available desks for a specific date and office location. Reserved desks are only included if they have been released for the given date.");
+
         group.MapPost("/", async ([FromBody] Desk desk, DeskService service) =>
         {
             var createdDesk = await service.CreateDeskAsync(desk);
