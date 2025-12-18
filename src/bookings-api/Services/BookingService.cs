@@ -93,6 +93,21 @@ public class BookingService
             startOfDay = DateTime.SpecifyKind(startOfDay, DateTimeKind.Utc);
         var endOfDay = startOfDay.AddDays(1);
 
+        // Check if staff member has a reserved desk that is not released
+        var reservedDesk = await _context.Desks
+            .FirstOrDefaultAsync(d => d.ReservedForStaffMemberId == booking.StaffMemberId);
+
+        if (reservedDesk != null)
+        {
+             var isReleased = await _context.DeskReleases
+                .AnyAsync(r => r.DeskId == reservedDesk.Id && r.Date == startOfDay);
+
+             if (!isReleased)
+             {
+                 throw new Exception("You have a reserved desk for this date. Please release it before booking another desk.");
+             }
+        }
+
         // Check if staff member already has a booking for this date
         var existingStaffBooking = await _context.Bookings
             .AnyAsync(b => b.StaffMemberId == booking.StaffMemberId
