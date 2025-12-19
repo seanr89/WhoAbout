@@ -1,4 +1,4 @@
-import { Location, Desk, Booking, BookingSlot, StaffMember } from '../types';
+import { Location, Desk, Booking, BookingSlot, StaffMember, StaffRole } from '../types';
 import { LOCATIONS, DESKS } from '../constants';
 import { bookingService } from './bookingService';
 
@@ -19,6 +19,10 @@ export const api = {
 
   fetchStaffMembers: async (): Promise<StaffMember[]> => {
     return await bookingService.getStaffMembers();
+  },
+
+  fetchStaffRoles: async (): Promise<StaffRole[]> => {
+    return await bookingService.getStaffRoles();
   },
 
   fetchBookingsByDateAndLocation: async (date: string, locationId: string): Promise<Booking[]> => {

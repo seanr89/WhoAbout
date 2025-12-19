@@ -1,4 +1,4 @@
-import { Booking, BookingSlot, Location, Desk, DeskType, StaffMember, DailyBookingCount } from '../types';
+import { Booking, BookingSlot, Location, Desk, DeskType, StaffMember, DailyBookingCount, StaffRole } from '../types';
 
 import { auth } from '../firebaseConfig';
 
@@ -50,6 +50,7 @@ interface ApiStaffMember {
     name: string;
     email: string;
     isActive: boolean;
+    role: number;
 }
 
 export const bookingService = {
@@ -91,6 +92,20 @@ export const bookingService = {
             return data.map(mapApiStaffToStaff);
         } catch (error) {
             console.error('Error fetching staff members:', error);
+            return [];
+        }
+    },
+
+    async getStaffRoles(): Promise<StaffRole[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/staffmembers/roles`, {
+                headers: await getHeaders()
+            });
+            if (!response.ok) throw new Error('Failed to fetch staff roles');
+            const data: StaffRole[] = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching staff roles:', error);
             return [];
         }
     },
@@ -238,7 +253,8 @@ export const bookingService = {
         const apiStaffRequest = {
             name: staff.name,
             email: staff.email,
-            isActive: staff.isActive
+            isActive: staff.isActive,
+            role: staff.role
         };
 
         const response = await fetch(`${API_BASE_URL}/api/staffmembers`, {
@@ -257,7 +273,8 @@ export const bookingService = {
             id: staff.id,
             name: staff.name,
             email: staff.email,
-            isActive: staff.isActive
+            isActive: staff.isActive,
+            role: staff.role
         };
 
         const response = await fetch(`${API_BASE_URL}/api/staffmembers/${staff.id}`, {
@@ -398,6 +415,6 @@ function mapApiStaffToStaff(apiStaff: ApiStaffMember): StaffMember {
         name: apiStaff.name,
         email: apiStaff.email,
         isActive: apiStaff.isActive,
-        role: 0, // Placeholder role using 0 (Role.Employee)
+        role: apiStaff.role,
     };
 }

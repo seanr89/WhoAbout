@@ -22,15 +22,13 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     const [isCancelling, setIsCancelling] = useState(false);
 
     const handleCancel = async () => {
-        if (window.confirm('Are you sure you want to cancel this booking?')) {
-            setIsCancelling(true);
-            try {
-                await onCancel(booking.id);
-                onClose();
-            } catch (error) {
-                console.error('Failed to cancel booking', error);
-                setIsCancelling(false);
-            }
+        setIsCancelling(true);
+        try {
+            await onCancel(booking.id);
+            onClose();
+        } catch (error) {
+            console.error('Failed to cancel booking', error);
+            setIsCancelling(false);
         }
     };
 

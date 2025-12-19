@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Location, Desk, Booking, StaffMember } from '../types';
+import { Location, Desk, Booking, StaffMember, StaffRole } from '../types';
 import { api } from '../services/api';
 import Header from './Header';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
@@ -10,6 +10,7 @@ const AuthenticatedLayout: React.FC = () => {
     const [desks, setDesks] = useState<Desk[]>([]);
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+    const [staffRoles, setStaffRoles] = useState<StaffRole[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -21,16 +22,18 @@ const AuthenticatedLayout: React.FC = () => {
         try {
             setIsLoading(true);
             setError(null);
-            const [locationsData, desksData, bookingsData, staffMembersData] = await Promise.all([
+            const [locationsData, desksData, bookingsData, staffMembersData, rolesData] = await Promise.all([
                 api.fetchLocations(),
                 api.fetchDesks(),
                 api.fetchBookings(),
                 api.fetchStaffMembers(),
+                api.fetchStaffRoles(),
             ]);
             setLocations(locationsData);
             setDesks(desksData);
             setBookings(bookingsData);
             setStaffMembers(staffMembersData);
+            setStaffRoles(rolesData);
         } catch (err) {
             setError('Failed to load data. Please try again later.');
             console.error(err);
@@ -76,7 +79,7 @@ const AuthenticatedLayout: React.FC = () => {
             />
             <main className="container mx-auto p-4 sm:p-6 lg:p-8">
                 <Outlet context={{
-                    locations, desks, bookings, staffMembers, currentUser, isLoading, error, onRefresh: fetchData
+                    locations, desks, bookings, staffMembers, staffRoles, currentUser, isLoading, error, onRefresh: fetchData
                 }} />
             </main>
         </div>

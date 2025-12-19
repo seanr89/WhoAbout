@@ -26,6 +26,11 @@ export enum BookingSlot {
   FULL_DAY = 'Full Day',
 }
 
+export interface StaffRole {
+  id: number;
+  name: string;
+}
+
 export enum Role {
   Employee = 0,
   Manager = 1,

@@ -19,6 +19,7 @@ interface AppContextType {
   desks: Desk[];
   bookings: Booking[];
   staffMembers: StaffMember[];
+  staffRoles: import('./types').StaffRole[];
   currentUser: StaffMember | null;
   isLoading: boolean;
   error: string | null;
@@ -37,6 +38,7 @@ const AdminScreenWrapper = () => {
   return <AdminScreen
     locations={context.locations}
     staffMembers={context.staffMembers}
+    staffRoles={context.staffRoles}
     bookings={context.bookings}
     desks={context.desks}
     onDataRefresh={context.onRefresh}

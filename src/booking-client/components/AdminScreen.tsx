@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Location, StaffMember, Booking, DailyBookingCount, Desk, BookingSlot, Role } from '../types';
+import { Location, StaffMember, Booking, DailyBookingCount, Desk, BookingSlot, Role, StaffRole } from '../types';
 import { api } from '../services/api';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons/ChevronIcons';
 import LocationIcon from './icons/LocationIcon';
@@ -10,12 +10,13 @@ import TrashIcon from './icons/TrashIcon';
 interface AdminScreenProps {
     locations: Location[];
     staffMembers: StaffMember[];
+    staffRoles: StaffRole[];
     bookings: Booking[];
     desks: Desk[];
     onDataRefresh: () => void;
 }
 
-const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, bookings, desks, onDataRefresh }) => {
+const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staffRoles, bookings, desks, onDataRefresh }) => {
     const [activeTab, setActiveTab] = useState<'offices' | 'staff' | 'stats' | 'bookings'>('offices');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -609,10 +610,9 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, book
                                     onChange={e => setNewStaffRole(Number(e.target.value) as Role)}
                                     className="p-2 border border-slate-300 rounded-md"
                                 >
-                                    <option value={Role.Employee}>Employee</option>
-                                    <option value={Role.Manager}>Manager</option>
-                                    <option value={Role.Admin}>Admin</option>
-                                    <option value={Role.Owner}>Owner</option>
+                                    {staffRoles.map(role => (
+                                        <option key={role.id} value={role.id}>{role.name}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="flex justify-end space-x-2">
@@ -679,13 +679,12 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, book
                                                     onChange={e => setEditingStaff({ ...editingStaff, role: Number(e.target.value) as Role })}
                                                     className="p-1 border border-slate-300 rounded w-full"
                                                 >
-                                                    <option value={Role.Employee}>Employee</option>
-                                                    <option value={Role.Manager}>Manager</option>
-                                                    <option value={Role.Admin}>Admin</option>
-                                                    <option value={Role.Owner}>Owner</option>
+                                                    {staffRoles.map(role => (
+                                                        <option key={role.id} value={role.id}>{role.name}</option>
+                                                    ))}
                                                 </select>
                                             ) : (
-                                                Role[staff.role]
+                                                staffRoles.find(r => r.id === staff.role)?.name || 'Unknown'
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
