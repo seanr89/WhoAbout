@@ -2,6 +2,7 @@ export interface Location {
   id: string;
   name: string;
   city: string;
+  seatMapUrl?: string;
 }
 
 export enum DeskType {

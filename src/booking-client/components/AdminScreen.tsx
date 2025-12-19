@@ -25,6 +25,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
     const [editingLocation, setEditingLocation] = useState<Location | null>(null);
     const [newLocationName, setNewLocationName] = useState('');
     const [newLocationCity, setNewLocationCity] = useState('');
+    const [newLocationSeatMapUrl, setNewLocationSeatMapUrl] = useState('');
     const [isAddingLocation, setIsAddingLocation] = useState(false);
 
     // Staff Form State
@@ -128,9 +129,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
         e.preventDefault();
         try {
             setIsLoading(true);
-            await api.createLocation({ name: newLocationName, city: newLocationCity });
+            await api.createLocation({ name: newLocationName, city: newLocationCity, seatMapUrl: newLocationSeatMapUrl });
             setNewLocationName('');
             setNewLocationCity('');
+            setNewLocationSeatMapUrl('');
             setIsAddingLocation(false);
             onDataRefresh();
         } catch (err) {
@@ -496,6 +498,13 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
                                     className="p-2 border border-slate-300 rounded-md"
                                     required
                                 />
+                                <input
+                                    type="text"
+                                    placeholder="Seat Map URL (optional)"
+                                    value={newLocationSeatMapUrl}
+                                    onChange={e => setNewLocationSeatMapUrl(e.target.value)}
+                                    className="p-2 border border-slate-300 rounded-md lg:col-span-2"
+                                />
                             </div>
                             <div className="flex justify-end space-x-2">
                                 <button
@@ -522,6 +531,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">City</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Seat Map</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
@@ -550,6 +560,19 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
                                                 />
                                             ) : (
                                                 location.city
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                            {editingLocation?.id === location.id ? (
+                                                <input
+                                                    type="text"
+                                                    value={editingLocation.seatMapUrl || ''}
+                                                    onChange={e => setEditingLocation({ ...editingLocation, seatMapUrl: e.target.value })}
+                                                    className="p-1 border border-slate-300 rounded w-full"
+                                                    placeholder="Seat Map URL"
+                                                />
+                                            ) : (
+                                                <span className="truncate max-w-xs block" title={location.seatMapUrl}>{location.seatMapUrl || 'No image'}</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

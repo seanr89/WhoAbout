@@ -35,6 +35,7 @@ interface ApiOffice {
     id: string;
     name: string;
     location: string;
+    seatMapUrl?: string;
 }
 
 interface ApiDesk {
@@ -208,7 +209,8 @@ export const bookingService = {
     async createLocation(location: Omit<Location, 'id'>): Promise<Location> {
         const apiOfficeRequest = {
             name: location.name,
-            location: location.city
+            location: location.city,
+            seatMapUrl: location.seatMapUrl
         };
 
         const response = await fetch(`${API_BASE_URL}/api/offices`, {
@@ -226,7 +228,8 @@ export const bookingService = {
         const apiOfficeRequest = {
             id: location.id,
             name: location.name,
-            location: location.city
+            location: location.city,
+            seatMapUrl: location.seatMapUrl
         };
 
         const response = await fetch(`${API_BASE_URL}/api/offices/${location.id}`, {
@@ -375,6 +378,7 @@ function mapApiOfficeToLocation(apiOffice: ApiOffice): Location {
         id: apiOffice.id,
         name: apiOffice.name,
         city: apiOffice.location,
+        seatMapUrl: apiOffice.seatMapUrl
     };
 }
 

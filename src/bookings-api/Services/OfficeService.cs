@@ -44,6 +44,7 @@ public class OfficeService
 
         existingOffice.Name = office.Name;
         existingOffice.Location = office.Location;
+        existingOffice.SeatMapUrl = office.SeatMapUrl;
         
         await _context.SaveChangesAsync();
         return existingOffice;

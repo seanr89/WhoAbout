@@ -22,7 +22,8 @@ public static class OfficeEndpoints
             {
                 Id = o.Id,
                 Name = o.Name,
-                Location = o.Location
+                Location = o.Location,
+                SeatMapUrl = o.SeatMapUrl
             });
             return Results.Ok(dtos);
         })

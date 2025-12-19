@@ -40,6 +40,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
     const [selectedSlotForBooking, setSelectedSlotForBooking] = useState<BookingSlot>(BookingSlot.FULL_DAY);
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [hideBookedDesks, setHideBookedDesks] = useState(false);
+    const [isSeatMapModalOpen, setIsSeatMapModalOpen] = useState(false);
 
     // Local state for filtered bookings
     const [bookings, setBookings] = useState<Booking[]>([]);
@@ -289,10 +290,65 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
                             />
                             <span className="text-sm font-medium">Hide Booked</span>
                         </label>
+                        {selectedLocation?.seatMapUrl && (
+                            <button
+                                onClick={() => setIsSeatMapModalOpen(true)}
+                                className="ml-4 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-md text-sm font-semibold hover:bg-indigo-100 transition flex items-center shadow-sm border border-indigo-200"
+                            >
+                                <img src={selectedLocation.seatMapUrl} className="w-4 h-4 mr-2 object-cover rounded-sm" />
+                                Show Seat Map
+                            </button>
+                        )}
                     </div>
                     <p className="text-slate-600 mb-6">
                         Showing desks for {selectedLocation?.name} on {new Date(selectedDate + 'T00:00:00').toDateString()} for {selectedSlot}.
                     </p>
+
+                    {/* Seat Map Modal */}
+                    {isSeatMapModalOpen && selectedLocation?.seatMapUrl && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+                                <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                    <h3 className="text-lg font-bold text-slate-800">{selectedLocation.name} - Office Seat Map</h3>
+                                    <div className="flex items-center space-x-4">
+                                        <a
+                                            href={selectedLocation.seatMapUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold flex items-center transition"
+                                        >
+                                            View Full Size
+                                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                        </a>
+                                        <button
+                                            onClick={() => setIsSeatMapModalOpen(false)}
+                                            className="p-2 hover:bg-slate-200 rounded-full text-slate-400 hover:text-slate-600 transition"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="p-6 bg-slate-100/30 overflow-auto flex justify-center items-center" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                                    <img
+                                        src={selectedLocation.seatMapUrl}
+                                        alt={`${selectedLocation.name} Seat Map`}
+                                        className="max-w-full h-auto rounded-xl shadow-lg border border-white"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                    />
+                                </div>
+                                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                                    <button
+                                        onClick={() => setIsSeatMapModalOpen(false)}
+                                        className="px-6 py-2 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition shadow-lg shadow-slate-200"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     <DeskLayout
                         desks={filteredDesks}
                         bookings={bookings}
