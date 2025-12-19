@@ -87,6 +87,26 @@ public class BookingService
              }
         }
 
+        // Check if staff member has a reserved desk that is not released
+        var reservedDesk = await _context.Desks
+            .FirstOrDefaultAsync(d => d.ReservedForStaffMemberId == booking.StaffMemberId);
+
+        if (reservedDesk != null)
+        {
+             // Normalize date to UTC start of day for check
+             var bookingDateRaw = booking.BookingDate.Date;
+             if (bookingDateRaw.Kind == DateTimeKind.Unspecified)
+                  bookingDateRaw = DateTime.SpecifyKind(bookingDateRaw, DateTimeKind.Utc);
+
+             var isReleased = await _context.DeskReleases
+                .AnyAsync(r => r.DeskId == reservedDesk.Id && r.Date == bookingDateRaw);
+
+             if (!isReleased)
+             {
+                 throw new Exception("You have a reserved desk for this date. Please release it before booking another desk.");
+             }
+        }
+
         // Check for double booking overlap
         var startOfDay = booking.BookingDate.Date;
         if (startOfDay.Kind == DateTimeKind.Unspecified) 
