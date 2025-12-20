@@ -11,7 +11,8 @@ import AdminScreen from './components/AdminScreen';
 import ReservedScreen from './components/ReservedScreen';
 import ProfileScreen from './components/ProfileScreen';
 import MyBookingsScreen from './components/MyBookingsScreen';
-import { Location, Desk, Booking, StaffMember } from './types';
+import RoleProtectedRoute from './components/RoleProtectedRoute';
+import { Location, Desk, Booking, StaffMember, Role } from './types';
 
 // Context interface for Outlet
 interface AppContextType {
@@ -82,8 +83,16 @@ const App: React.FC = () => {
         }>
           <Route index element={<BookingScreenWrapper />} />
 
-          <Route path="admin" element={<AdminScreenWrapper />} />
-          <Route path="reserved" element={<ReservedScreenWrapper />} />
+          <Route path="admin" element={
+            <RoleProtectedRoute allowedRoles={[Role.Admin, Role.Owner]}>
+              <AdminScreenWrapper />
+            </RoleProtectedRoute>
+          } />
+          <Route path="reserved" element={
+            <RoleProtectedRoute allowedRoles={[Role.Admin, Role.Owner]}>
+              <ReservedScreenWrapper />
+            </RoleProtectedRoute>
+          } />
           <Route path="profile" element={<ProfileScreenWrapper />} />
           <Route path="my-bookings" element={<MyBookingsScreenWrapper />} />
         </Route>

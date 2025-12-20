@@ -1,6 +1,6 @@
 import React from 'react';
 import ChairIcon from './icons/ChairIcon';
-import { StaffMember } from '../types';
+import { StaffMember, Role } from '../types';
 
 interface HeaderProps {
   currentScreen: 'booking' | 'admin' | 'reserved' | 'profile' | 'my-bookings';
@@ -35,24 +35,29 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
                 Book a Desk
               </button>
 
-              <button
-                onClick={() => onNavigate('reserved')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'reserved'
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-              >
-                Reserved
-              </button>
-              <button
-                onClick={() => onNavigate('admin')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'admin'
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
-              >
-                Admin
-              </button>
+              {(currentUser?.role === Role.Admin || currentUser?.role === Role.Owner) && (
+                <>
+                  <button
+                    onClick={() => onNavigate('reserved')}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'reserved'
+                      ? 'bg-indigo-50 text-indigo-700'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      }`}
+                  >
+                    Reserved
+                  </button>
+                  <button
+                    onClick={() => onNavigate('admin')}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'admin'
+                      ? 'bg-indigo-50 text-indigo-700'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      }`}
+                  >
+                    Admin
+                  </button>
+                </>
+              )}
+
               <button
                 onClick={() => onNavigate('my-bookings')}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'my-bookings'
@@ -75,18 +80,23 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
                 Book
               </button>
 
-              <button
-                onClick={() => onNavigate('reserved')}
-                className={`p-2 rounded-md ${currentScreen === 'reserved' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
-              >
-                Reserved
-              </button>
-              <button
-                onClick={() => onNavigate('admin')}
-                className={`p-2 rounded-md ${currentScreen === 'admin' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
-              >
-                Admin
-              </button>
+              {(currentUser?.role === Role.Admin || currentUser?.role === Role.Owner) && (
+                <>
+                  <button
+                    onClick={() => onNavigate('reserved')}
+                    className={`p-2 rounded-md ${currentScreen === 'reserved' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
+                  >
+                    Reserved
+                  </button>
+                  <button
+                    onClick={() => onNavigate('admin')}
+                    className={`p-2 rounded-md ${currentScreen === 'admin' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
+                  >
+                    Admin
+                  </button>
+                </>
+              )}
+
               <button
                 onClick={() => onNavigate('my-bookings')}
                 className={`p-2 rounded-md ${currentScreen === 'my-bookings' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
