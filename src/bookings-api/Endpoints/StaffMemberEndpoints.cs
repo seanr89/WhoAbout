@@ -72,7 +72,7 @@ public static class StaffMemberEndpoints
                     : null
             };
 
-            logger.LogInformation("Authenticated User: {@User}", user);
+            //logger.LogInformation("Authenticated User: {@User}", user);
 
             if (string.IsNullOrEmpty(user.UserId))
             {
@@ -81,7 +81,6 @@ public static class StaffMemberEndpoints
             }
 
             logger.LogInformation("Getting staff member for User Id: {UserId}", user.UserId);
-            //var staffMember = await service.GetStaffMemberByUserIdAsync(user.UserId);
             var staffMemberByEmail = await service.GetStaffMemberByEmailAsync(user.Email);
             
             if (staffMemberByEmail is null)

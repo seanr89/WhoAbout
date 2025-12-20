@@ -21,7 +21,7 @@ public static class BookingEndpoints
         group.MapGet("/", async (BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
-            logger.LogInformation("Getting all bookings");
+            //logger.LogInformation("Getting all bookings");
             var bookings = await service.GetAllBookingsAsync();
             var dtos = bookings.Select(b => new BookingDto
             {
@@ -41,7 +41,7 @@ public static class BookingEndpoints
         group.MapGet("/{id}", async (int id, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
-            logger.LogInformation("Getting booking with Id: {Id}", id);
+            //logger.LogInformation("Getting booking with Id: {Id}", id);
             var booking = await service.GetBookingByIdAsync(id);
             if (booking is null)
             {
@@ -66,7 +66,7 @@ public static class BookingEndpoints
         group.MapPost("/", async ([FromBody] Booking booking, BookingService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("BookingEndpoints");
-            logger.LogInformation("Creating new booking for DeskId: {DeskId}", booking.DeskId);
+            logger.LogInformation("Creating new booking for DeskId: {DeskId} and staffMemberId: {StaffMemberId}", booking.DeskId, booking.StaffMemberId);
             var createdBooking = await service.CreateBookingAsync(booking);
             var dto = new BookingDto
             {

@@ -15,8 +15,8 @@ public static class OfficeEndpoints
 
         group.MapGet("/", async (OfficeService service, ILoggerFactory loggerFactory) =>
         {
-            var logger = loggerFactory.CreateLogger("OfficeEndpoints");
-            logger.LogInformation("Getting all offices");
+            //var logger = loggerFactory.CreateLogger("OfficeEndpoints");
+            //logger.LogInformation("Getting all offices");
             var offices = await service.GetAllOfficesAsync();
             var dtos = offices.Select(o => new OfficeDto
             {
@@ -32,7 +32,7 @@ public static class OfficeEndpoints
         group.MapGet("/{id}", async (Guid id, OfficeService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("OfficeEndpoints");
-            logger.LogInformation("Getting office with Id: {Id}", id);
+            //logger.LogInformation("Getting office with Id: {Id}", id);
             var office = await service.GetOfficeByIdAsync(id);
             if (office is null)
             {
