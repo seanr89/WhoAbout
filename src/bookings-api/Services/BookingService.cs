@@ -106,6 +106,21 @@ public class BookingService
             throw new Exception("Staff member already has a booking for this date.");
         }
 
+        // Check if staff member has a reserved desk and if it is released
+        var reservedDesk = await _context.Desks
+            .FirstOrDefaultAsync(d => d.ReservedForStaffMemberId == booking.StaffMemberId);
+
+        if (reservedDesk != null)
+        {
+             var isReleased = await _context.DeskReleases
+                 .AnyAsync(r => r.DeskId == reservedDesk.Id && r.Date == startOfDay);
+
+             if (!isReleased && reservedDesk.Id != booking.DeskId)
+             {
+                 throw new Exception("You have a reserved desk for this date.");
+             }
+        }
+
         var existingBookings = await _context.Bookings
             .Where(b => b.DeskId == booking.DeskId 
                      && b.BookingDate >= startOfDay 
