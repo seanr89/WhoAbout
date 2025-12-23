@@ -106,6 +106,27 @@ public class BookingService
             throw new Exception("Staff member already has a booking for this date.");
         }
 
+        // Check if staff member has a reserved desk that is not released for this date
+        var myReservedDesk = await _context.Desks
+            .FirstOrDefaultAsync(d => d.ReservedForStaffMemberId == booking.StaffMemberId);
+
+        if (myReservedDesk != null)
+        {
+             // Ensure staff member does not double book.
+             // If they have a reserved desk, they are implicitly booked.
+             // They cannot book ANOTHER desk unless their reserved desk is released for that day.
+             if (myReservedDesk.Id != booking.DeskId)
+             {
+                 var isMyDeskReleased = await _context.DeskReleases
+                    .AnyAsync(r => r.DeskId == myReservedDesk.Id && r.Date == startOfDay);
+
+                 if (!isMyDeskReleased)
+                 {
+                     throw new Exception("You have a reserved desk for this date. Please release it before booking another desk.");
+                 }
+             }
+        }
+
         var existingBookings = await _context.Bookings
             .Where(b => b.DeskId == booking.DeskId 
                      && b.BookingDate >= startOfDay 
