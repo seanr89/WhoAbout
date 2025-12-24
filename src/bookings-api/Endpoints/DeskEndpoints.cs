@@ -55,5 +55,22 @@ public static class DeskEndpoints
             return deleted ? Results.NoContent() : Results.NotFound();
         })
         .WithName("DeleteDesk");
+
+        group.MapGet("/available", async ([FromQuery] DateTime date, [FromQuery] Guid officeId, DeskService service) =>
+        {
+            var desks = await service.GetAvailableDesksAsync(date, officeId);
+            var dtos = desks.Select(d => new DeskDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Type = d.Type,
+                OfficeId = d.OfficeId,
+                ReservedForStaffMemberId = d.ReservedForStaffMemberId
+            });
+            return Results.Ok(dtos);
+        })
+        .WithName("GetAvailableDesks")
+        .WithSummary("Get available desks")
+        .WithDescription("Retrieves all desks that are available for booking on a specific date and office, including released reserved desks.");
     }
 }

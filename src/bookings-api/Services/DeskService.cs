@@ -64,4 +64,54 @@ public class DeskService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<Desk>> GetAvailableDesksAsync(DateTime date, Guid officeId)
+    {
+        // Normalize to UTC date
+        var targetDate = date.Date;
+        if (targetDate.Kind == DateTimeKind.Unspecified)
+             targetDate = DateTime.SpecifyKind(targetDate, DateTimeKind.Utc);
+
+        var nextDay = targetDate.AddDays(1);
+
+        // Get all desks in the office
+        var desks = await _context.Desks
+            .Where(d => d.OfficeId == officeId)
+            .ToListAsync();
+
+        // Get all bookings for the date
+        var bookings = await _context.Bookings
+            .Where(b => b.BookingDate >= targetDate && b.BookingDate < nextDay && b.Desk.OfficeId == officeId
+                        && b.Status != bookings_api.Enums.BookingStatus.Cancelled
+                        && b.Status != bookings_api.Enums.BookingStatus.Rejected)
+            .Select(b => b.DeskId)
+            .ToListAsync();
+
+        // Get all releases for the date
+        var releases = await _context.DeskReleases
+            .Where(r => r.Date == targetDate && r.Desk.OfficeId == officeId)
+            .Select(r => r.DeskId)
+            .ToListAsync();
+
+        var availableDesks = new List<Desk>();
+
+        foreach (var desk in desks)
+        {
+            // If desk is already booked, skip
+            if (bookings.Contains(desk.Id)) continue;
+
+            // If desk is reserved
+            if (desk.ReservedForStaffMemberId.HasValue)
+            {
+                // If it is NOT released, then it is NOT available (because it's reserved)
+                if (!releases.Contains(desk.Id)) continue;
+
+                // If it IS released, it IS available (unless booked, which we checked above)
+            }
+
+            availableDesks.Add(desk);
+        }
+
+        return availableDesks;
+    }
 }
