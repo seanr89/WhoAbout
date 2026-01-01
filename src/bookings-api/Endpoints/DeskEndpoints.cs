@@ -26,34 +26,49 @@ public static class DeskEndpoints
             });
             return Results.Ok(dtos);
         })
-        .WithName("GetAllDesks");
+        .RequireAuthorization()
+        .WithName("GetAllDesks")
+        .WithSummary("Get all desks")
+        .WithDescription("Retrieves a list of all desks across all offices.");
 
         group.MapGet("/{id}", async (int id, DeskService service) =>
         {
             var desk = await service.GetDeskByIdAsync(id);
             return desk is not null ? Results.Ok(desk) : Results.NotFound();
         })
-        .WithName("GetDeskById");
+        .RequireAuthorization()
+        .WithName("GetDeskById")
+        .WithSummary("Get desk by ID")
+        .WithDescription("Retrieves a specific desk by its unique ID.");
 
         group.MapPost("/", async ([FromBody] Desk desk, DeskService service) =>
         {
             var createdDesk = await service.CreateDeskAsync(desk);
             return Results.Created($"/api/desks/{createdDesk.Id}", createdDesk);
         })
-        .WithName("CreateDesk");
+        .RequireAuthorization()
+        .WithName("CreateDesk")
+        .WithSummary("Create desk")
+        .WithDescription("Creates a new desk record.");
 
         group.MapPut("/{id}", async (int id, [FromBody] Desk desk, DeskService service) =>
         {
             var updatedDesk = await service.UpdateDeskAsync(id, desk);
             return updatedDesk is not null ? Results.Ok(updatedDesk) : Results.NotFound();
         })
-        .WithName("UpdateDesk");
+        .RequireAuthorization()
+        .WithName("UpdateDesk")
+        .WithSummary("Update desk")
+        .WithDescription("Updates an existing desk's details.");
 
         group.MapDelete("/{id}", async (int id, DeskService service) =>
         {
             var deleted = await service.DeleteDeskAsync(id);
             return deleted ? Results.NoContent() : Results.NotFound();
         })
-        .WithName("DeleteDesk");
+        .RequireAuthorization()
+        .WithName("DeleteDesk")
+        .WithSummary("Delete desk")
+        .WithDescription("Deletes a desk by its unique ID.");
     }
 }

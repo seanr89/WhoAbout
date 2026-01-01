@@ -33,6 +33,7 @@ public static class BookingEndpoints
             });
             return Results.Ok(dtos);
         })
+        .RequireAuthorization()
         .WithName("GetAllBookings")
         .WithSummary("Get all bookings")
         .WithDescription("Retrieves a list of all existing bookings.");
@@ -58,6 +59,7 @@ public static class BookingEndpoints
             };
             return Results.Ok(dto);
         })
+        .RequireAuthorization()
         .WithName("GetBookingById")
         .WithSummary("Get booking by ID")
         .WithDescription("Retrieves a specific booking by its unique ID.");
@@ -78,6 +80,7 @@ public static class BookingEndpoints
             };
             return Results.Created($"/api/bookings/{createdBooking.Id}", dto);
         })
+        .RequireAuthorization()
         .WithName("CreateBooking")
         .WithSummary("Create booking")
         .WithDescription("Creates a new booking record.");
@@ -103,6 +106,7 @@ public static class BookingEndpoints
             };
             return Results.Ok(dto);
         })
+        .RequireAuthorization()
         .WithName("UpdateBooking")
         .WithSummary("Update booking")
         .WithDescription("Updates an existing booking's details.");
@@ -120,6 +124,7 @@ public static class BookingEndpoints
             }
             return Results.NoContent();
         })
+        .RequireAuthorization()
         .WithName("DeleteBooking")
         .WithSummary("Delete booking")
         .WithDescription("Deletes a booking by its unique ID.");
@@ -147,6 +152,7 @@ public static class BookingEndpoints
             });
             return Results.Ok(dtos);
         })
+        .RequireAuthorization()
         .WithName("GetBookingsByDateAndLocation")
         .WithSummary("Get bookings by date and location")
         .WithDescription("Retrieves bookings filtered by specific date and office location.");
@@ -174,6 +180,7 @@ public static class BookingEndpoints
             });
             return Results.Ok(dtos);
         })
+        .RequireAuthorization()
         .WithName("GetBookingsByDate")
         .WithSummary("Get bookings by date")
         .WithDescription("Retrieves all bookings for a specific date.");
@@ -201,6 +208,7 @@ public static class BookingEndpoints
             var stats = await service.GetDailyBookingCountsAsync(officeId, start, end);
             return Results.Ok(stats);
         })
+        .RequireAuthorization()
         .WithName("GetBookingStats")
         .WithSummary("Get booking statistics")
         .WithDescription("Retrieves booking statistics for a specific office location within a date range.");

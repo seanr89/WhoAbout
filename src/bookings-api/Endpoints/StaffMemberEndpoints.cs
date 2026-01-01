@@ -28,6 +28,7 @@ public static class StaffMemberEndpoints
                             .ToList();
             return Results.Ok(roles);
         })
+        .RequireAuthorization()
         .WithName("GetStaffRoles")
         .WithSummary("Get all staff roles")
         .WithDescription("Retrieves a list of all possible staff roles.");
@@ -49,6 +50,7 @@ public static class StaffMemberEndpoints
             });
             return Results.Ok(dtos);
         })
+        .RequireAuthorization()
         .WithName("GetAllStaffMembers")
         .WithSummary("Get all staff members")
         .WithDescription("Retrieves a list of all registered staff members.");

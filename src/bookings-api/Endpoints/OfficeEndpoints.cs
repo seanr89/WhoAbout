@@ -27,7 +27,10 @@ public static class OfficeEndpoints
             });
             return Results.Ok(dtos);
         })
-        .WithName("GetAllOffices");
+        .RequireAuthorization()
+        .WithName("GetAllOffices")
+        .WithSummary("Get all offices")
+        .WithDescription("Retrieves a list of all office locations.");
 
         group.MapGet("/{id}", async (Guid id, OfficeService service, ILoggerFactory loggerFactory) =>
         {
@@ -41,7 +44,10 @@ public static class OfficeEndpoints
             }
             return Results.Ok(office);
         })
-        .WithName("GetOfficeById");
+        .RequireAuthorization()
+        .WithName("GetOfficeById")
+        .WithSummary("Get office by ID")
+        .WithDescription("Retrieves a specific office location by its unique ID.");
 
         group.MapPost("/", async ([FromBody] Office office, OfficeService service, ILoggerFactory loggerFactory) =>
         {
@@ -50,7 +56,10 @@ public static class OfficeEndpoints
             var createdOffice = await service.CreateOfficeAsync(office);
             return Results.Created($"/api/offices/{createdOffice.Id}", createdOffice);
         })
-        .WithName("CreateOffice");
+        .RequireAuthorization()
+        .WithName("CreateOffice")
+        .WithSummary("Create office")
+        .WithDescription("Creates a new office location.");
 
         group.MapPut("/{id}", async (Guid id, [FromBody] Office office, OfficeService service, ILoggerFactory loggerFactory) =>
         {
@@ -64,7 +73,10 @@ public static class OfficeEndpoints
             }
             return Results.Ok(updatedOffice);
         })
-        .WithName("UpdateOffice");
+        .RequireAuthorization()
+        .WithName("UpdateOffice")
+        .WithSummary("Update office")
+        .WithDescription("Updates an existing office location's details.");
 
         group.MapDelete("/{id}", async (Guid id, OfficeService service, ILoggerFactory loggerFactory) =>
         {
@@ -78,6 +90,9 @@ public static class OfficeEndpoints
             }
             return Results.NoContent();
         })
-        .WithName("DeleteOffice");
+        .RequireAuthorization()
+        .WithName("DeleteOffice")
+        .WithSummary("Delete office")
+        .WithDescription("Deletes an office location by its unique ID.");
     }
 }
