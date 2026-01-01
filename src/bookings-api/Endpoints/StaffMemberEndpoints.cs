@@ -119,6 +119,7 @@ public static class StaffMemberEndpoints
             }
             return Results.Ok(staffMember);
         })
+        .RequireAuthorization()
         .WithName("GetStaffMemberById")
         .WithSummary("Get staff member by ID")
         .WithDescription("Retrieves a specific staff member by their unique ID.");
@@ -131,6 +132,7 @@ public static class StaffMemberEndpoints
             var createdStaffMember = await service.CreateStaffMemberAsync(staffMember);
             return Results.Created($"/api/staffmembers/{createdStaffMember.Id}", createdStaffMember);
         })
+        .RequireAuthorization()
         .WithName("CreateStaffMember")
         .WithSummary("Create staff member")
         .WithDescription("Creates a new staff member record.");
@@ -148,6 +150,7 @@ public static class StaffMemberEndpoints
             }
             return Results.Ok(updatedStaffMember);
         })
+        .RequireAuthorization()
         .WithName("UpdateStaffMember")
         .WithSummary("Update staff member")
         .WithDescription("Updates an existing staff member's details.");
@@ -165,6 +168,7 @@ public static class StaffMemberEndpoints
             }
             return Results.NoContent();
         })
+        .RequireAuthorization()
         .WithName("DeleteStaffMember")
         .WithSummary("Delete staff member")
         .WithDescription("Deletes a staff member by their unique ID.");
