@@ -28,6 +28,14 @@ public class DeskService
             .FirstOrDefaultAsync(d => d.Id == id);
     }
 
+    public async Task<List<Desk>> GetDesksByOfficeIdAsync(Guid officeId)
+    {
+        return await _context.Desks
+            .Where(d => d.OfficeId == officeId)
+            .Include(d => d.Office)
+            .ToListAsync();
+    }
+
     public async Task<Desk> CreateDeskAsync(Desk desk)
     {
         _context.Desks.Add(desk);

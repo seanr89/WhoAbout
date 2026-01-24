@@ -49,6 +49,24 @@ public static class OfficeEndpoints
         .WithSummary("Get office by ID")
         .WithDescription("Retrieves a specific office location by its unique ID.");
 
+        group.MapGet("/{id}/desks", async (Guid id, DeskService deskService) =>
+        {
+            var desks = await deskService.GetDesksByOfficeIdAsync(id);
+            var dtos = desks.Select(d => new DeskDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Type = d.Type,
+                OfficeId = d.OfficeId,
+                ReservedForStaffMemberId = d.ReservedForStaffMemberId
+            });
+            return Results.Ok(dtos);
+        })
+        .RequireAuthorization()
+        .WithName("GetOfficeDesks")
+        .WithSummary("Get desks for office")
+        .WithDescription("Retrieves all desks assigned to a specific office.");
+
         group.MapPost("/", async ([FromBody] Office office, OfficeService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("OfficeEndpoints");

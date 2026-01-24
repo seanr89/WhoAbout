@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Location, StaffMember, Booking, DailyBookingCount, Desk, BookingSlot, Role, StaffRole } from '../types';
+import { Location, StaffMember, Booking, DailyBookingCount, Desk, BookingSlot, Role, StaffRole, DeskType } from '../types';
 import { api } from '../services/api';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons/ChevronIcons';
 import LocationIcon from './icons/LocationIcon';
@@ -27,6 +27,14 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
     const [newLocationCity, setNewLocationCity] = useState('');
     const [newLocationSeatMapUrl, setNewLocationSeatMapUrl] = useState('');
     const [isAddingLocation, setIsAddingLocation] = useState(false);
+
+    // Desk Management State
+    const [selectedOfficeForDesks, setSelectedOfficeForDesks] = useState<string | null>(null);
+    const [officeDesks, setOfficeDesks] = useState<Desk[]>([]);
+    const [isAddingDesk, setIsAddingDesk] = useState(false);
+    const [newDeskLabel, setNewDeskLabel] = useState('');
+    const [newDeskType, setNewDeskType] = useState<DeskType>(DeskType.STANDARD);
+    const [editingDesk, setEditingDesk] = useState<Desk | null>(null);
 
     // Staff Form State
     const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
@@ -61,6 +69,27 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
             setSelectedDate(`${year}-${month}-${day}`);
         }
     }, [selectedDate]);
+
+    // Fetch Desks when office is selected
+    React.useEffect(() => {
+        if (selectedOfficeForDesks) {
+            const fetchDesks = async () => {
+                try {
+                    setIsLoading(true);
+                    const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
+                    setOfficeDesks(desks);
+                } catch (err) {
+                    console.error("Failed to fetch desks", err);
+                    setError("Failed to fetch desks for the selected office.");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchDesks();
+        } else {
+            setOfficeDesks([]);
+        }
+    }, [selectedOfficeForDesks]);
 
     React.useEffect(() => {
         if (activeTab === 'stats' && occupancyLocationId) {
@@ -122,6 +151,69 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
         });
     }, [bookings, selectedLocationId, selectedDate, desks]);
 
+
+    // --- Desk Handlers ---
+
+    const handleCreateDesk = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (!selectedOfficeForDesks) return;
+            setIsLoading(true);
+            await api.createDesk({
+                locationId: selectedOfficeForDesks,
+                label: newDeskLabel,
+                type: newDeskType
+            });
+            setNewDeskLabel('');
+            setNewDeskType(DeskType.STANDARD);
+            setIsAddingDesk(false);
+            // Refresh desks
+            const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
+            setOfficeDesks(desks);
+        } catch (err) {
+            setError('Failed to create desk');
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleUpdateDesk = async () => {
+        if (!editingDesk) return;
+        try {
+            setIsLoading(true);
+            await api.updateDesk(editingDesk);
+            setEditingDesk(null);
+            // Refresh desks
+            if (selectedOfficeForDesks) {
+                const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
+                setOfficeDesks(desks);
+            }
+        } catch (err) {
+            setError('Failed to update desk');
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDeleteDesk = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this desk?')) return;
+        try {
+            setIsLoading(true);
+            await api.deleteDesk(id);
+            // Refresh desks
+            if (selectedOfficeForDesks) {
+                const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
+                setOfficeDesks(desks);
+            }
+        } catch (err) {
+            setError('Failed to delete desk');
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // --- Office Handlers ---
 
@@ -470,129 +562,292 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-lg font-semibold text-slate-800">Manage Offices</h3>
-                        <button
-                            onClick={() => setIsAddingLocation(true)}
-                            className="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
-                        >
-                            Add Office
-                        </button>
+                        <div className="space-x-2">
+                            {selectedOfficeForDesks && (
+                                <button
+                                    onClick={() => setSelectedOfficeForDesks(null)}
+                                    className="px-3 py-2 bg-slate-200 text-slate-700 rounded-md text-sm hover:bg-slate-300 transition"
+                                >
+                                    Back to Offices
+                                </button>
+                            )}
+                            {!selectedOfficeForDesks && (
+                                <button
+                                    onClick={() => setIsAddingLocation(true)}
+                                    className="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
+                                >
+                                    Add Office
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                    {isAddingLocation && (
-                        <form onSubmit={handleCreateLocation} className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                            <h4 className="text-sm font-bold text-slate-700 mb-3">New Office</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <input
-                                    type="text"
-                                    placeholder="Office Name"
-                                    value={newLocationName}
-                                    onChange={e => setNewLocationName(e.target.value)}
-                                    className="p-2 border border-slate-300 rounded-md"
-                                    required
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="City"
-                                    value={newLocationCity}
-                                    onChange={e => setNewLocationCity(e.target.value)}
-                                    className="p-2 border border-slate-300 rounded-md"
-                                    required
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Seat Map URL (optional)"
-                                    value={newLocationSeatMapUrl}
-                                    onChange={e => setNewLocationSeatMapUrl(e.target.value)}
-                                    className="p-2 border border-slate-300 rounded-md lg:col-span-2"
-                                />
-                            </div>
-                            <div className="flex justify-end space-x-2">
+                    {selectedOfficeForDesks ? (
+                        <div className="space-y-6">
+                            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                <h4 className="text-md font-bold text-slate-800 flex items-center mb-4">
+                                    <LocationIcon className="w-5 h-5 mr-2 text-indigo-600" />
+                                    Desks for <span className="text-indigo-600 ml-1">{locations.find(l => l.id === selectedOfficeForDesks)?.name}</span>
+                                </h4>
+
                                 <button
-                                    type="button"
-                                    onClick={() => setIsAddingLocation(false)}
-                                    className="px-3 py-1 text-slate-600 hover:text-slate-800"
+                                    onClick={() => setIsAddingDesk(true)}
+                                    className="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 transition mb-4"
                                 >
-                                    Cancel
+                                    Add Desk
                                 </button>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                                >
-                                    {isLoading ? 'Saving...' : 'Save'}
-                                </button>
+
+                                {isAddingDesk && (
+                                    <form onSubmit={handleCreateDesk} className="mb-6 p-4 bg-white rounded-lg border border-slate-200 shadow-sm">
+                                        <h5 className="text-sm font-bold text-slate-700 mb-3">New Desk</h5>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                            <input
+                                                type="text"
+                                                placeholder="Desk Label (e.g., D-01)"
+                                                value={newDeskLabel}
+                                                onChange={e => setNewDeskLabel(e.target.value)}
+                                                className="p-2 border border-slate-300 rounded-md"
+                                                required
+                                            />
+                                            <select
+                                                value={newDeskType}
+                                                onChange={e => setNewDeskType(e.target.value as DeskType)}
+                                                className="p-2 border border-slate-300 rounded-md"
+                                            >
+                                                {Object.values(DeskType).map(type => (
+                                                    <option key={type} value={type}>{type}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="flex justify-end space-x-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsAddingDesk(false)}
+                                                className="px-3 py-1 text-slate-600 hover:text-slate-800"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={isLoading}
+                                                className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                                            >
+                                                {isLoading ? 'Saving...' : 'Save'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+
+                                <div className="overflow-x-auto bg-white rounded-lg border border-slate-200">
+                                    <table className="min-w-full divide-y divide-slate-200">
+                                        <thead className="bg-slate-50">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Label</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Reserved</th>
+                                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-slate-200">
+                                            {officeDesks.length > 0 ? officeDesks.map(desk => (
+                                                <tr key={desk.id}>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-medium">
+                                                        {editingDesk?.id === desk.id ? (
+                                                            <input
+                                                                type="text"
+                                                                value={editingDesk.label}
+                                                                onChange={e => setEditingDesk({ ...editingDesk, label: e.target.value })}
+                                                                className="p-1 border border-slate-300 rounded w-full"
+                                                            />
+                                                        ) : (
+                                                            desk.label
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                                        {editingDesk?.id === desk.id ? (
+                                                            <select
+                                                                value={editingDesk.type}
+                                                                onChange={e => setEditingDesk({ ...editingDesk, type: e.target.value as DeskType })}
+                                                                className="p-1 border border-slate-300 rounded w-full"
+                                                            >
+                                                                {Object.values(DeskType).map(type => (
+                                                                    <option key={type} value={type}>{type}</option>
+                                                                ))}
+                                                            </select>
+                                                        ) : (
+                                                            <span className={`px-2 py-1 rounded-full text-xs font-medium 
+                                                                ${desk.type === DeskType.STANDARD ? 'bg-slate-100 text-slate-700' :
+                                                                    desk.type === DeskType.STANDING ? 'bg-blue-100 text-blue-700' :
+                                                                        desk.type === DeskType.MEETING_ROOM ? 'bg-purple-100 text-purple-700' :
+                                                                            'bg-orange-100 text-orange-700'}`}>
+                                                                {desk.type}
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                                        {desk.isReserved ? (
+                                                            <span className="text-amber-600 font-medium text-xs bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                                                Reserved: {staffMembers.find(s => s.id === desk.reservedForStaffMemberId)?.name || 'Unknown'}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-slate-400 text-xs">Available</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                        {editingDesk?.id === desk.id ? (
+                                                            <div className="flex justify-end space-x-2">
+                                                                <button onClick={handleUpdateDesk} className="text-green-600 hover:text-green-900">Save</button>
+                                                                <button onClick={() => setEditingDesk(null)} className="text-slate-600 hover:text-slate-900">Cancel</button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex justify-end space-x-2">
+                                                                <button onClick={() => setEditingDesk(desk)} className="text-indigo-600 hover:text-indigo-900">Edit</button>
+                                                                <button onClick={() => handleDeleteDesk(desk.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            )) : (
+                                                <tr>
+                                                    <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-500">
+                                                        No desks found for this office. Add one to get started.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </form>
+                        </div>
+                    ) : (
+                        <>
+                            {isAddingLocation && (
+                                <form onSubmit={handleCreateLocation} className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                                    <h4 className="text-sm font-bold text-slate-700 mb-3">New Office</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Office Name"
+                                            value={newLocationName}
+                                            onChange={e => setNewLocationName(e.target.value)}
+                                            className="p-2 border border-slate-300 rounded-md"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="City"
+                                            value={newLocationCity}
+                                            onChange={e => setNewLocationCity(e.target.value)}
+                                            className="p-2 border border-slate-300 rounded-md"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Seat Map URL (optional)"
+                                            value={newLocationSeatMapUrl}
+                                            onChange={e => setNewLocationSeatMapUrl(e.target.value)}
+                                            className="p-2 border border-slate-300 rounded-md lg:col-span-2"
+                                        />
+                                    </div>
+                                    <div className="flex justify-end space-x-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsAddingLocation(false)}
+                                            className="px-3 py-1 text-slate-600 hover:text-slate-800"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={isLoading}
+                                            className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                                        >
+                                            {isLoading ? 'Saving...' : 'Save'}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-slate-200">
+                                    <thead className="bg-slate-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">City</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Seat Map</th>
+                                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-slate-200">
+                                        {locations.map(location => (
+                                            <tr key={location.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                                                    {editingLocation?.id === location.id ? (
+                                                        <input
+                                                            type="text"
+                                                            value={editingLocation.name}
+                                                            onChange={e => setEditingLocation({ ...editingLocation, name: e.target.value })}
+                                                            className="p-1 border border-slate-300 rounded w-full"
+                                                        />
+                                                    ) : (
+                                                        location.name
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                                    {editingLocation?.id === location.id ? (
+                                                        <input
+                                                            type="text"
+                                                            value={editingLocation.city}
+                                                            onChange={e => setEditingLocation({ ...editingLocation, city: e.target.value })}
+                                                            className="p-1 border border-slate-300 rounded w-full"
+                                                        />
+                                                    ) : (
+                                                        location.city
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                                    {editingLocation?.id === location.id ? (
+                                                        <input
+                                                            type="text"
+                                                            value={editingLocation.seatMapUrl || ''}
+                                                            onChange={e => setEditingLocation({ ...editingLocation, seatMapUrl: e.target.value })}
+                                                            className="p-1 border border-slate-300 rounded w-full"
+                                                            placeholder="Seat Map URL"
+                                                        />
+                                                    ) : (
+                                                        <span className="truncate max-w-xs block" title={location.seatMapUrl}>{location.seatMapUrl || 'No image'}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    {editingLocation?.id === location.id ? (
+                                                        <div className="flex justify-end space-x-2">
+                                                            <button onClick={handleUpdateLocation} className="text-green-600 hover:text-green-900">Save</button>
+                                                            <button onClick={() => setEditingLocation(null)} className="text-slate-600 hover:text-slate-900">Cancel</button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex justify-end space-x-2">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedOfficeForDesks(location.id);
+                                                                    // We might want to fetch fresh desks here
+                                                                }}
+                                                                className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-2 py-1 rounded"
+                                                            >
+                                                                Manage Desks
+                                                            </button>
+                                                            <div className="w-px h-4 bg-slate-300 mx-1 inline-block align-middle"></div>
+                                                            <button onClick={() => setEditingLocation(location)} className="text-slate-600 hover:text-indigo-900">Edit</button>
+                                                            <button onClick={() => handleDeleteLocation(location.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
                     )}
-
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-slate-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">City</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Seat Map</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-slate-200">
-                                {locations.map(location => (
-                                    <tr key={location.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                                            {editingLocation?.id === location.id ? (
-                                                <input
-                                                    type="text"
-                                                    value={editingLocation.name}
-                                                    onChange={e => setEditingLocation({ ...editingLocation, name: e.target.value })}
-                                                    className="p-1 border border-slate-300 rounded w-full"
-                                                />
-                                            ) : (
-                                                location.name
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {editingLocation?.id === location.id ? (
-                                                <input
-                                                    type="text"
-                                                    value={editingLocation.city}
-                                                    onChange={e => setEditingLocation({ ...editingLocation, city: e.target.value })}
-                                                    className="p-1 border border-slate-300 rounded w-full"
-                                                />
-                                            ) : (
-                                                location.city
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {editingLocation?.id === location.id ? (
-                                                <input
-                                                    type="text"
-                                                    value={editingLocation.seatMapUrl || ''}
-                                                    onChange={e => setEditingLocation({ ...editingLocation, seatMapUrl: e.target.value })}
-                                                    className="p-1 border border-slate-300 rounded w-full"
-                                                    placeholder="Seat Map URL"
-                                                />
-                                            ) : (
-                                                <span className="truncate max-w-xs block" title={location.seatMapUrl}>{location.seatMapUrl || 'No image'}</span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            {editingLocation?.id === location.id ? (
-                                                <div className="flex justify-end space-x-2">
-                                                    <button onClick={handleUpdateLocation} className="text-green-600 hover:text-green-900">Save</button>
-                                                    <button onClick={() => setEditingLocation(null)} className="text-slate-600 hover:text-slate-900">Cancel</button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex justify-end space-x-2">
-                                                    <button onClick={() => setEditingLocation(location)} className="text-indigo-600 hover:text-indigo-900">Edit</button>
-                                                    <button onClick={() => handleDeleteLocation(location.id)} className="text-red-600 hover:text-red-900">Delete</button>
-                                                </div>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             )}
 

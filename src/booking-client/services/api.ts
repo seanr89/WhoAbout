@@ -79,4 +79,16 @@ export const api = {
   updateDesk: async (desk: Desk): Promise<Desk> => {
     return await bookingService.updateDesk(desk);
   },
+
+  fetchDesksByOffice: async (officeId: string): Promise<Desk[]> => {
+    return await bookingService.getDesksByOffice(officeId);
+  },
+
+  createDesk: async (desk: Omit<Desk, 'id'>): Promise<Desk> => {
+    return await bookingService.createDesk(desk);
+  },
+
+  deleteDesk: async (id: number): Promise<boolean> => {
+    return await bookingService.deleteDesk(id);
+  },
 };

@@ -330,6 +330,47 @@ export const bookingService = {
         if (!response.ok) throw new Error('Failed to update desk');
         const updatedDesk: ApiDesk = await response.json();
         return mapApiDeskToDesk(updatedDesk);
+    },
+
+    async getDesksByOffice(officeId: string): Promise<Desk[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/offices/${officeId}/desks`, {
+                headers: await getHeaders()
+            });
+            if (!response.ok) throw new Error('Failed to fetch desks for office');
+            const data: ApiDesk[] = await response.json();
+            return data.map(mapApiDeskToDesk);
+        } catch (error) {
+            console.error('Error fetching desks for office:', error);
+            return [];
+        }
+    },
+
+    async createDesk(desk: Omit<Desk, 'id'>): Promise<Desk> {
+        const apiDeskRequest = {
+            name: desk.label,
+            type: mapDeskTypeToInt(desk.type),
+            officeId: desk.locationId,
+            reservedForStaffMemberId: desk.reservedForStaffMemberId
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/desks`, {
+            method: 'POST',
+            headers: await getHeaders(),
+            body: JSON.stringify(apiDeskRequest),
+        });
+
+        if (!response.ok) throw new Error('Failed to create desk');
+        const newDesk: ApiDesk = await response.json();
+        return mapApiDeskToDesk(newDesk);
+    },
+
+    async deleteDesk(id: number): Promise<boolean> {
+        const response = await fetch(`${API_BASE_URL}/api/desks/${id}`, {
+            method: 'DELETE',
+            headers: await getHeaders()
+        });
+        return response.ok;
     }
 };
 
