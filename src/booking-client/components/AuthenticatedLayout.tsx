@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Location, Desk, Booking, StaffMember, StaffRole } from '../types';
+import { Location, Desk, StaffMember, StaffRole } from '../types';
 import { api } from '../services/api';
 import Header from './Header';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
@@ -8,7 +8,6 @@ import { useAuth } from '../contexts/AuthContext';
 const AuthenticatedLayout: React.FC = () => {
     const [locations, setLocations] = useState<Location[]>([]);
     const [desks, setDesks] = useState<Desk[]>([]);
-    const [bookings, setBookings] = useState<Booking[]>([]);
     const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
     const [staffRoles, setStaffRoles] = useState<StaffRole[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -22,16 +21,14 @@ const AuthenticatedLayout: React.FC = () => {
         try {
             setIsLoading(true);
             setError(null);
-            const [locationsData, desksData, bookingsData, staffMembersData, rolesData] = await Promise.all([
+            const [locationsData, desksData, staffMembersData, rolesData] = await Promise.all([
                 api.fetchLocations(),
                 api.fetchDesks(),
-                api.fetchBookings(),
                 api.fetchStaffMembers(),
                 api.fetchStaffRoles(),
             ]);
             setLocations(locationsData);
             setDesks(desksData);
-            setBookings(bookingsData);
             setStaffMembers(staffMembersData);
             setStaffRoles(rolesData);
         } catch (err) {
@@ -79,7 +76,7 @@ const AuthenticatedLayout: React.FC = () => {
             />
             <main className="container mx-auto p-4 sm:p-6 lg:p-8">
                 <Outlet context={{
-                    locations, desks, bookings, staffMembers, staffRoles, currentUser, isLoading, error, onRefresh: fetchData
+                    locations, desks, staffMembers, staffRoles, currentUser, isLoading, error, onRefresh: fetchData
                 }} />
             </main>
         </div>
