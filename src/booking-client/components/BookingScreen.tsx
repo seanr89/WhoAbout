@@ -13,7 +13,6 @@ import RefreshCwIcon from './icons/RefreshCwIcon';
 interface BookingScreenProps {
     locations: Location[];
     desks: Desk[];
-    bookings: Booking[];
     staffMembers: StaffMember[];
     currentUser: StaffMember | null;
     isLoading: boolean;

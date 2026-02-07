@@ -18,7 +18,6 @@ import { Location, Desk, Booking, StaffMember, Role } from './types';
 interface AppContextType {
   locations: Location[];
   desks: Desk[];
-  bookings: Booking[];
   staffMembers: StaffMember[];
   staffRoles: import('./types').StaffRole[];
   currentUser: StaffMember | null;
@@ -40,7 +39,6 @@ const AdminScreenWrapper = () => {
     locations={context.locations}
     staffMembers={context.staffMembers}
     staffRoles={context.staffRoles}
-    bookings={context.bookings}
     desks={context.desks}
     onDataRefresh={context.onRefresh}
   />;

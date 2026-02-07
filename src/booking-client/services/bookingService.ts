@@ -159,6 +159,26 @@ export const bookingService = {
         }
     },
 
+    async getBookingsByStaffId(staffId: string, startDate?: string, endDate?: string): Promise<Booking[]> {
+        try {
+            const params = new URLSearchParams();
+            if (startDate) params.append('startDate', startDate);
+            if (endDate) params.append('endDate', endDate);
+
+            const response = await fetch(`${API_BASE_URL}/api/bookings/staff/${staffId}?${params.toString()}`, {
+                headers: await getHeaders()
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch bookings for staff member');
+            }
+            const data: ApiBooking[] = await response.json();
+            return data.map(mapApiBookingToClient);
+        } catch (error) {
+            console.error('Error fetching bookings for staff member:', error);
+            return [];
+        }
+    },
+
     async getByDateAndLocation(date: string, locationId: string): Promise<Booking[]> {
         try {
             const params = new URLSearchParams();

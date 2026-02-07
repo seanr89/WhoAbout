@@ -17,6 +17,10 @@ export const api = {
     return await bookingService.getAll();
   },
 
+  fetchBookingsByStaffId: async (staffId: string, startDate?: string, endDate?: string): Promise<Booking[]> => {
+    return await bookingService.getBookingsByStaffId(staffId, startDate, endDate);
+  },
+
   fetchStaffMembers: async (): Promise<StaffMember[]> => {
     return await bookingService.getStaffMembers();
   },
