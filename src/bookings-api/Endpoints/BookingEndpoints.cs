@@ -213,6 +213,29 @@ public static class BookingEndpoints
         .WithSummary("Get booking statistics")
         .WithDescription("Retrieves booking statistics for a specific office location within a date range.");
 
+        // GET: /api/bookings/staff/{id}
+        group.MapGet("/staff/{id}", async (Guid id, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, BookingService service, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("BookingEndpoints");
+            logger.LogInformation("Getting bookings for StaffMemberId: {StaffMemberId}", id);
+
+            var bookings = await service.GetBookingsByStaffMemberIdAsync(id, startDate, endDate);
+
+            var dtos = bookings.Select(b => new BookingDto
+            {
+                Id = b.Id,
+                DeskId = b.DeskId,
+                StaffMemberId = b.StaffMemberId,
+                Date = b.BookingDate,
+                BookingType = (int)b.BookingType
+            });
+            return Results.Ok(dtos);
+        })
+        .RequireAuthorization()
+        .WithName("GetBookingsByStaffId")
+        .WithSummary("Get bookings by staff ID")
+        .WithDescription("Retrieves all bookings for a specific staff member.");
+
         // GET: /api/bookings/my
         group.MapGet("/my", async (HttpContext httpContext, BookingService service, StaffMemberService staffService, ILoggerFactory loggerFactory) =>
         {

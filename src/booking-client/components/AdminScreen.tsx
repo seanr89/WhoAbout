@@ -11,12 +11,11 @@ interface AdminScreenProps {
     locations: Location[];
     staffMembers: StaffMember[];
     staffRoles: StaffRole[];
-    bookings: Booking[];
     desks: Desk[];
     onDataRefresh: () => void;
 }
 
-const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staffRoles, bookings, desks, onDataRefresh }) => {
+const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staffRoles, desks, onDataRefresh }) => {
     const [activeTab, setActiveTab] = useState<'offices' | 'staff' | 'stats' | 'bookings'>('offices');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -47,6 +46,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
     const [statsStaffId, setStatsStaffId] = useState<string>('');
     const [statsStartDate, setStatsStartDate] = useState<string>('');
     const [statsEndDate, setStatsEndDate] = useState<string>('');
+    const [userStats, setUserStats] = useState<{ totalBookings: number, avgBookingsPerWeek: string } | null>(null);
+
 
     // Occupancy Stats State
     const [occupancyLocationId, setOccupancyLocationId] = useState<string>(locations[0]?.id || '');
@@ -58,6 +59,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState<number | null>(null);
+    const [historyBookings, setHistoryBookings] = useState<Booking[]>([]);
+
 
     // Initialize selectedDate to today if not set
     React.useEffect(() => {
@@ -69,6 +72,13 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
             setSelectedDate(`${year}-${month}-${day}`);
         }
     }, [selectedDate]);
+
+    // Initialize selectedLocationId when locations are loaded
+    React.useEffect(() => {
+        if (locations.length > 0 && !selectedLocationId) {
+            setSelectedLocationId(locations[0].id);
+        }
+    }, [locations, selectedLocationId]);
 
     // Fetch Desks when office is selected
     React.useEffect(() => {
@@ -115,41 +125,56 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
         }
     }, [activeTab, occupancyLocationId, occupancyMonth]);
 
-    const stats = useMemo(() => {
-        if (!statsStaffId || !statsStartDate || !statsEndDate) return null;
+    // Fetch User Stats
+    React.useEffect(() => {
+        if (activeTab === 'stats' && statsStaffId && statsStartDate && statsEndDate) {
+            const fetchUserStats = async () => {
+                try {
+                    const bookings = await api.fetchBookingsByStaffId(statsStaffId, statsStartDate, statsEndDate);
 
-        const start = new Date(statsStartDate);
-        const end = new Date(statsEndDate);
+                    const totalBookings = bookings.length;
+                    const start = new Date(statsStartDate);
+                    const end = new Date(statsEndDate);
+                    const timeDiff = end.getTime() - start.getTime();
+                    const daysDiff = timeDiff / (1000 * 3600 * 24);
+                    const weeksDiff = Math.max(1, Math.ceil(daysDiff / 7));
+                    const avgBookingsPerWeek = totalBookings / weeksDiff;
 
-        const filteredBookings = bookings.filter(b => {
-            const bookingDate = new Date(b.date);
-            return b.staffMemberId === statsStaffId &&
-                bookingDate >= start &&
-                bookingDate <= end;
-        });
+                    setUserStats({
+                        totalBookings,
+                        avgBookingsPerWeek: avgBookingsPerWeek.toFixed(1)
+                    });
+                } catch (err) {
+                    console.error("Failed to fetch user stats", err);
+                    setUserStats(null);
+                }
+            };
+            fetchUserStats();
+        } else {
+            setUserStats(null);
+        }
+    }, [activeTab, statsStaffId, statsStartDate, statsEndDate]);
 
-        const totalBookings = filteredBookings.length;
+    // Fetch History Bookings
+    const fetchHistory = React.useCallback(async () => {
+        if (!selectedLocationId || !selectedDate) return;
+        try {
+            setIsLoading(true);
+            const data = await api.fetchBookingsByDateAndLocation(selectedDate, selectedLocationId);
+            setHistoryBookings(data);
+        } catch (err) {
+            console.error("Failed to fetch history bookings", err);
+            setHistoryBookings([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [selectedLocationId, selectedDate]);
 
-        // Calculate weeks difference
-        const timeDiff = end.getTime() - start.getTime();
-        const daysDiff = timeDiff / (1000 * 3600 * 24);
-        const weeksDiff = Math.max(1, Math.ceil(daysDiff / 7));
-
-        const avgBookingsPerWeek = totalBookings / weeksDiff;
-
-        return {
-            totalBookings,
-            avgBookingsPerWeek: avgBookingsPerWeek.toFixed(1)
-        };
-    }, [bookings, statsStaffId, statsStartDate, statsEndDate]);
-
-    const historyFilteredBookings = useMemo(() => {
-        return bookings.filter(booking => {
-            const locationMatch = !selectedLocationId || desks.find(d => d.id === booking.deskId)?.locationId === selectedLocationId;
-            const dateMatch = !selectedDate || booking.date === selectedDate;
-            return locationMatch && dateMatch;
-        });
-    }, [bookings, selectedLocationId, selectedDate, desks]);
+    React.useEffect(() => {
+        if (activeTab === 'bookings') {
+            fetchHistory();
+        }
+    }, [activeTab, fetchHistory]);
 
 
     // --- Desk Handlers ---
@@ -323,7 +348,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
         try {
             setIsDeleting(bookingId);
             await api.deleteBooking(bookingId);
-            onDataRefresh();
+            // Refresh history
+            fetchHistory();
         } catch (error) {
             console.error('Failed to cancel booking:', error);
             setError('Failed to cancel booking. Please try again.');
@@ -503,8 +529,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-slate-200">
-                                    {historyFilteredBookings.length > 0 ? (
-                                        historyFilteredBookings.map((booking) => (
+                                    {historyBookings.length > 0 ? (
+                                        historyBookings.map((booking) => (
                                             <tr key={booking.id} className="hover:bg-slate-50 transition">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
                                                     {new Date(booking.date).toLocaleDateString()}
@@ -998,85 +1024,6 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staf
                                 ))}
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'stats' && (
-                <div className="space-y-8">
-                    {/* User Stats Section */}
-                    <div className="bg-white rounded-xl shadow-sm p-6">
-                        <h3 className="text-lg font-semibold text-slate-800 mb-6">User Booking Statistics</h3>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Staff Member</label>
-                                <select
-                                    value={statsStaffId}
-                                    onChange={(e) => setStatsStaffId(e.target.value)}
-                                    className="w-full p-2 border border-slate-300 rounded-md"
-                                >
-                                    <option value="">Select Staff Member</option>
-                                    {staffMembers.map(staff => (
-                                        <option key={staff.id} value={staff.id}>{staff.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
-                                <input
-                                    type="date"
-                                    value={statsStartDate}
-                                    onChange={(e) => setStatsStartDate(e.target.value)}
-                                    className="w-full p-2 border border-slate-300 rounded-md"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">End Date</label>
-                                <input
-                                    type="date"
-                                    value={statsEndDate}
-                                    onChange={(e) => setStatsEndDate(e.target.value)}
-                                    className="w-full p-2 border border-slate-300 rounded-md"
-                                />
-                            </div>
-                        </div>
-
-                        {stats ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="bg-indigo-50 p-6 rounded-lg border border-indigo-100">
-                                    <p className="text-sm font-medium text-indigo-600 mb-1">Total Bookings</p>
-                                    <p className="text-3xl font-bold text-indigo-900">{stats.totalBookings}</p>
-                                </div>
-                                <div className="bg-green-50 p-6 rounded-lg border border-green-100">
-                                    <p className="text-sm font-medium text-green-600 mb-1">Average Bookings / Week</p>
-                                    <p className="text-3xl font-bold text-green-900">{stats.avgBookingsPerWeek}</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="text-center py-6 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                                <p className="text-slate-500">Select a staff member and date range to view statistics.</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Office Occupancy Section */}
-                    <div className="bg-white rounded-xl shadow-sm p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-semibold text-slate-800">Office Occupancy</h3>
-                            <div className="w-64">
-                                <select
-                                    value={occupancyLocationId}
-                                    onChange={(e) => setOccupancyLocationId(e.target.value)}
-                                    className="w-full p-2 border border-slate-300 rounded-md text-sm"
-                                >
-                                    {locations.map(loc => (
-                                        <option key={loc.id} value={loc.id}>{loc.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                        {renderOccupancyCalendar()}
                     </div>
                 </div>
             )}

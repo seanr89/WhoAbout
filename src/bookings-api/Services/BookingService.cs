@@ -178,11 +178,37 @@ public class BookingService
         return counts;
     }
 
-    public async Task<List<Booking>> GetBookingsByStaffMemberIdAsync(Guid staffMemberId)
+    public async Task<List<Booking>> GetBookingsByStaffMemberIdAsync(Guid staffMemberId, DateTime? startDate = null, DateTime? endDate = null)
     {
-        return await _context.Bookings
+        var query = _context.Bookings
             .Include(b => b.Desk)
-            .Where(b => b.StaffMemberId == staffMemberId)
+            .Where(b => b.StaffMemberId == staffMemberId);
+
+        if (startDate.HasValue)
+        {
+            var start = startDate.Value.Date;
+            if (start.Kind == DateTimeKind.Unspecified)
+                start = DateTime.SpecifyKind(start, DateTimeKind.Utc);
+            else if (start.Kind == DateTimeKind.Local)
+                start = start.ToUniversalTime();
+
+            query = query.Where(b => b.BookingDate >= start);
+        }
+
+        if (endDate.HasValue)
+        {
+            var end = endDate.Value.Date;
+            if (end.Kind == DateTimeKind.Unspecified)
+                end = DateTime.SpecifyKind(end, DateTimeKind.Utc);
+            else if (end.Kind == DateTimeKind.Local)
+                end = end.ToUniversalTime();
+
+            // Make sure end date includes the full day
+            end = end.AddDays(1);
+            query = query.Where(b => b.BookingDate < end);
+        }
+
+        return await query
             .OrderBy(b => b.BookingDate)
             .ToListAsync();
     }
