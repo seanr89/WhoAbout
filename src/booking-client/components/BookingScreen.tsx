@@ -141,6 +141,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
         setSelectedDate(getTodayString());
         setSelectedSlot(BookingSlot.FULL_DAY);
         setDeskTypeFilter('all');
+        setHideBookedDesks(false);
     };
 
     const selectedLocation = locations.find(l => l.id === selectedLocationId);
@@ -163,7 +164,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
     return (
         <>
             <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 items-end">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-6 items-end">
                     {/* Location Selector */}
                     <div className="space-y-2">
                         <label htmlFor="location-select" className="flex items-center text-sm font-medium text-slate-600">
@@ -253,6 +254,20 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
                         </select>
                     </div>
 
+                    {/* Hide Booked */}
+                    <div className="space-y-2">
+                        <label className="flex items-center text-sm font-medium text-slate-600 invisible" aria-hidden="true">Hide</label>
+                        <label className="flex items-center space-x-2 cursor-pointer text-slate-600 h-10">
+                            <input
+                                type="checkbox"
+                                className="form-checkbox h-5 w-5 text-indigo-600 rounded bg-gray-100 border-gray-300 focus:ring-indigo-500"
+                                checked={hideBookedDesks}
+                                onChange={(e) => setHideBookedDesks(e.target.checked)}
+                            />
+                            <span className="text-sm font-medium">Hide Booked</span>
+                        </label>
+                    </div>
+
                     {/* Clear Filters Button */}
                     <div className="space-y-2">
                         <label className="flex items-center text-sm font-medium text-slate-600 invisible" aria-hidden="true">Clear</label>
@@ -280,19 +295,10 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
                 <div>
                     <div className="flex justify-between items-center mb-2">
                         <h2 className="text-2xl font-bold text-slate-800">Available Desks</h2>
-                        <label className="flex items-center space-x-2 cursor-pointer text-slate-600">
-                            <input
-                                type="checkbox"
-                                className="form-checkbox h-5 w-5 text-indigo-600 rounded bg-gray-100 border-gray-300 focus:ring-indigo-500"
-                                checked={hideBookedDesks}
-                                onChange={(e) => setHideBookedDesks(e.target.checked)}
-                            />
-                            <span className="text-sm font-medium">Hide Booked</span>
-                        </label>
                         {selectedLocation?.seatMapUrl && (
                             <button
                                 onClick={() => setIsSeatMapModalOpen(true)}
-                                className="ml-4 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-md text-sm font-semibold hover:bg-indigo-100 transition flex items-center shadow-sm border border-indigo-200"
+                                className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-md text-sm font-semibold hover:bg-indigo-100 transition flex items-center shadow-sm border border-indigo-200"
                             >
                                 <img src={selectedLocation.seatMapUrl} className="w-4 h-4 mr-2 object-cover rounded-sm" />
                                 Show Seat Map
