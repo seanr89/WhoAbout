@@ -75,4 +75,16 @@ public class DeskReleaseService
          return await _context.DeskReleases
             .AnyAsync(r => r.DeskId == deskId && r.Date == releaseDate);
     }
+
+    public async Task<List<DeskRelease>> GetReleasesByDateAndOfficeAsync(DateTime date, Guid officeId)
+    {
+        var releaseDate = date.Date;
+        if (releaseDate.Kind == DateTimeKind.Unspecified)
+             releaseDate = DateTime.SpecifyKind(releaseDate, DateTimeKind.Utc);
+
+        return await _context.DeskReleases
+            .Include(r => r.Desk)
+            .Where(r => r.Date == releaseDate && r.Desk.OfficeId == officeId)
+            .ToListAsync();
+    }
 }

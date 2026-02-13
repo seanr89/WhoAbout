@@ -44,6 +44,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
     // Local state for filtered bookings
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [isBookingsLoading, setIsBookingsLoading] = useState(false);
+    const [releasedDeskIds, setReleasedDeskIds] = useState<number[]>([]);
 
     const calendarRef = useRef<HTMLDivElement>(null);
 
@@ -60,8 +61,12 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
 
         setIsBookingsLoading(true);
         try {
-            const data = await api.fetchBookingsByDateAndLocation(selectedDate, selectedLocationId);
-            setBookings(data);
+            const [bookingsData, releasesData] = await Promise.all([
+                api.fetchBookingsByDateAndLocation(selectedDate, selectedLocationId),
+                api.fetchReleasesByDateAndLocation(selectedDate, selectedLocationId)
+            ]);
+            setBookings(bookingsData);
+            setReleasedDeskIds(releasesData);
         } catch (err) {
             console.error("Failed to fetch filtered bookings", err);
         } finally {
@@ -89,29 +94,37 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
 
     const filteredDesks = useMemo(() => {
         if (!selectedLocationId) return [];
-        return desks.filter(desk => {
-            const locationMatch = desk.locationId === selectedLocationId;
-            const typeMatch = deskTypeFilter === 'all' || desk.type === deskTypeFilter;
+        return desks
+            .map(desk => {
+                 const isReleased = releasedDeskIds.includes(desk.id);
+                 if (isReleased) {
+                     return { ...desk, isReserved: false };
+                 }
+                 return desk;
+            })
+            .filter(desk => {
+                const locationMatch = desk.locationId === selectedLocationId;
+                const typeMatch = deskTypeFilter === 'all' || desk.type === deskTypeFilter;
 
-            if (!locationMatch || !typeMatch) return false;
+                if (!locationMatch || !typeMatch) return false;
 
-            if (hideBookedDesks) {
-                const deskBookings = bookings.filter(b => b.deskId === desk.id && b.date === selectedDate);
-                const isMorningBooked = deskBookings.some(b => b.slot === BookingSlot.MORNING || b.slot === BookingSlot.FULL_DAY);
-                const isAfternoonBooked = deskBookings.some(b => b.slot === BookingSlot.AFTERNOON || b.slot === BookingSlot.FULL_DAY);
+                if (hideBookedDesks) {
+                    const deskBookings = bookings.filter(b => b.deskId === desk.id && b.date === selectedDate);
+                    const isMorningBooked = deskBookings.some(b => b.slot === BookingSlot.MORNING || b.slot === BookingSlot.FULL_DAY);
+                    const isAfternoonBooked = deskBookings.some(b => b.slot === BookingSlot.AFTERNOON || b.slot === BookingSlot.FULL_DAY);
 
-                if (selectedSlot === BookingSlot.FULL_DAY) {
-                    if (isMorningBooked || isAfternoonBooked) return false;
-                } else if (selectedSlot === BookingSlot.MORNING) {
-                    if (isMorningBooked) return false;
-                } else if (selectedSlot === BookingSlot.AFTERNOON) {
-                    if (isAfternoonBooked) return false;
+                    if (selectedSlot === BookingSlot.FULL_DAY) {
+                        if (isMorningBooked || isAfternoonBooked) return false;
+                    } else if (selectedSlot === BookingSlot.MORNING) {
+                        if (isMorningBooked) return false;
+                    } else if (selectedSlot === BookingSlot.AFTERNOON) {
+                        if (isAfternoonBooked) return false;
+                    }
+                    if (desk.isReserved) return false;
                 }
-                if (desk.isReserved) return false;
-            }
-            return true;
-        });
-    }, [desks, selectedLocationId, deskTypeFilter, hideBookedDesks, bookings, selectedDate, selectedSlot]);
+                return true;
+            });
+    }, [desks, selectedLocationId, deskTypeFilter, hideBookedDesks, bookings, selectedDate, selectedSlot, releasedDeskIds]);
 
     const handleSelectDesk = (desk: Desk, slot?: BookingSlot) => {
         setSelectedDeskForBooking(desk);

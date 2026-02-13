@@ -38,5 +38,16 @@ public static class DeskReleaseEndpoints
         .WithName("DeleteDeskRelease")
         .WithSummary("Delete desk release")
         .WithDescription("Deletes a desk release for a specific date.");
+
+        group.MapGet("/releases", async ([FromQuery] DateTime date, [FromQuery] Guid officeId, DeskReleaseService service) =>
+        {
+             var releases = await service.GetReleasesByDateAndOfficeAsync(date, officeId);
+             var deskIds = releases.Select(r => r.DeskId).ToList();
+             return Results.Ok(deskIds);
+        })
+        .RequireAuthorization()
+        .WithName("GetReleasesByDateAndOffice")
+        .WithSummary("Get releases by date and office")
+        .WithDescription("Retrieves a list of desk IDs that are released for a specific date and office.");
     }
 }

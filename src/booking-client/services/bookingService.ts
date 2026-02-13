@@ -391,6 +391,57 @@ export const bookingService = {
             headers: await getHeaders()
         });
         return response.ok;
+    },
+
+    async getDeskReleases(deskId: number): Promise<string[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/desks/${deskId}/releases`, {
+                headers: await getHeaders()
+            });
+            if (!response.ok) throw new Error('Failed to fetch desk releases');
+            const data: any[] = await response.json();
+            return data.map((d: any) => d.date.split('T')[0]);
+        } catch (error) {
+            console.error('Error fetching desk releases:', error);
+            return [];
+        }
+    },
+
+    async createDeskRelease(deskId: number, date: string): Promise<void> {
+        const response = await fetch(`${API_BASE_URL}/api/desks/${deskId}/releases`, {
+            method: 'POST',
+            headers: await getHeaders(),
+            body: JSON.stringify(new Date(date).toISOString()),
+        });
+        if (!response.ok) throw new Error('Failed to create desk release');
+    },
+
+    async deleteDeskRelease(deskId: number, date: string): Promise<void> {
+        const response = await fetch(`${API_BASE_URL}/api/desks/${deskId}/releases/${date}`, {
+            method: 'DELETE',
+            headers: await getHeaders()
+        });
+        if (!response.ok) throw new Error('Failed to delete desk release');
+    },
+
+    async getReleasesByDateAndLocation(date: string, locationId: string): Promise<number[]> {
+        try {
+            const params = new URLSearchParams();
+            params.append('date', date);
+            params.append('officeId', locationId);
+
+            const response = await fetch(`${API_BASE_URL}/api/desks/releases?${params.toString()}`, {
+                headers: await getHeaders()
+            });
+
+            if (!response.ok) {
+                 throw new Error('Failed to fetch released desks');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching released desks:', error);
+            return [];
+        }
     }
 };
 
