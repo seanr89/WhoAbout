@@ -28,6 +28,7 @@ const MyBookingsScreen: React.FC = () => {
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [deskReleases, setDeskReleases] = useState<Map<number, string[]>>(new Map());
 
     useEffect(() => {
         fetchData();
@@ -51,6 +52,17 @@ const MyBookingsScreen: React.FC = () => {
             if (me) {
                 const reserved = desks.filter(d => d.reservedForStaffMemberId === me.id);
                 setMyReservedDesks(reserved);
+
+                const releasesMap = new Map<number, string[]>();
+                await Promise.all(reserved.map(async (desk) => {
+                     try {
+                         const releases = await bookingService.getDeskReleases(desk.id);
+                         releasesMap.set(desk.id, releases);
+                     } catch (e) {
+                         console.error("Failed to fetch releases for desk", desk.id);
+                     }
+                }));
+                setDeskReleases(releasesMap);
             }
         } catch (err) {
             console.error(err);
@@ -103,6 +115,26 @@ const MyBookingsScreen: React.FC = () => {
         } catch (err) {
             console.error('Error cancelling booking:', err);
             alert('Failed to cancel booking. Please try again.');
+        }
+    };
+
+    const handleToggleRelease = async (deskId: number, dateStr: string, isReleased: boolean) => {
+        try {
+            if (isReleased) {
+                await bookingService.deleteDeskRelease(deskId, dateStr);
+            } else {
+                await bookingService.createDeskRelease(deskId, dateStr);
+            }
+
+            const releases = await bookingService.getDeskReleases(deskId);
+            setDeskReleases(prev => {
+                const newMap = new Map(prev);
+                newMap.set(deskId, releases);
+                return newMap;
+            });
+        } catch (err) {
+            console.error('Failed to toggle release', err);
+            alert('Failed to update desk availability.');
         }
     };
 
@@ -170,16 +202,40 @@ const MyBookingsScreen: React.FC = () => {
                                     {myReservedDesks.length > 0 && (
                                         <div className="space-y-2">
                                             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Reserved</p>
-                                            {myReservedDesks.map(desk => (
-                                                <div key={`reserved-${desk.id}`} className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                                                    <div className="flex items-center space-x-2 mb-1">
-                                                        <ChairIcon className="w-4 h-4 text-amber-600" />
-                                                        <span className="font-bold text-amber-800 text-sm">{desk.label}</span>
+                                            {myReservedDesks.map(desk => {
+                                                const releases = deskReleases.get(desk.id) || [];
+                                                const dateStr = formatDate(date);
+                                                const isReleased = releases.includes(dateStr);
+
+                                                return (
+                                                <div key={`reserved-${desk.id}`} className={`border rounded-lg p-3 transition-colors ${isReleased ? 'bg-slate-50 border-slate-200' : 'bg-amber-50 border-amber-200'}`}>
+                                                    <div className="flex justify-between items-start">
+                                                        <div>
+                                                            <div className="flex items-center space-x-2 mb-1">
+                                                                <ChairIcon className={`w-4 h-4 ${isReleased ? 'text-slate-400' : 'text-amber-600'}`} />
+                                                                <span className={`font-bold text-sm ${isReleased ? 'text-slate-500 line-through' : 'text-amber-800'}`}>{desk.label}</span>
+                                                            </div>
+                                                            <p className={`text-xs ${isReleased ? 'text-slate-500' : 'text-amber-700'}`}>Permanent Reservation</p>
+                                                            {isReleased && <p className="text-xs text-slate-500 font-medium mt-1">Released for today</p>}
+                                                        </div>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleToggleRelease(desk.id, dateStr, isReleased);
+                                                            }}
+                                                            className={`text-xs px-2 py-1 rounded border transition-colors ${
+                                                                isReleased
+                                                                ? 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
+                                                                : 'bg-white border-amber-300 text-amber-700 hover:bg-amber-50'
+                                                            }`}
+                                                            title={isReleased ? "Reclaim this desk for this date" : "Release this desk for other to book on this date"}
+                                                        >
+                                                            {isReleased ? 'Reclaim' : 'Release'}
+                                                        </button>
                                                     </div>
-                                                    <p className="text-xs text-amber-700">Permanent Reservation</p>
-                                                    <p className="text-xs text-amber-600 mt-1">{desk.type}</p>
                                                 </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
 
