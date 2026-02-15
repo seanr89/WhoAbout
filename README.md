@@ -1,6 +1,6 @@
-# WhoAbout
+# NoteForge
 
-WhoAbout is an office desk booking and monitoring system designed with agentic development in mind. It separates the backend logic and frontend presentation to allow for scalable and maintainable development.
+NoteForge (formerly WhoAbout) is an office desk booking and monitoring system designed with agentic development in mind. It separates the backend logic and frontend presentation to allow for scalable and maintainable development.
 
 ## 🚀 Tech Stack
 
@@ -22,7 +22,7 @@ WhoAbout is an office desk booking and monitoring system designed with agentic d
 ## 📂 Project Structure
 
 ```
-WhoAbout/
+NoteForge/
 ├── src/
 │   ├── bookings-api/       # .NET Web API Backend
 │   │   ├── Data/          # EF Core DbContext and Initializers
@@ -119,3 +119,7 @@ The project includes a `Makefile` for convenience:
 | `make db-migrate-add NAME=X` | Add EF Core Migration |
 
 ---
+
+## 📝 TODOs & Future Roadmap
+
+See [TODO.md](TODO.md) for a list of known issues, missing features, and technical debt.
