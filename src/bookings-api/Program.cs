@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using bookings_api.Data;
 using Scalar.AspNetCore;
 using bookings_api.Services;
-using bookings_api.Services;
 using bookings_api.Endpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -25,11 +24,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<OfficeService>();
-builder.Services.AddScoped<DeskService>();
-builder.Services.AddScoped<BookingService>();
-builder.Services.AddScoped<StaffMemberService>();
-builder.Services.AddScoped<DeskReleaseService>();
+builder.Services.AddApiServices();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -80,11 +75,7 @@ app.UseAuthorization();
 app.MapGet("/healthcheck", () => Results.Ok("Healthy"))
     .WithName("GetHealthCheck");
 
-app.MapOfficeEndpoints();
-app.MapDeskEndpoints();
-app.MapBookingEndpoints();
-app.MapStaffMemberEndpoints();
-app.MapDeskReleaseEndpoints();
+app.MapApiEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
