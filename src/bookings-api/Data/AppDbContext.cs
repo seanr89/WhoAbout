@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<StaffMember> StaffMembers { get; set; }
     public DbSet<DeskRelease> DeskReleases { get; set; }
+    public DbSet<Organisation> Organisations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +57,13 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<StaffMember>(entity =>
         {
             entity.HasKey(e => e.Id);
+        });
+
+        // Organisation Configuration
+        modelBuilder.Entity<Organisation>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired();
         });
     }
 }

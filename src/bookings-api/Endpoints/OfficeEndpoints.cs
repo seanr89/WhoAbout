@@ -13,6 +13,12 @@ public static class OfficeEndpoints
             .WithTags("Offices")
             .WithOpenApi();
 
+        /// <summary>
+        /// Get all offices
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapGet("/", async (OfficeService service, ILoggerFactory loggerFactory) =>
         {
             //var logger = loggerFactory.CreateLogger("OfficeEndpoints");
@@ -32,6 +38,13 @@ public static class OfficeEndpoints
         .WithSummary("Get all offices")
         .WithDescription("Retrieves a list of all office locations.");
 
+        /// <summary>
+        /// Get office by ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="service"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapGet("/{id}", async (Guid id, OfficeService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("OfficeEndpoints");
@@ -49,6 +62,12 @@ public static class OfficeEndpoints
         .WithSummary("Get office by ID")
         .WithDescription("Retrieves a specific office location by its unique ID.");
 
+        /// <summary>
+        /// Get desks for office
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="deskService"></param>
+        /// <returns></returns>
         group.MapGet("/{id}/desks", async (Guid id, DeskService deskService) =>
         {
             var desks = await deskService.GetDesksByOfficeIdAsync(id);
@@ -79,6 +98,14 @@ public static class OfficeEndpoints
         .WithSummary("Create office")
         .WithDescription("Creates a new office location.");
 
+        /// <summary>
+        /// Update office
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="office"></param>
+        /// <param name="service"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapPut("/{id}", async (Guid id, [FromBody] Office office, OfficeService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("OfficeEndpoints");
@@ -96,6 +123,13 @@ public static class OfficeEndpoints
         .WithSummary("Update office")
         .WithDescription("Updates an existing office location's details.");
 
+        /// <summary>
+        /// Delete office
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="service"></param>
+        /// <param name="loggerFactory"></param>
+        /// <returns></returns>
         group.MapDelete("/{id}", async (Guid id, OfficeService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("OfficeEndpoints");

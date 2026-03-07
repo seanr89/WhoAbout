@@ -61,17 +61,13 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
-    {
-        options.WithTitle("Bookings API");
-        options.WithTheme(ScalarTheme.DeepSpace);
-        options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-        options.Servers = [new ScalarServer("http://localhost:8080")];
-    });
-}
+    options.WithTitle("Bookings API");
+    options.WithTheme(ScalarTheme.DeepSpace);
+    options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+});
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
