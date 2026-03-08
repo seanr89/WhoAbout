@@ -44,3 +44,72 @@ Content-Type: application/json
 ### Delete Office (Replace with actual ID)
 DELETE {{bookings_api_HostAddress}}/api/offices/{{officeId}}
 Accept: application/json
+
+###
+
+### Get All Desks
+GET {{bookings_api_HostAddress}}/api/desks
+Accept: application/json
+
+###
+
+### Get Desk By ID (Replace with actual ID)
+@deskId = 1
+GET {{bookings_api_HostAddress}}/api/desks/{{deskId}}
+Accept: application/json
+
+###
+
+### Create Desk
+POST {{bookings_api_HostAddress}}/api/desks
+Content-Type: application/json
+
+{
+  "name": "Desk 101",
+  "type": 0,
+  "officeId": "{{officeId}}"
+}
+
+###
+
+### Update Desk (Replace with actual ID)
+PUT {{bookings_api_HostAddress}}/api/desks/{{deskId}}
+Content-Type: application/json
+
+{
+  "name": "Desk 101 Updated",
+  "type": 1,
+  "officeId": "{{officeId}}"
+}
+
+###
+
+### Delete Desk (Replace with actual ID)
+DELETE {{bookings_api_HostAddress}}/api/desks/{{deskId}}
+Accept: application/json
+
+###
+
+### Get Desk Releases
+GET {{bookings_api_HostAddress}}/api/deskreleases/{{deskId}}/releases
+
+###
+
+### Create Desk Release
+POST {{bookings_api_HostAddress}}/api/deskreleases/{{deskId}}/releases
+Content-Type: application/json
+
+"2024-12-25T00:00:00"
+
+###
+
+### Delete Desk Release
+DELETE {{bookings_api_HostAddress}}/api/deskreleases/{{deskId}}/releases/2024-12-25T00:00:00
+
+###
+
+### Get Desk Releases by Date and Office
+GET {{bookings_api_HostAddress}}/api/deskreleases/releases?date=2024-12-25T00:00:00&officeId={{officeId}}
+
+
+
