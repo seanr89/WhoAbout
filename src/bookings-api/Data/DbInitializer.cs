@@ -4,8 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace bookings_api.Data;
 
+/// <summary>
+/// Initializes the database with seed data.
+/// </summary>
 public static class DbInitializer
 {
+    /// <summary>
+    /// Initializes the database with seed data.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public static void Initialize(AppDbContext context)
     {
         Console.WriteLine("Applying migrations...");
