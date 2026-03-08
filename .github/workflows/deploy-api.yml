@@ -8,9 +8,9 @@ env:
 
 on:
   push:
-    branches: [ "main" ]
+    branches-ignore: [ "main" ]
     paths:
-      - 'bookings-api/**'
+      - '/src/bookings-api/**'
   workflow_dispatch:
 
 permissions:
