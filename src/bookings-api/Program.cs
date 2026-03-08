@@ -72,10 +72,6 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// app.MapHealthChecks("/health");
-
-app.MapGet("/healthcheck", () => Results.Ok("Healthy"))
-    .WithName("GetHealthCheck");
 
 app.MapApiEndpoints();
 

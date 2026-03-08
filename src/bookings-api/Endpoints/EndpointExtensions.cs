@@ -14,5 +14,6 @@ public static class EndpointExtensions
         app.MapBookingEndpoints();
         app.MapStaffMemberEndpoints();
         app.MapDeskReleaseEndpoints();
+        app.MapHealthCheckEndpoints();
     }
 }
