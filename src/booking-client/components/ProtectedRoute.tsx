@@ -10,7 +10,7 @@ const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
     }
 
     if (!currentUser) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/welcome" replace />;
     }
 
     return children;

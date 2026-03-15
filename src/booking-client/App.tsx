@@ -6,6 +6,7 @@ import RegisterScreen from './components/RegisterScreen';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthenticatedLayout from './components/AuthenticatedLayout';
 import BookingScreen from './components/BookingScreen';
+import HomeScreen from './components/HomeScreen';
 
 import AdminScreen from './components/AdminScreen';
 import ReservedScreen from './components/ReservedScreen';
@@ -71,6 +72,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Routes>
+        <Route path="/welcome" element={<HomeScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/register" element={<RegisterScreen />} />
 

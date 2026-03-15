@@ -17,7 +17,7 @@ const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({ children, allow
 
     if (!staffMember) {
         // Not logged in or staff profile not found, redirect to login
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/welcome" replace />;
     }
 
     if (!allowedRoles.includes(staffMember.role)) {
