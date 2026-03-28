@@ -34,7 +34,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: src/booking-client/package-lock.json
 
@@ -44,7 +44,7 @@ jobs:
 
       - name: Debug Token Check
         run: |
-          if [ -z "${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}" ]; then
+          if [ -z "${{ env.AZURE_STATIC_WEB_APPS_API_TOKEN }}" ]; then
             echo "TOKEN IS MISSING"
             exit 1
           else
@@ -67,12 +67,12 @@ jobs:
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          azure_static_web_apps_api_token: ${{ env.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           # Point this to the actual folder containing your index.html
           app_location: "/" 
-          app_artifact_location: "src/booking-client/dist"
+          app_artifact_location: "dist"
           skip_app_build: true
 
   close_pull_request_job:
@@ -83,5 +83,5 @@ jobs:
       - name: Close Pull Request
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          azure_static_web_apps_api_token: ${{ env.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           action: "close"
