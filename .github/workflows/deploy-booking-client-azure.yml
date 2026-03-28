@@ -42,14 +42,14 @@ jobs:
         run: npm ci
         working-directory: ./src/booking-client
 
-      - name: Debug Token Check
-        run: |
-          if [ -z "${{ env.AZURE_STATIC_WEB_APPS_API_TOKEN }}" ]; then
-            echo "TOKEN IS MISSING"
-            exit 1
-          else
-            echo "TOKEN IS PRESENT"
-          fi
+      # - name: Debug Token Check
+      #   run: |
+      #     if [ -z "${{ env.AZURE_STATIC_WEB_APPS_API_TOKEN }}" ]; then
+      #       echo "TOKEN IS MISSING"
+      #       exit 1
+      #     else
+      #       echo "TOKEN IS PRESENT"
+      #     fi
 
       - name: Build
         run: npm run build
