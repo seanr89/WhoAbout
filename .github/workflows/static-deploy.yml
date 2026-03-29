@@ -2,8 +2,8 @@ name: SPA - Deploy
 on:
   push:
     branches: [ "azuredeploy" ]
-    paths:
-      - 'src/booking-client/**'
+    # paths:
+    #   - 'src/booking-client/**'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches: [ "main" ]
