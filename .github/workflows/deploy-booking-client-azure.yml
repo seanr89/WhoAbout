@@ -71,7 +71,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           # Point this to the actual folder containing your index.html
-          app_location: "/" 
+          app_location: "src/booking-client" 
           app_artifact_location: "dist"
           skip_app_build: true
 
