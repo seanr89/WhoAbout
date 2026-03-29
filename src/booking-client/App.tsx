@@ -69,6 +69,7 @@ const MyBookingsScreenWrapper = () => {
 }
 
 const App: React.FC = () => {
+  console.log('App rendering');
   return (
     <AuthProvider>
       <Routes>

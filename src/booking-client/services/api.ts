@@ -6,10 +6,12 @@ const SIMULATED_DELAY = 500; // ms
 
 export const api = {
   fetchLocations: async (): Promise<Location[]> => {
+    console.log('api.fetchLocations');
     return await bookingService.getLocations();
   },
 
   fetchDesks: async (): Promise<Desk[]> => {
+    console.log('api.fetchDesks');
     return await bookingService.getDesks();
   },
 
