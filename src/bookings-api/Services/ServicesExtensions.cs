@@ -10,6 +10,7 @@ public static class ServicesExtensions
         services.AddScoped<BookingService>();
         services.AddScoped<StaffMemberService>();
         services.AddScoped<DeskReleaseService>();
+        services.AddScoped<IDbInitializationSetup, DbInitializationSetup>();
         
         return services;
     }
