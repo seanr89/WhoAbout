@@ -1,6 +1,6 @@
-# NoteForge API
+# WhoAbout API
 
-The backend API for the NoteForge desk booking system. Built with ASP.NET Core and Entity Framework Core.
+The backend API for the WhoAbout desk booking system. Built with ASP.NET Core and Entity Framework Core.
 
 ## 🚀 Tech Stack
 

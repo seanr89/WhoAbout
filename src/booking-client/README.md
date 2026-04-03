@@ -1,6 +1,6 @@
-# NoteForge Client
+# WhoAbout Client
 
-The frontend client for the NoteForge desk booking system. Built with React, TypeScript, and Vite.
+The frontend client for the WhoAbout desk booking system. Built with React, TypeScript, and Vite.
 
 ## 🚀 Tech Stack
 

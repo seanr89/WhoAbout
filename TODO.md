@@ -1,6 +1,6 @@
-# NoteForge TODOs & Roadmap
+# WhoAbout TODOs & Roadmap
 
-This file tracks planned features, known bugs, and technical debt for the NoteForge project.
+This file tracks planned features, known bugs, and technical debt for the WhoAbout project.
 
 ## 🐛 Bugs & Issues
 
@@ -19,6 +19,6 @@ This file tracks planned features, known bugs, and technical debt for the NoteFo
 
 ## 🔧 Technical Debt & Refactoring
 
-- [ ] **Rename "WhoAbout"**: Ensure all internal code references (namespaces, variables, comments) are updated from "WhoAbout" to "NoteForge" where appropriate.
+- [x] **Rename "WhoAbout"**: Ensure all internal code references (namespaces, variables, comments) are updated from "NoteForge" to "WhoAbout" where appropriate.
 - [ ] **Linting & Formatting**: Add ESLint and Prettier configuration to `booking-client` to enforce code style.
 - [ ] **Environment Variables**: Centralize and document all environment variables for both client and API in a single reference document.

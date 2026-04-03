@@ -40,7 +40,7 @@ const HomeScreen: React.FC = () => {
       <div className="max-w-7xl w-full text-center space-y-12">
         <div className="pt-10">
           <h1 className="text-5xl font-extrabold text-slate-900 tracking-tight sm:text-6xl">
-            Welcome to NoteForge
+            Welcome to WhoAbout
           </h1>
           <p className="mt-4 text-xl text-slate-600 max-w-3xl mx-auto">
             The modern office desk booking system designed to streamline your hybrid work experience.
@@ -49,7 +49,7 @@ const HomeScreen: React.FC = () => {
 
         <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-8 sm:p-12 text-left mb-12">
           <h2 className="text-2xl font-bold text-slate-800 mb-4">
-            Why NoteForge?
+            Why WhoAbout?
           </h2>
           <ul className="space-y-4 text-slate-600 mb-8">
             <li className="flex items-start">
@@ -161,7 +161,7 @@ const HomeScreen: React.FC = () => {
         </div>
 
         <p className="text-sm text-slate-500 pb-12">
-          NoteForge - Making office coordination seamless.
+          WhoAbout - Making office coordination seamless.
         </p>
       </div>
     </div>
