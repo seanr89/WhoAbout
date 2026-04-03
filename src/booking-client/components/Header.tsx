@@ -17,7 +17,10 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onNavigate('booking')}>
+            <div
+              className="flex items-center space-x-3 cursor-pointer"
+              onClick={() => onNavigate('booking')}
+            >
               <ChairIcon className="h-8 w-8 text-indigo-600" />
               <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
                 Office Desk Booker
@@ -27,10 +30,11 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
             <nav className="hidden md:flex space-x-4">
               <button
                 onClick={() => onNavigate('booking')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'booking'
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  currentScreen === 'booking'
+                    ? 'bg-indigo-50 text-indigo-700'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
               >
                 Book a Desk
               </button>
@@ -39,19 +43,21 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
                 <>
                   <button
                     onClick={() => onNavigate('reserved')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'reserved'
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                      }`}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      currentScreen === 'reserved'
+                        ? 'bg-indigo-50 text-indigo-700'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
                   >
                     Reserved
                   </button>
                   <button
                     onClick={() => onNavigate('admin')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'admin'
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                      }`}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      currentScreen === 'admin'
+                        ? 'bg-indigo-50 text-indigo-700'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
                   >
                     Admin
                   </button>
@@ -60,10 +66,11 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
 
               <button
                 onClick={() => onNavigate('my-bookings')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${currentScreen === 'my-bookings'
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  currentScreen === 'my-bookings'
+                    ? 'bg-indigo-50 text-indigo-700'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
               >
                 My Bookings
               </button>
@@ -116,8 +123,18 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
                 <span className="text-sm font-medium text-slate-600 hidden sm:block">
                   {currentUser ? currentUser.name : 'Guest'}
                 </span>
-                <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4 text-slate-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
 

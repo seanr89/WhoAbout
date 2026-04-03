@@ -27,8 +27,8 @@ public static class DbInitializer
         var offices = new Office[]
         {
             new Office { Id = Guid.NewGuid(), Name = "Belfast", Location = "Belfast" },
-            new Office { Id = Guid.NewGuid(), Name = "London", Location = "London" },
-            new Office { Id = Guid.NewGuid(), Name = "Dubai", Location = "Dubai" }
+            new Office { Id = Guid.NewGuid(), Name = "London", Location = "London" }
+            // new Office { Id = Guid.NewGuid(), Name = "Dubai", Location = "Dubai" }
         };
 
         foreach (var o in offices)
@@ -51,9 +51,9 @@ public static class DbInitializer
         // DTO Desks (Belfast) - 65
         for (int i = 1; i <= 25; i++)
         {
-            desks.Add(new Desk 
-            { 
-                Name = $"DTO-{i}", 
+            desks.Add(new Desk
+            {
+                Name = $"DTO-{i}",
                 OfficeId = offices[0].Id,
                 Type = GetDeskType(i)
             });
@@ -62,21 +62,10 @@ public static class DbInitializer
         // HQ Desks (London) - 40
         for (int i = 1; i <= 15; i++)
         {
-            desks.Add(new Desk 
-            { 
-                Name = $"HQ-{i}", 
+            desks.Add(new Desk
+            {
+                Name = $"HQ-{i}",
                 OfficeId = offices[1].Id,
-                Type = GetDeskType(i)
-            });
-        }
-
-        // International Desks (Dubai) - 20
-        for (int i = 1; i <= 10; i++)
-        {
-            desks.Add(new Desk 
-            { 
-                Name = $"INT-{i}", 
-                OfficeId = offices[2].Id,
                 Type = GetDeskType(i)
             });
         }
@@ -100,18 +89,7 @@ public static class DbInitializer
             new StaffMember { Id = Guid.NewGuid(), Name = "Ian Jackson", Email = "ian.jackson@example.com", IsActive = true },
             new StaffMember { Id = Guid.NewGuid(), Name = "Julia King", Email = "julia.king@example.com", IsActive = true },
             new StaffMember { Id = Guid.NewGuid(), Name = "Kevin Lewis", Email = "kevin.lewis@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Laura Miller", Email = "laura.miller@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Michael Nelson", Email = "michael.nelson@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Olivia Parker", Email = "olivia.parker@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Peter Quinn", Email = "peter.quinn@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Rachel Roberts", Email = "rachel.roberts@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Samuel Scott", Email = "samuel.scott@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Tina Turner", Email = "tina.turner@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Ursula Underwood", Email = "ursula.underwood@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Victor Vance", Email = "victor.vance@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Wendy White", Email = "wendy.white@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Xander Xavier", Email = "xander.xavier@example.com", IsActive = true },
-            new StaffMember { Id = Guid.NewGuid(), Name = "Yvonne Young", Email = "yvonne.young@example.com", IsActive = true }
+            new StaffMember { Id = Guid.NewGuid(), Name = "Laura Miller", Email = "laura.miller@example.com", IsActive = true }
         };
 
         context.StaffMembers.AddRange(staffMembers);
@@ -120,7 +98,7 @@ public static class DbInitializer
         // Reserve 5 desks in DTO office for the new staff members
         var dtoOfficeId = offices[0].Id;
         var dtoDesksForReservation = desks.Where(d => d.OfficeId == dtoOfficeId).Take(5).ToList();
-        
+
         // Use the last 5 added staff members for reservation
         for (int i = 0; i < 5; i++)
         {
@@ -130,7 +108,7 @@ public static class DbInitializer
                 // Let's pick from the newly added ones, e.g., index 15 to 19.
                 var staffToReserve = staffMembers[15 + i];
                 var deskToReserve = dtoDesksForReservation[i];
-                
+
                 deskToReserve.ReservedForStaffMemberId = staffToReserve.Id;
                 // We need to update the desk in the context, but since 'desks' list objects are tracked (added via AddRange), 
                 // modifying them here before SaveChanges might work if we hadn't already called SaveChanges for desks.
@@ -143,7 +121,7 @@ public static class DbInitializer
 
         // Generate 35 bookings for DTO office for next 5 working days (Mon-Fri)
         var bookingList = new List<Booking>();
-        
+
         DateTime baseDate = DateTime.UtcNow.Date;
         // Find next Monday
         int daysToMonday = ((int)DayOfWeek.Monday - (int)baseDate.DayOfWeek + 7) % 7;
@@ -158,12 +136,12 @@ public static class DbInitializer
         for (int day = 0; day < 5; day++)
         {
             var currentDate = startMonday.AddDays(day).AddHours(12);
-            
+
             for (int i = 0; i < 7; i++)
             {
                 // Ensure we have enough staff and desks
                 if (i >= dtoDesks.Count) break;
-                
+
                 var staffIndex = (day * 7 + i) % staffMembers.Length;
                 var staff = staffMembers[staffIndex];
                 var desk = dtoDesks[i];

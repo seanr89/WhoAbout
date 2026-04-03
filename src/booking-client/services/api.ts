@@ -19,7 +19,11 @@ export const api = {
     return await bookingService.getAll();
   },
 
-  fetchBookingsByStaffId: async (staffId: string, startDate?: string, endDate?: string): Promise<Booking[]> => {
+  fetchBookingsByStaffId: async (
+    staffId: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<Booking[]> => {
     return await bookingService.getBookingsByStaffId(staffId, startDate, endDate);
   },
 
@@ -39,7 +43,12 @@ export const api = {
     return await bookingService.getReleasesByDateAndLocation(date, locationId);
   },
 
-  createBooking: async (desk: Desk, date: string, slot: BookingSlot, staffMemberId: string): Promise<Booking> => {
+  createBooking: async (
+    desk: Desk,
+    date: string,
+    slot: BookingSlot,
+    staffMemberId: string,
+  ): Promise<Booking> => {
     // We don't have the user ID here easily to pass to the service if it needed it,
     // but the service handles the mapping.
     // The API will handle validation.
@@ -48,7 +57,7 @@ export const api = {
       userId: 'current-user', // Placeholder, API might ignore or use context
       staffMemberId: staffMemberId,
       date: date,
-      slot: slot
+      slot: slot,
     });
   },
 
@@ -82,7 +91,11 @@ export const api = {
     return await bookingService.deleteStaffMember(id);
   },
 
-  fetchBookingStats: async (officeId: string, startDate?: string, endDate?: string): Promise<import('../types').DailyBookingCount[]> => {
+  fetchBookingStats: async (
+    officeId: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<import('../types').DailyBookingCount[]> => {
     return await bookingService.getBookingStats(officeId, startDate, endDate);
   },
 

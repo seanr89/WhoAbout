@@ -14,11 +14,22 @@ interface DeskCardProps {
   currentUserId: string;
 }
 
-const DeskCard: React.FC<DeskCardProps> = ({ desk, selectedSlot, morningBooking, afternoonBooking, onBook, currentUserId }) => {
+const DeskCard: React.FC<DeskCardProps> = ({
+  desk,
+  selectedSlot,
+  morningBooking,
+  afternoonBooking,
+  onBook,
+  currentUserId,
+}) => {
   if (desk.isReserved) {
     return (
       <div className="bg-slate-200 text-slate-500 rounded-lg p-3 text-center cursor-not-allowed relative">
-        <div className="absolute top-2 right-2 w-3 h-3 bg-rose-500 rounded-full" title="Fully booked or permanently reserved" aria-label="Fully booked or permanently reserved"></div>
+        <div
+          className="absolute top-2 right-2 w-3 h-3 bg-rose-500 rounded-full"
+          title="Fully booked or permanently reserved"
+          aria-label="Fully booked or permanently reserved"
+        ></div>
         <p className="font-bold">{desk.label}</p>
         <div className="flex items-center justify-center text-xs text-slate-500 mt-1">
           <DeskTypeIcon type={desk.type} className="w-4 h-4 mr-1" />
@@ -31,8 +42,10 @@ const DeskCard: React.FC<DeskCardProps> = ({ desk, selectedSlot, morningBooking,
 
   const isMorningBooked = !!morningBooking;
   const isAfternoonBooked = !!afternoonBooking;
-  const isMorningBookedByMe = morningBooking?.userId === currentUserId || morningBooking?.staffMemberId === currentUserId;
-  const isAfternoonBookedByMe = afternoonBooking?.userId === currentUserId || afternoonBooking?.staffMemberId === currentUserId;
+  const isMorningBookedByMe =
+    morningBooking?.userId === currentUserId || morningBooking?.staffMemberId === currentUserId;
+  const isAfternoonBookedByMe =
+    afternoonBooking?.userId === currentUserId || afternoonBooking?.staffMemberId === currentUserId;
 
   // Check if at least one slot is available for the card to be interactive
   const isBookable = !isMorningBooked || !isAfternoonBooked;
@@ -45,7 +58,7 @@ const DeskCard: React.FC<DeskCardProps> = ({ desk, selectedSlot, morningBooking,
     if (byMe) return 'bg-indigo-500 text-white border-indigo-500';
     if (booked) return 'bg-rose-500 text-white border-rose-500';
     return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
-  }
+  };
 
   let availabilityStatus: 'available' | 'partially' | 'booked';
   let availabilityTitle: string;
@@ -136,12 +149,21 @@ interface DeskLayoutProps {
   currentUserId: string;
 }
 
-const DeskLayout: React.FC<DeskLayoutProps> = ({ desks, bookings, selectedDate, selectedSlot, onSelectDesk, currentUserId }) => {
+const DeskLayout: React.FC<DeskLayoutProps> = ({
+  desks,
+  bookings,
+  selectedDate,
+  selectedSlot,
+  onSelectDesk,
+  currentUserId,
+}) => {
   if (desks.length === 0) {
     return (
       <div className="text-center py-16">
         <h3 className="text-lg font-semibold text-slate-700">No Desks Found</h3>
-        <p className="text-slate-500 mt-2">Try adjusting your filters or selecting a different location.</p>
+        <p className="text-slate-500 mt-2">
+          Try adjusting your filters or selecting a different location.
+        </p>
       </div>
     );
   }
@@ -149,9 +171,15 @@ const DeskLayout: React.FC<DeskLayoutProps> = ({ desks, bookings, selectedDate, 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
       {desks.map((desk) => {
-        const deskBookings = bookings.filter(b => b.deskId === desk.id && b.date === selectedDate);
-        const morningBooking = deskBookings.find(b => b.slot === BookingSlot.MORNING || b.slot === BookingSlot.FULL_DAY);
-        const afternoonBooking = deskBookings.find(b => b.slot === BookingSlot.AFTERNOON || b.slot === BookingSlot.FULL_DAY);
+        const deskBookings = bookings.filter(
+          (b) => b.deskId === desk.id && b.date === selectedDate,
+        );
+        const morningBooking = deskBookings.find(
+          (b) => b.slot === BookingSlot.MORNING || b.slot === BookingSlot.FULL_DAY,
+        );
+        const afternoonBooking = deskBookings.find(
+          (b) => b.slot === BookingSlot.AFTERNOON || b.slot === BookingSlot.FULL_DAY,
+        );
 
         return (
           <DeskCard

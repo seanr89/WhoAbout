@@ -6,300 +6,342 @@ import ChairIcon from './icons/ChairIcon';
 
 // Helper to get start of current week (Monday)
 const getStartOfWeek = (date: Date) => {
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-    return new Date(date.setDate(diff));
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+  return new Date(date.setDate(diff));
 };
 
 const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
+  return date.toISOString().split('T')[0];
 };
 
 const formatDisplayDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  return date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 };
 
 const MyBookingsScreen: React.FC = () => {
-    const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
-    const [myBookings, setMyBookings] = useState<Booking[]>([]);
-    const [myReservedDesks, setMyReservedDesks] = useState<Desk[]>([]);
-    const [allDesks, setAllDesks] = useState<Desk[]>([]);
-    const [locations, setLocations] = useState<Location[]>([]);
-    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [deskReleases, setDeskReleases] = useState<Map<number, string[]>>(new Map());
+  const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
+  const [myBookings, setMyBookings] = useState<Booking[]>([]);
+  const [myReservedDesks, setMyReservedDesks] = useState<Desk[]>([]);
+  const [allDesks, setAllDesks] = useState<Desk[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [deskReleases, setDeskReleases] = useState<Map<number, string[]>>(new Map());
 
-    useEffect(() => {
-        fetchData();
-    }, [currentWeekStart]);
+  useEffect(() => {
+    fetchData();
+  }, [currentWeekStart]);
 
-    const fetchData = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const [bookings, desks, me, locs] = await Promise.all([
-                bookingService.getMyBookings(),
-                bookingService.getDesks(),
-                bookingService.getMe(),
-                bookingService.getLocations()
-            ]);
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [bookings, desks, me, locs] = await Promise.all([
+        bookingService.getMyBookings(),
+        bookingService.getDesks(),
+        bookingService.getMe(),
+        bookingService.getLocations(),
+      ]);
 
-            setMyBookings(bookings);
-            setAllDesks(desks);
-            setLocations(locs);
+      setMyBookings(bookings);
+      setAllDesks(desks);
+      setLocations(locs);
 
-            if (me) {
-                const reserved = desks.filter(d => d.reservedForStaffMemberId === me.id);
-                setMyReservedDesks(reserved);
+      if (me) {
+        const reserved = desks.filter((d) => d.reservedForStaffMemberId === me.id);
+        setMyReservedDesks(reserved);
 
-                const releasesMap = new Map<number, string[]>();
-                await Promise.all(reserved.map(async (desk) => {
-                     try {
-                         const releases = await bookingService.getDeskReleases(desk.id);
-                         releasesMap.set(desk.id, releases);
-                     } catch (e) {
-                         console.error("Failed to fetch releases for desk", desk.id);
-                     }
-                }));
-                setDeskReleases(releasesMap);
+        const releasesMap = new Map<number, string[]>();
+        await Promise.all(
+          reserved.map(async (desk) => {
+            try {
+              const releases = await bookingService.getDeskReleases(desk.id);
+              releasesMap.set(desk.id, releases);
+            } catch (e) {
+              console.error('Failed to fetch releases for desk', desk.id);
             }
-        } catch (err) {
-            console.error(err);
-            setError('Failed to load bookings data.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handlePreviousWeek = () => {
-        const newDate = new Date(currentWeekStart);
-        newDate.setDate(newDate.getDate() - 7);
-        setCurrentWeekStart(newDate);
-    };
-
-    const handleNextWeek = () => {
-        const newDate = new Date(currentWeekStart);
-        newDate.setDate(newDate.getDate() + 7);
-        setCurrentWeekStart(newDate);
-    };
-
-    const handleCurrentWeek = () => {
-        setCurrentWeekStart(getStartOfWeek(new Date()));
+          }),
+        );
+        setDeskReleases(releasesMap);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load bookings data.');
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const weekDays = Array.from({ length: 5 }).map((_, i) => {
-        const date = new Date(currentWeekStart);
-        date.setDate(date.getDate() + i);
-        return date;
-    });
+  const handlePreviousWeek = () => {
+    const newDate = new Date(currentWeekStart);
+    newDate.setDate(newDate.getDate() - 7);
+    setCurrentWeekStart(newDate);
+  };
 
-    const getBookingsForDate = (date: Date) => {
-        const dateStr = formatDate(date);
-        return myBookings.filter(b => b.date === dateStr);
-    };
+  const handleNextWeek = () => {
+    const newDate = new Date(currentWeekStart);
+    newDate.setDate(newDate.getDate() + 7);
+    setCurrentWeekStart(newDate);
+  };
 
-    const handleBookingClick = (booking: Booking) => {
-        setSelectedBooking(booking);
-    };
+  const handleCurrentWeek = () => {
+    setCurrentWeekStart(getStartOfWeek(new Date()));
+  };
 
-    const handleCancelBooking = async (bookingId: number) => {
-        try {
-            const success = await bookingService.deleteBooking(bookingId);
-            if (success) {
-                // Refresh data
-                await fetchData();
-            } else {
-                throw new Error('Failed to delete booking');
-            }
-        } catch (err) {
-            console.error('Error cancelling booking:', err);
-            alert('Failed to cancel booking. Please try again.');
-        }
-    };
+  const weekDays = Array.from({ length: 5 }).map((_, i) => {
+    const date = new Date(currentWeekStart);
+    date.setDate(date.getDate() + i);
+    return date;
+  });
 
-    const handleToggleRelease = async (deskId: number, dateStr: string, isReleased: boolean) => {
-        try {
-            if (isReleased) {
-                await bookingService.deleteDeskRelease(deskId, dateStr);
-            } else {
-                await bookingService.createDeskRelease(deskId, dateStr);
-            }
+  const getBookingsForDate = (date: Date) => {
+    const dateStr = formatDate(date);
+    return myBookings.filter((b) => b.date === dateStr);
+  };
 
-            const releases = await bookingService.getDeskReleases(deskId);
-            setDeskReleases(prev => {
-                const newMap = new Map(prev);
-                newMap.set(deskId, releases);
-                return newMap;
-            });
-        } catch (err) {
-            console.error('Failed to toggle release', err);
-            alert('Failed to update desk availability.');
-        }
-    };
+  const handleBookingClick = (booking: Booking) => {
+    setSelectedBooking(booking);
+  };
 
-    return (
-        <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                <h2 className="text-2xl font-bold text-slate-800 mb-4 sm:mb-0">My Bookings</h2>
+  const handleCancelBooking = async (bookingId: number) => {
+    try {
+      const success = await bookingService.deleteBooking(bookingId);
+      if (success) {
+        // Refresh data
+        await fetchData();
+      } else {
+        throw new Error('Failed to delete booking');
+      }
+    } catch (err) {
+      console.error('Error cancelling booking:', err);
+      alert('Failed to cancel booking. Please try again.');
+    }
+  };
 
-                <div className="flex items-center space-x-4">
-                    <button
-                        onClick={handlePreviousWeek}
-                        className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
-                        aria-label="Previous week"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                    </button>
-                    <span className="text-lg font-medium text-slate-700 min-w-[140px] text-center">
-                        {formatDisplayDate(currentWeekStart)} - {formatDisplayDate(weekDays[4])}
-                    </span>
-                    <button
-                        onClick={handleNextWeek}
-                        className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
-                        aria-label="Next week"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                    </button>
-                    <button
-                        onClick={handleCurrentWeek}
-                        className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-md text-sm font-medium hover:bg-indigo-100 transition-colors ml-2"
-                    >
-                        Today
-                    </button>
+  const handleToggleRelease = async (deskId: number, dateStr: string, isReleased: boolean) => {
+    try {
+      if (isReleased) {
+        await bookingService.deleteDeskRelease(deskId, dateStr);
+      } else {
+        await bookingService.createDeskRelease(deskId, dateStr);
+      }
+
+      const releases = await bookingService.getDeskReleases(deskId);
+      setDeskReleases((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(deskId, releases);
+        return newMap;
+      });
+    } catch (err) {
+      console.error('Failed to toggle release', err);
+      alert('Failed to update desk availability.');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+        <h2 className="text-2xl font-bold text-slate-800 mb-4 sm:mb-0">My Bookings</h2>
+
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={handlePreviousWeek}
+            className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+            aria-label="Previous week"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <span className="text-lg font-medium text-slate-700 min-w-[140px] text-center">
+            {formatDisplayDate(currentWeekStart)} - {formatDisplayDate(weekDays[4])}
+          </span>
+          <button
+            onClick={handleNextWeek}
+            className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+            aria-label="Next week"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          <button
+            onClick={handleCurrentWeek}
+            className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-md text-sm font-medium hover:bg-indigo-100 transition-colors ml-2"
+          >
+            Today
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 text-red-700 p-4 rounded-md border border-red-200">{error}</div>
+      )}
+
+      {isLoading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div>
+          <p className="mt-2 text-slate-500">Loading your schedule...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {weekDays.map((date) => {
+            const dateBookings = getBookingsForDate(date);
+            const isToday = formatDate(date) === formatDate(new Date());
+
+            return (
+              <div
+                key={formatDate(date)}
+                className={`flex flex-col h-full min-h-[300px] rounded-xl border ${isToday ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50/10' : 'border-slate-200 bg-white'} overflow-hidden transition-all hover:shadow-md`}
+              >
+                <div
+                  className={`p-3 border-b ${isToday ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-50 text-slate-700'}`}
+                >
+                  <p className="font-bold text-lg">
+                    {date.toLocaleDateString('en-GB', { weekday: 'long' })}
+                  </p>
+                  <p className="text-sm opacity-75">
+                    {date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
+                  </p>
                 </div>
-            </div>
 
-            {error && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-md border border-red-200">
-                    {error}
-                </div>
-            )}
-
-            {isLoading ? (
-                <div className="text-center py-12">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent"></div>
-                    <p className="mt-2 text-slate-500">Loading your schedule...</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    {weekDays.map(date => {
-                        const dateBookings = getBookingsForDate(date);
-                        const isToday = formatDate(date) === formatDate(new Date());
+                <div className="p-3 space-y-3 flex-1">
+                  {/* Reserved Desks Section */}
+                  {myReservedDesks.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                        Reserved
+                      </p>
+                      {myReservedDesks.map((desk) => {
+                        const releases = deskReleases.get(desk.id) || [];
+                        const dateStr = formatDate(date);
+                        const isReleased = releases.includes(dateStr);
 
                         return (
-                            <div
-                                key={formatDate(date)}
-                                className={`flex flex-col h-full min-h-[300px] rounded-xl border ${isToday ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50/10' : 'border-slate-200 bg-white'} overflow-hidden transition-all hover:shadow-md`}
-                            >
-                                <div className={`p-3 border-b ${isToday ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-50 text-slate-700'}`}>
-                                    <p className="font-bold text-lg">{date.toLocaleDateString('en-GB', { weekday: 'long' })}</p>
-                                    <p className="text-sm opacity-75">{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}</p>
+                          <div
+                            key={`reserved-${desk.id}`}
+                            className={`border rounded-lg p-3 transition-colors ${isReleased ? 'bg-slate-50 border-slate-200' : 'bg-amber-50 border-amber-200'}`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <ChairIcon
+                                    className={`w-4 h-4 ${isReleased ? 'text-slate-400' : 'text-amber-600'}`}
+                                  />
+                                  <span
+                                    className={`font-bold text-sm ${isReleased ? 'text-slate-500 line-through' : 'text-amber-800'}`}
+                                  >
+                                    {desk.label}
+                                  </span>
                                 </div>
-
-                                <div className="p-3 space-y-3 flex-1">
-                                    {/* Reserved Desks Section */}
-                                    {myReservedDesks.length > 0 && (
-                                        <div className="space-y-2">
-                                            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Reserved</p>
-                                            {myReservedDesks.map(desk => {
-                                                const releases = deskReleases.get(desk.id) || [];
-                                                const dateStr = formatDate(date);
-                                                const isReleased = releases.includes(dateStr);
-
-                                                return (
-                                                <div key={`reserved-${desk.id}`} className={`border rounded-lg p-3 transition-colors ${isReleased ? 'bg-slate-50 border-slate-200' : 'bg-amber-50 border-amber-200'}`}>
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <div className="flex items-center space-x-2 mb-1">
-                                                                <ChairIcon className={`w-4 h-4 ${isReleased ? 'text-slate-400' : 'text-amber-600'}`} />
-                                                                <span className={`font-bold text-sm ${isReleased ? 'text-slate-500 line-through' : 'text-amber-800'}`}>{desk.label}</span>
-                                                            </div>
-                                                            <p className={`text-xs ${isReleased ? 'text-slate-500' : 'text-amber-700'}`}>Permanent Reservation</p>
-                                                            {isReleased && <p className="text-xs text-slate-500 font-medium mt-1">Released for today</p>}
-                                                        </div>
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleToggleRelease(desk.id, dateStr, isReleased);
-                                                            }}
-                                                            className={`text-xs px-2 py-1 rounded border transition-colors ${
-                                                                isReleased
-                                                                ? 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
-                                                                : 'bg-white border-amber-300 text-amber-700 hover:bg-amber-50'
-                                                            }`}
-                                                            title={isReleased ? "Reclaim this desk for this date" : "Release this desk for other to book on this date"}
-                                                        >
-                                                            {isReleased ? 'Reclaim' : 'Release'}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-
-                                    {/* Bookings Section */}
-                                    {dateBookings.length > 0 && (
-                                        <div className="space-y-2 mt-4">
-                                            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Booked</p>
-                                            {dateBookings.map(booking => {
-                                                const desk = allDesks.find(d => d.id === booking.deskId);
-                                                const location = desk ? locations.find(l => l.id === desk.locationId) : null;
-
-                                                return (
-                                                    <div
-                                                        key={booking.id}
-                                                        onClick={() => handleBookingClick(booking)}
-                                                        className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 relative group cursor-pointer hover:bg-indigo-100 transition-colors"
-                                                    >
-                                                        <div className="flex justify-between items-start">
-                                                            <div>
-                                                                <span className="font-bold text-indigo-800 text-sm block">
-                                                                    {desk ? desk.label : `Desk ${booking.deskId}`}
-                                                                </span>
-                                                                {location && (
-                                                                    <span className="text-xs text-indigo-600 block mb-1 font-medium">
-                                                                        {location.name}, {location.city}
-                                                                    </span>
-                                                                )}
-                                                                <span className="text-xs text-indigo-600 font-medium inline-block bg-indigo-100 px-2 py-0.5 rounded-full mt-1">
-                                                                    {booking.slot}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-
-                                    {myReservedDesks.length === 0 && dateBookings.length === 0 && (
-                                        <div className="h-full flex flex-col items-center justify-center text-slate-400 py-8">
-                                            <p className="text-sm italic">No bookings</p>
-                                        </div>
-                                    )}
-                                </div>
+                                <p
+                                  className={`text-xs ${isReleased ? 'text-slate-500' : 'text-amber-700'}`}
+                                >
+                                  Permanent Reservation
+                                </p>
+                                {isReleased && (
+                                  <p className="text-xs text-slate-500 font-medium mt-1">
+                                    Released for today
+                                  </p>
+                                )}
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleRelease(desk.id, dateStr, isReleased);
+                                }}
+                                className={`text-xs px-2 py-1 rounded border transition-colors ${
+                                  isReleased
+                                    ? 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
+                                    : 'bg-white border-amber-300 text-amber-700 hover:bg-amber-50'
+                                }`}
+                                title={
+                                  isReleased
+                                    ? 'Reclaim this desk for this date'
+                                    : 'Release this desk for other to book on this date'
+                                }
+                              >
+                                {isReleased ? 'Reclaim' : 'Release'}
+                              </button>
                             </div>
+                          </div>
                         );
-                    })}
+                      })}
+                    </div>
+                  )}
+
+                  {/* Bookings Section */}
+                  {dateBookings.length > 0 && (
+                    <div className="space-y-2 mt-4">
+                      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                        Booked
+                      </p>
+                      {dateBookings.map((booking) => {
+                        const desk = allDesks.find((d) => d.id === booking.deskId);
+                        const location = desk
+                          ? locations.find((l) => l.id === desk.locationId)
+                          : null;
+
+                        return (
+                          <div
+                            key={booking.id}
+                            onClick={() => handleBookingClick(booking)}
+                            className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 relative group cursor-pointer hover:bg-indigo-100 transition-colors"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <span className="font-bold text-indigo-800 text-sm block">
+                                  {desk ? desk.label : `Desk ${booking.deskId}`}
+                                </span>
+                                {location && (
+                                  <span className="text-xs text-indigo-600 block mb-1 font-medium">
+                                    {location.name}, {location.city}
+                                  </span>
+                                )}
+                                <span className="text-xs text-indigo-600 font-medium inline-block bg-indigo-100 px-2 py-0.5 rounded-full mt-1">
+                                  {booking.slot}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {myReservedDesks.length === 0 && dateBookings.length === 0 && (
+                    <div className="h-full flex flex-col items-center justify-center text-slate-400 py-8">
+                      <p className="text-sm italic">No bookings</p>
+                    </div>
+                  )}
                 </div>
-            )}
-            {/* Booking Details Modal */}
-            {selectedBooking && (
-                <BookingDetailsModal
-                    booking={selectedBooking}
-                    desk={allDesks.find(d => d.id === selectedBooking.deskId) || null}
-                    location={(() => {
-                        const desk = allDesks.find(d => d.id === selectedBooking.deskId);
-                        return desk ? locations.find(l => l.id === desk.locationId) || null : null;
-                    })()}
-                    onClose={() => setSelectedBooking(null)}
-                    onCancel={handleCancelBooking}
-                />
-            )}
+              </div>
+            );
+          })}
         </div>
-    );
+      )}
+      {/* Booking Details Modal */}
+      {selectedBooking && (
+        <BookingDetailsModal
+          booking={selectedBooking}
+          desk={allDesks.find((d) => d.id === selectedBooking.deskId) || null}
+          location={(() => {
+            const desk = allDesks.find((d) => d.id === selectedBooking.deskId);
+            return desk ? locations.find((l) => l.id === desk.locationId) || null : null;
+          })()}
+          onClose={() => setSelectedBooking(null)}
+          onCancel={handleCancelBooking}
+        />
+      )}
+    </div>
+  );
 };
 
 export default MyBookingsScreen;

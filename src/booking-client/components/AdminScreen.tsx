@@ -1,5 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { Location, StaffMember, Booking, DailyBookingCount, Desk, BookingSlot, Role, StaffRole, DeskType } from '../types';
+import {
+  Location,
+  StaffMember,
+  Booking,
+  DailyBookingCount,
+  Desk,
+  BookingSlot,
+  Role,
+  StaffRole,
+  DeskType,
+} from '../types';
 import { api } from '../services/api';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons/ChevronIcons';
 import LocationIcon from './icons/LocationIcon';
@@ -8,1027 +18,1272 @@ import Calendar from './Calendar';
 import TrashIcon from './icons/TrashIcon';
 
 interface AdminScreenProps {
-    locations: Location[];
-    staffMembers: StaffMember[];
-    staffRoles: StaffRole[];
-    desks: Desk[];
-    onDataRefresh: () => void;
+  locations: Location[];
+  staffMembers: StaffMember[];
+  staffRoles: StaffRole[];
+  desks: Desk[];
+  onDataRefresh: () => void;
 }
 
-const AdminScreen: React.FC<AdminScreenProps> = ({ locations, staffMembers, staffRoles, desks, onDataRefresh }) => {
-    const [activeTab, setActiveTab] = useState<'offices' | 'staff' | 'stats' | 'bookings'>('offices');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+const AdminScreen: React.FC<AdminScreenProps> = ({
+  locations,
+  staffMembers,
+  staffRoles,
+  desks,
+  onDataRefresh,
+}) => {
+  const [activeTab, setActiveTab] = useState<'offices' | 'staff' | 'stats' | 'bookings'>('offices');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    // Office Form State
-    const [editingLocation, setEditingLocation] = useState<Location | null>(null);
-    const [newLocationName, setNewLocationName] = useState('');
-    const [newLocationCity, setNewLocationCity] = useState('');
-    const [newLocationSeatMapUrl, setNewLocationSeatMapUrl] = useState('');
-    const [isAddingLocation, setIsAddingLocation] = useState(false);
+  // Office Form State
+  const [editingLocation, setEditingLocation] = useState<Location | null>(null);
+  const [newLocationName, setNewLocationName] = useState('');
+  const [newLocationCity, setNewLocationCity] = useState('');
+  const [newLocationSeatMapUrl, setNewLocationSeatMapUrl] = useState('');
+  const [isAddingLocation, setIsAddingLocation] = useState(false);
 
-    // Desk Management State
-    const [selectedOfficeForDesks, setSelectedOfficeForDesks] = useState<string | null>(null);
-    const [officeDesks, setOfficeDesks] = useState<Desk[]>([]);
-    const [isAddingDesk, setIsAddingDesk] = useState(false);
-    const [newDeskLabel, setNewDeskLabel] = useState('');
-    const [newDeskType, setNewDeskType] = useState<DeskType>(DeskType.STANDARD);
-    const [editingDesk, setEditingDesk] = useState<Desk | null>(null);
+  // Desk Management State
+  const [selectedOfficeForDesks, setSelectedOfficeForDesks] = useState<string | null>(null);
+  const [officeDesks, setOfficeDesks] = useState<Desk[]>([]);
+  const [isAddingDesk, setIsAddingDesk] = useState(false);
+  const [newDeskLabel, setNewDeskLabel] = useState('');
+  const [newDeskType, setNewDeskType] = useState<DeskType>(DeskType.STANDARD);
+  const [editingDesk, setEditingDesk] = useState<Desk | null>(null);
 
-    // Staff Form State
-    const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
-    const [newStaffName, setNewStaffName] = useState('');
-    const [newStaffEmail, setNewStaffEmail] = useState('');
-    const [newStaffRole, setNewStaffRole] = useState<Role>(Role.Employee);
-    const [isAddingStaff, setIsAddingStaff] = useState(false);
+  // Staff Form State
+  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
+  const [newStaffName, setNewStaffName] = useState('');
+  const [newStaffEmail, setNewStaffEmail] = useState('');
+  const [newStaffRole, setNewStaffRole] = useState<Role>(Role.Employee);
+  const [isAddingStaff, setIsAddingStaff] = useState(false);
 
-    // Stats State
-    const [statsStaffId, setStatsStaffId] = useState<string>('');
-    const [statsStartDate, setStatsStartDate] = useState<string>('');
-    const [statsEndDate, setStatsEndDate] = useState<string>('');
-    const [userStats, setUserStats] = useState<{ totalBookings: number, avgBookingsPerWeek: string } | null>(null);
+  // Stats State
+  const [statsStaffId, setStatsStaffId] = useState<string>('');
+  const [statsStartDate, setStatsStartDate] = useState<string>('');
+  const [statsEndDate, setStatsEndDate] = useState<string>('');
+  const [userStats, setUserStats] = useState<{
+    totalBookings: number;
+    avgBookingsPerWeek: string;
+  } | null>(null);
 
+  // Occupancy Stats State
+  const [occupancyLocationId, setOccupancyLocationId] = useState<string>(locations[0]?.id || '');
+  const [occupancyMonth, setOccupancyMonth] = useState<Date>(new Date());
+  const [occupancyStats, setOccupancyStats] = useState<DailyBookingCount[]>([]);
 
-    // Occupancy Stats State
-    const [occupancyLocationId, setOccupancyLocationId] = useState<string>(locations[0]?.id || '');
-    const [occupancyMonth, setOccupancyMonth] = useState<Date>(new Date());
-    const [occupancyStats, setOccupancyStats] = useState<DailyBookingCount[]>([]);
+  // History / Bookings State
+  const [selectedLocationId, setSelectedLocationId] = useState<string>(locations[0]?.id || '');
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [historyBookings, setHistoryBookings] = useState<Booking[]>([]);
 
-    // History / Bookings State
-    const [selectedLocationId, setSelectedLocationId] = useState<string>(locations[0]?.id || '');
-    const [selectedDate, setSelectedDate] = useState<string>('');
-    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-    const [isDeleting, setIsDeleting] = useState<number | null>(null);
-    const [historyBookings, setHistoryBookings] = useState<Booking[]>([]);
+  // Initialize selectedDate to today if not set
+  React.useEffect(() => {
+    if (!selectedDate) {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      setSelectedDate(`${year}-${month}-${day}`);
+    }
+  }, [selectedDate]);
 
+  // Initialize selectedLocationId when locations are loaded
+  React.useEffect(() => {
+    if (locations.length > 0 && !selectedLocationId) {
+      setSelectedLocationId(locations[0].id);
+    }
+  }, [locations, selectedLocationId]);
 
-    // Initialize selectedDate to today if not set
-    React.useEffect(() => {
-        if (!selectedDate) {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            setSelectedDate(`${year}-${month}-${day}`);
-        }
-    }, [selectedDate]);
-
-    // Initialize selectedLocationId when locations are loaded
-    React.useEffect(() => {
-        if (locations.length > 0 && !selectedLocationId) {
-            setSelectedLocationId(locations[0].id);
-        }
-    }, [locations, selectedLocationId]);
-
-    // Fetch Desks when office is selected
-    React.useEffect(() => {
-        if (selectedOfficeForDesks) {
-            const fetchDesks = async () => {
-                try {
-                    setIsLoading(true);
-                    const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
-                    setOfficeDesks(desks);
-                } catch (err) {
-                    console.error("Failed to fetch desks", err);
-                    setError("Failed to fetch desks for the selected office.");
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            fetchDesks();
-        } else {
-            setOfficeDesks([]);
-        }
-    }, [selectedOfficeForDesks]);
-
-    React.useEffect(() => {
-        if (activeTab === 'stats' && occupancyLocationId) {
-            const startOfMonth = new Date(occupancyMonth.getFullYear(), occupancyMonth.getMonth(), 1);
-            const endOfMonth = new Date(occupancyMonth.getFullYear(), occupancyMonth.getMonth() + 1, 0);
-
-            const startStr = `${startOfMonth.getFullYear()}-${String(startOfMonth.getMonth() + 1).padStart(2, '0')}-${String(startOfMonth.getDate()).padStart(2, '0')}`;
-            const endStr = `${endOfMonth.getFullYear()}-${String(endOfMonth.getMonth() + 1).padStart(2, '0')}-${String(endOfMonth.getDate()).padStart(2, '0')}`;
-
-            const fetchStats = async () => {
-                try {
-                    const stats = await api.fetchBookingStats(
-                        occupancyLocationId,
-                        startStr,
-                        endStr
-                    );
-                    setOccupancyStats(stats);
-                } catch (err) {
-                    console.error("Failed to fetch occupancy stats", err);
-                }
-            };
-            fetchStats();
-        }
-    }, [activeTab, occupancyLocationId, occupancyMonth]);
-
-    // Fetch User Stats
-    React.useEffect(() => {
-        if (activeTab === 'stats' && statsStaffId && statsStartDate && statsEndDate) {
-            const fetchUserStats = async () => {
-                try {
-                    const bookings = await api.fetchBookingsByStaffId(statsStaffId, statsStartDate, statsEndDate);
-
-                    const totalBookings = bookings.length;
-                    const start = new Date(statsStartDate);
-                    const end = new Date(statsEndDate);
-                    const timeDiff = end.getTime() - start.getTime();
-                    const daysDiff = timeDiff / (1000 * 3600 * 24);
-                    const weeksDiff = Math.max(1, Math.ceil(daysDiff / 7));
-                    const avgBookingsPerWeek = totalBookings / weeksDiff;
-
-                    setUserStats({
-                        totalBookings,
-                        avgBookingsPerWeek: avgBookingsPerWeek.toFixed(1)
-                    });
-                } catch (err) {
-                    console.error("Failed to fetch user stats", err);
-                    setUserStats(null);
-                }
-            };
-            fetchUserStats();
-        } else {
-            setUserStats(null);
-        }
-    }, [activeTab, statsStaffId, statsStartDate, statsEndDate]);
-
-    // Fetch History Bookings
-    const fetchHistory = React.useCallback(async () => {
-        if (!selectedLocationId || !selectedDate) return;
+  // Fetch Desks when office is selected
+  React.useEffect(() => {
+    if (selectedOfficeForDesks) {
+      const fetchDesks = async () => {
         try {
-            setIsLoading(true);
-            const data = await api.fetchBookingsByDateAndLocation(selectedDate, selectedLocationId);
-            setHistoryBookings(data);
+          setIsLoading(true);
+          const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
+          setOfficeDesks(desks);
         } catch (err) {
-            console.error("Failed to fetch history bookings", err);
-            setHistoryBookings([]);
+          console.error('Failed to fetch desks', err);
+          setError('Failed to fetch desks for the selected office.');
         } finally {
-            setIsLoading(false);
+          setIsLoading(false);
         }
-    }, [selectedLocationId, selectedDate]);
+      };
+      fetchDesks();
+    } else {
+      setOfficeDesks([]);
+    }
+  }, [selectedOfficeForDesks]);
 
-    React.useEffect(() => {
-        if (activeTab === 'bookings') {
-            fetchHistory();
-        }
-    }, [activeTab, fetchHistory]);
+  React.useEffect(() => {
+    if (activeTab === 'stats' && occupancyLocationId) {
+      const startOfMonth = new Date(occupancyMonth.getFullYear(), occupancyMonth.getMonth(), 1);
+      const endOfMonth = new Date(occupancyMonth.getFullYear(), occupancyMonth.getMonth() + 1, 0);
 
+      const startStr = `${startOfMonth.getFullYear()}-${String(startOfMonth.getMonth() + 1).padStart(2, '0')}-${String(startOfMonth.getDate()).padStart(2, '0')}`;
+      const endStr = `${endOfMonth.getFullYear()}-${String(endOfMonth.getMonth() + 1).padStart(2, '0')}-${String(endOfMonth.getDate()).padStart(2, '0')}`;
 
-    // --- Desk Handlers ---
-
-    const handleCreateDesk = async (e: React.FormEvent) => {
-        e.preventDefault();
+      const fetchStats = async () => {
         try {
-            if (!selectedOfficeForDesks) return;
-            setIsLoading(true);
-            await api.createDesk({
-                locationId: selectedOfficeForDesks,
-                label: newDeskLabel,
-                type: newDeskType
-            });
-            setNewDeskLabel('');
-            setNewDeskType(DeskType.STANDARD);
-            setIsAddingDesk(false);
-            // Refresh desks
-            const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
-            setOfficeDesks(desks);
+          const stats = await api.fetchBookingStats(occupancyLocationId, startStr, endStr);
+          setOccupancyStats(stats);
         } catch (err) {
-            setError('Failed to create desk');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
+          console.error('Failed to fetch occupancy stats', err);
         }
-    };
+      };
+      fetchStats();
+    }
+  }, [activeTab, occupancyLocationId, occupancyMonth]);
 
-    const handleUpdateDesk = async () => {
-        if (!editingDesk) return;
+  // Fetch User Stats
+  React.useEffect(() => {
+    if (activeTab === 'stats' && statsStaffId && statsStartDate && statsEndDate) {
+      const fetchUserStats = async () => {
         try {
-            setIsLoading(true);
-            await api.updateDesk(editingDesk);
-            setEditingDesk(null);
-            // Refresh desks
-            if (selectedOfficeForDesks) {
-                const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
-                setOfficeDesks(desks);
-            }
+          const bookings = await api.fetchBookingsByStaffId(
+            statsStaffId,
+            statsStartDate,
+            statsEndDate,
+          );
+
+          const totalBookings = bookings.length;
+          const start = new Date(statsStartDate);
+          const end = new Date(statsEndDate);
+          const timeDiff = end.getTime() - start.getTime();
+          const daysDiff = timeDiff / (1000 * 3600 * 24);
+          const weeksDiff = Math.max(1, Math.ceil(daysDiff / 7));
+          const avgBookingsPerWeek = totalBookings / weeksDiff;
+
+          setUserStats({
+            totalBookings,
+            avgBookingsPerWeek: avgBookingsPerWeek.toFixed(1),
+          });
         } catch (err) {
-            setError('Failed to update desk');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
+          console.error('Failed to fetch user stats', err);
+          setUserStats(null);
         }
-    };
+      };
+      fetchUserStats();
+    } else {
+      setUserStats(null);
+    }
+  }, [activeTab, statsStaffId, statsStartDate, statsEndDate]);
 
-    const handleDeleteDesk = async (id: number) => {
-        if (!confirm('Are you sure you want to delete this desk?')) return;
-        try {
-            setIsLoading(true);
-            await api.deleteDesk(id);
-            // Refresh desks
-            if (selectedOfficeForDesks) {
-                const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
-                setOfficeDesks(desks);
-            }
-        } catch (err) {
-            setError('Failed to delete desk');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  // Fetch History Bookings
+  const fetchHistory = React.useCallback(async () => {
+    if (!selectedLocationId || !selectedDate) return;
+    try {
+      setIsLoading(true);
+      const data = await api.fetchBookingsByDateAndLocation(selectedDate, selectedLocationId);
+      setHistoryBookings(data);
+    } catch (err) {
+      console.error('Failed to fetch history bookings', err);
+      setHistoryBookings([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedLocationId, selectedDate]);
 
-    // --- Office Handlers ---
+  React.useEffect(() => {
+    if (activeTab === 'bookings') {
+      fetchHistory();
+    }
+  }, [activeTab, fetchHistory]);
 
-    const handleCreateLocation = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            setIsLoading(true);
-            await api.createLocation({ name: newLocationName, city: newLocationCity, seatMapUrl: newLocationSeatMapUrl });
-            setNewLocationName('');
-            setNewLocationCity('');
-            setNewLocationSeatMapUrl('');
-            setIsAddingLocation(false);
-            onDataRefresh();
-        } catch (err) {
-            setError('Failed to create location');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  // --- Desk Handlers ---
 
-    const handleUpdateLocation = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!editingLocation) return;
-        try {
-            setIsLoading(true);
-            await api.updateLocation(editingLocation);
-            setEditingLocation(null);
-            onDataRefresh();
-        } catch (err) {
-            setError('Failed to update location');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const handleCreateDesk = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!selectedOfficeForDesks) return;
+      setIsLoading(true);
+      await api.createDesk({
+        locationId: selectedOfficeForDesks,
+        label: newDeskLabel,
+        type: newDeskType,
+      });
+      setNewDeskLabel('');
+      setNewDeskType(DeskType.STANDARD);
+      setIsAddingDesk(false);
+      // Refresh desks
+      const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
+      setOfficeDesks(desks);
+    } catch (err) {
+      setError('Failed to create desk');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const handleDeleteLocation = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this location?')) return;
-        try {
-            setIsLoading(true);
-            await api.deleteLocation(id);
-            onDataRefresh();
-        } catch (err) {
-            setError('Failed to delete location');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const handleUpdateDesk = async () => {
+    if (!editingDesk) return;
+    try {
+      setIsLoading(true);
+      await api.updateDesk(editingDesk);
+      setEditingDesk(null);
+      // Refresh desks
+      if (selectedOfficeForDesks) {
+        const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
+        setOfficeDesks(desks);
+      }
+    } catch (err) {
+      setError('Failed to update desk');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // --- Staff Handlers ---
+  const handleDeleteDesk = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this desk?')) return;
+    try {
+      setIsLoading(true);
+      await api.deleteDesk(id);
+      // Refresh desks
+      if (selectedOfficeForDesks) {
+        const desks = await api.fetchDesksByOffice(selectedOfficeForDesks);
+        setOfficeDesks(desks);
+      }
+    } catch (err) {
+      setError('Failed to delete desk');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const handleCreateStaff = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            setIsLoading(true);
-            await api.createStaffMember({ name: newStaffName, email: newStaffEmail, isActive: true, role: newStaffRole });
-            setNewStaffName('');
-            setNewStaffEmail('');
-            setNewStaffRole(Role.Employee);
-            setIsAddingStaff(false);
-            onDataRefresh();
-        } catch (err) {
-            setError('Failed to create staff member');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  // --- Office Handlers ---
 
-    const handleUpdateStaff = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!editingStaff) return;
-        try {
-            setIsLoading(true);
-            await api.updateStaffMember(editingStaff);
-            setEditingStaff(null);
-            onDataRefresh();
-        } catch (err) {
-            setError('Failed to update staff member');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const handleCreateLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      await api.createLocation({
+        name: newLocationName,
+        city: newLocationCity,
+        seatMapUrl: newLocationSeatMapUrl,
+      });
+      setNewLocationName('');
+      setNewLocationCity('');
+      setNewLocationSeatMapUrl('');
+      setIsAddingLocation(false);
+      onDataRefresh();
+    } catch (err) {
+      setError('Failed to create location');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const handleDeleteStaff = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this staff member?')) return;
-        try {
-            setIsLoading(true);
-            await api.deleteStaffMember(id);
-            onDataRefresh();
-        } catch (err) {
-            setError('Failed to delete staff member');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const handleUpdateLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLocation) return;
+    try {
+      setIsLoading(true);
+      await api.updateLocation(editingLocation);
+      setEditingLocation(null);
+      onDataRefresh();
+    } catch (err) {
+      setError('Failed to update location');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // --- History / Bookings Handlers ---
+  const handleDeleteLocation = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this location?')) return;
+    try {
+      setIsLoading(true);
+      await api.deleteLocation(id);
+      onDataRefresh();
+    } catch (err) {
+      setError('Failed to delete location');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const handleDeleteBooking = async (bookingId: number) => {
-        if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+  // --- Staff Handlers ---
 
-        try {
-            setIsDeleting(bookingId);
-            await api.deleteBooking(bookingId);
-            // Refresh history
-            fetchHistory();
-        } catch (error) {
-            console.error('Failed to cancel booking:', error);
-            setError('Failed to cancel booking. Please try again.');
-        } finally {
-            setIsDeleting(null);
-        }
-    };
+  const handleCreateStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      await api.createStaffMember({
+        name: newStaffName,
+        email: newStaffEmail,
+        isActive: true,
+        role: newStaffRole,
+      });
+      setNewStaffName('');
+      setNewStaffEmail('');
+      setNewStaffRole(Role.Employee);
+      setIsAddingStaff(false);
+      onDataRefresh();
+    } catch (err) {
+      setError('Failed to create staff member');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const getDeskName = (deskId: number) => desks.find(d => d.id === deskId)?.label || 'Unknown Desk';
-    const getStaffName = (staffId: string) => staffMembers.find(s => s.id === staffId)?.name || 'Unknown Staff';
-    const getLocationName = (deskId: number) => {
-        const desk = desks.find(d => d.id === deskId);
-        return locations.find(l => l.id === desk?.locationId)?.name || 'Unknown Location';
-    };
+  const handleUpdateStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingStaff) return;
+    try {
+      setIsLoading(true);
+      await api.updateStaffMember(editingStaff);
+      setEditingStaff(null);
+      onDataRefresh();
+    } catch (err) {
+      setError('Failed to update staff member');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const handleDeleteStaff = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this staff member?')) return;
+    try {
+      setIsLoading(true);
+      await api.deleteStaffMember(id);
+      onDataRefresh();
+    } catch (err) {
+      setError('Failed to delete staff member');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    const renderOccupancyCalendar = () => {
-        const year = occupancyMonth.getFullYear();
-        const month = occupancyMonth.getMonth();
-        const firstDayOfMonth = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // --- History / Bookings Handlers ---
 
-        const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-        const leadingBlanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
+  const handleDeleteBooking = async (bookingId: number) => {
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
 
-        const handlePrevMonth = () => setOccupancyMonth(new Date(year, month - 1, 1));
-        const handleNextMonth = () => setOccupancyMonth(new Date(year, month + 1, 1));
+    try {
+      setIsDeleting(bookingId);
+      await api.deleteBooking(bookingId);
+      // Refresh history
+      fetchHistory();
+    } catch (error) {
+      console.error('Failed to cancel booking:', error);
+      setError('Failed to cancel booking. Please try again.');
+    } finally {
+      setIsDeleting(null);
+    }
+  };
 
-        return (
-            <div className="bg-white rounded-lg border border-slate-200 p-4 mt-6">
-                <div className="flex justify-between items-center mb-4">
-                    <button onClick={handlePrevMonth} className="p-2 hover:bg-slate-100 rounded-full"><ChevronLeftIcon className="w-5 h-5 text-slate-600" /></button>
-                    <span className="font-bold text-lg text-slate-800">{occupancyMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-                    <button onClick={handleNextMonth} className="p-2 hover:bg-slate-100 rounded-full"><ChevronRightIcon className="w-5 h-5 text-slate-600" /></button>
-                </div>
+  const getDeskName = (deskId: number) =>
+    desks.find((d) => d.id === deskId)?.label || 'Unknown Desk';
+  const getStaffName = (staffId: string) =>
+    staffMembers.find((s) => s.id === staffId)?.name || 'Unknown Staff';
+  const getLocationName = (deskId: number) => {
+    const desk = desks.find((d) => d.id === deskId);
+    return locations.find((l) => l.id === desk?.locationId)?.name || 'Unknown Location';
+  };
 
-                <div className="grid grid-cols-7 gap-2 text-center text-sm font-medium text-slate-500 mb-2">
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => <div key={d}>{d}</div>)}
-                </div>
-                <div className="grid grid-cols-7 gap-2">
-                    {leadingBlanks.map(i => <div key={`blank-${i}`} className="h-24 bg-slate-50 rounded-lg"></div>)}
-                    {days.map(day => {
-                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                        const stat = occupancyStats.find(s => s.date === dateStr);
-                        const count = stat ? stat.count : 0;
+  const renderOccupancyCalendar = () => {
+    const year = occupancyMonth.getFullYear();
+    const month = occupancyMonth.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-                        return (
-                            <div key={day} className="h-24 border border-slate-100 rounded-lg p-2 flex flex-col justify-between hover:bg-slate-50 transition bg-white">
-                                <span className="text-sm font-medium text-slate-700">{day}</span>
-                                <div className="flex items-end justify-end">
-                                    {count > 0 && (
-                                        <div className="flex flex-col items-end">
-                                            <span className="text-xs text-slate-500 mb-1">Bookings</span>
-                                            <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded-full">
-                                                {count}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-        );
-    };
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const leadingBlanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
+
+    const handlePrevMonth = () => setOccupancyMonth(new Date(year, month - 1, 1));
+    const handleNextMonth = () => setOccupancyMonth(new Date(year, month + 1, 1));
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-slate-800">Admin Dashboard</h2>
-                <div className="flex space-x-2">
-                    <button
-                        onClick={() => setActiveTab('offices')}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'offices' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'
-                            }`}
-                    >
-                        Offices
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('staff')}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'staff' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'
-                            }`}
-                    >
-                        Staff
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('stats')}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'stats' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'
-                            }`}
-                    >
-                        Stats
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('bookings')}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'bookings' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'
-                            }`}
-                    >
-                        Bookings
-                    </button>
-                </div>
-            </div>
-
-            {error && (
-                <div className="bg-red-50 text-red-700 p-4 rounded-md flex justify-between items-center">
-                    <span>{error}</span>
-                    <button onClick={() => setError(null)} className="text-sm font-bold">Dismiss</button>
-                </div>
-            )}
-
-            {activeTab === 'bookings' && (
-                <div className="space-y-6">
-                    <div className="bg-white rounded-xl shadow-sm p-6">
-                        <h2 className="text-xl font-bold text-slate-800 mb-4">Booking History & Management</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                            {/* Location Selector */}
-                            <div className="space-y-2">
-                                <label htmlFor="history-location-select" className="flex items-center text-sm font-medium text-slate-600">
-                                    <LocationIcon className="w-5 h-5 mr-2 text-slate-400" />
-                                    Location
-                                </label>
-                                <select
-                                    id="history-location-select"
-                                    value={selectedLocationId}
-                                    onChange={(e) => setSelectedLocationId(e.target.value)}
-                                    className="w-full p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                                >
-                                    {locations.map(location => (
-                                        <option key={location.id} value={location.id}>{location.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Date Picker */}
-                            <div className="space-y-2 relative">
-                                <label htmlFor="history-date-picker" className="flex items-center text-sm font-medium text-slate-600">
-                                    <CalendarIcon className="w-5 h-5 mr-2 text-slate-400" />
-                                    Date
-                                </label>
-                                <button
-                                    id="history-date-picker"
-                                    type="button"
-                                    onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                                    className="w-full text-left p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                                >
-                                    {selectedDate ? new Date(selectedDate).toLocaleDateString(undefined, {
-                                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                                    }) : 'Select Date'}
-                                </button>
-                                {isCalendarOpen && (
-                                    <div className="absolute top-full mt-2 z-10">
-                                        <Calendar
-                                            selectedDate={selectedDate}
-                                            onDateSelect={(date) => {
-                                                setSelectedDate(date);
-                                                setIsCalendarOpen(false);
-                                            }}
-                                        // No minDate for history, we want to see past bookings too
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-200">
-                                <thead className="bg-slate-50">
-                                    <tr>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Time Slot</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Location</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Desk</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Staff Member</th>
-                                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-slate-200">
-                                    {historyBookings.length > 0 ? (
-                                        historyBookings.map((booking) => (
-                                            <tr key={booking.id} className="hover:bg-slate-50 transition">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                                                    {new Date(booking.date).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${booking.slot === BookingSlot.FULL_DAY ? 'bg-green-100 text-green-800' :
-                                                            booking.slot === BookingSlot.MORNING ? 'bg-blue-100 text-blue-800' :
-                                                                'bg-orange-100 text-orange-800'}`}>
-                                                        {booking.slot}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                                    {getLocationName(booking.deskId)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
-                                                    {getDeskName(booking.deskId)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                                    {getStaffName(booking.staffMemberId)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <button
-                                                        onClick={() => handleDeleteBooking(booking.id)}
-                                                        disabled={isDeleting === booking.id}
-                                                        className="text-red-600 hover:text-red-900 disabled:opacity-50 inline-flex items-center"
-                                                    >
-                                                        {isDeleting === booking.id ? (
-                                                            'Cancelling...'
-                                                        ) : (
-                                                            <>
-                                                                <TrashIcon className="w-4 h-4 mr-1" />
-                                                                Cancel
-                                                            </>
-                                                        )}
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={6} className="px-6 py-10 text-center text-sm text-slate-500">
-                                                No bookings found for the selected criteria.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {activeTab === 'offices' && (
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-lg font-semibold text-slate-800">Manage Offices</h3>
-                        <div className="space-x-2">
-                            {selectedOfficeForDesks && (
-                                <button
-                                    onClick={() => setSelectedOfficeForDesks(null)}
-                                    className="px-3 py-2 bg-slate-200 text-slate-700 rounded-md text-sm hover:bg-slate-300 transition"
-                                >
-                                    Back to Offices
-                                </button>
-                            )}
-                            {!selectedOfficeForDesks && (
-                                <button
-                                    onClick={() => setIsAddingLocation(true)}
-                                    className="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
-                                >
-                                    Add Office
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {selectedOfficeForDesks ? (
-                        <div className="space-y-6">
-                            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                                <h4 className="text-md font-bold text-slate-800 flex items-center mb-4">
-                                    <LocationIcon className="w-5 h-5 mr-2 text-indigo-600" />
-                                    Desks for <span className="text-indigo-600 ml-1">{locations.find(l => l.id === selectedOfficeForDesks)?.name}</span>
-                                </h4>
-
-                                <button
-                                    onClick={() => setIsAddingDesk(true)}
-                                    className="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 transition mb-4"
-                                >
-                                    Add Desk
-                                </button>
-
-                                {isAddingDesk && (
-                                    <form onSubmit={handleCreateDesk} className="mb-6 p-4 bg-white rounded-lg border border-slate-200 shadow-sm">
-                                        <h5 className="text-sm font-bold text-slate-700 mb-3">New Desk</h5>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                            <input
-                                                type="text"
-                                                placeholder="Desk Label (e.g., D-01)"
-                                                value={newDeskLabel}
-                                                onChange={e => setNewDeskLabel(e.target.value)}
-                                                className="p-2 border border-slate-300 rounded-md"
-                                                required
-                                            />
-                                            <select
-                                                value={newDeskType}
-                                                onChange={e => setNewDeskType(e.target.value as DeskType)}
-                                                className="p-2 border border-slate-300 rounded-md"
-                                            >
-                                                {Object.values(DeskType).map(type => (
-                                                    <option key={type} value={type}>{type}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="flex justify-end space-x-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsAddingDesk(false)}
-                                                className="px-3 py-1 text-slate-600 hover:text-slate-800"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                disabled={isLoading}
-                                                className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                                            >
-                                                {isLoading ? 'Saving...' : 'Save'}
-                                            </button>
-                                        </div>
-                                    </form>
-                                )}
-
-                                <div className="overflow-x-auto bg-white rounded-lg border border-slate-200">
-                                    <table className="min-w-full divide-y divide-slate-200">
-                                        <thead className="bg-slate-50">
-                                            <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Label</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Reserved</th>
-                                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-slate-200">
-                                            {officeDesks.length > 0 ? officeDesks.map(desk => (
-                                                <tr key={desk.id}>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-medium">
-                                                        {editingDesk?.id === desk.id ? (
-                                                            <input
-                                                                type="text"
-                                                                value={editingDesk.label}
-                                                                onChange={e => setEditingDesk({ ...editingDesk, label: e.target.value })}
-                                                                className="p-1 border border-slate-300 rounded w-full"
-                                                            />
-                                                        ) : (
-                                                            desk.label
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                                        {editingDesk?.id === desk.id ? (
-                                                            <select
-                                                                value={editingDesk.type}
-                                                                onChange={e => setEditingDesk({ ...editingDesk, type: e.target.value as DeskType })}
-                                                                className="p-1 border border-slate-300 rounded w-full"
-                                                            >
-                                                                {Object.values(DeskType).map(type => (
-                                                                    <option key={type} value={type}>{type}</option>
-                                                                ))}
-                                                            </select>
-                                                        ) : (
-                                                            <span className={`px-2 py-1 rounded-full text-xs font-medium 
-                                                                ${desk.type === DeskType.STANDARD ? 'bg-slate-100 text-slate-700' :
-                                                                    desk.type === DeskType.STANDING ? 'bg-blue-100 text-blue-700' :
-                                                                        desk.type === DeskType.MEETING_ROOM ? 'bg-purple-100 text-purple-700' :
-                                                                            'bg-orange-100 text-orange-700'}`}>
-                                                                {desk.type}
-                                                            </span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                                        {desk.isReserved ? (
-                                                            <span className="text-amber-600 font-medium text-xs bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                                                                Reserved: {staffMembers.find(s => s.id === desk.reservedForStaffMemberId)?.name || 'Unknown'}
-                                                            </span>
-                                                        ) : (
-                                                            <span className="text-slate-400 text-xs">Available</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                        {editingDesk?.id === desk.id ? (
-                                                            <div className="flex justify-end space-x-2">
-                                                                <button onClick={handleUpdateDesk} className="text-green-600 hover:text-green-900">Save</button>
-                                                                <button onClick={() => setEditingDesk(null)} className="text-slate-600 hover:text-slate-900">Cancel</button>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex justify-end space-x-2">
-                                                                <button onClick={() => setEditingDesk(desk)} className="text-indigo-600 hover:text-indigo-900">Edit</button>
-                                                                <button onClick={() => handleDeleteDesk(desk.id)} className="text-red-600 hover:text-red-900">Delete</button>
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            )) : (
-                                                <tr>
-                                                    <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-500">
-                                                        No desks found for this office. Add one to get started.
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <>
-                            {isAddingLocation && (
-                                <form onSubmit={handleCreateLocation} className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                                    <h4 className="text-sm font-bold text-slate-700 mb-3">New Office</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        <input
-                                            type="text"
-                                            placeholder="Office Name"
-                                            value={newLocationName}
-                                            onChange={e => setNewLocationName(e.target.value)}
-                                            className="p-2 border border-slate-300 rounded-md"
-                                            required
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="City"
-                                            value={newLocationCity}
-                                            onChange={e => setNewLocationCity(e.target.value)}
-                                            className="p-2 border border-slate-300 rounded-md"
-                                            required
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Seat Map URL (optional)"
-                                            value={newLocationSeatMapUrl}
-                                            onChange={e => setNewLocationSeatMapUrl(e.target.value)}
-                                            className="p-2 border border-slate-300 rounded-md lg:col-span-2"
-                                        />
-                                    </div>
-                                    <div className="flex justify-end space-x-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsAddingLocation(false)}
-                                            className="px-3 py-1 text-slate-600 hover:text-slate-800"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={isLoading}
-                                            className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                                        >
-                                            {isLoading ? 'Saving...' : 'Save'}
-                                        </button>
-                                    </div>
-                                </form>
-                            )}
-
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-slate-200">
-                                    <thead className="bg-slate-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">City</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Seat Map</th>
-                                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-slate-200">
-                                        {locations.map(location => (
-                                            <tr key={location.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                                                    {editingLocation?.id === location.id ? (
-                                                        <input
-                                                            type="text"
-                                                            value={editingLocation.name}
-                                                            onChange={e => setEditingLocation({ ...editingLocation, name: e.target.value })}
-                                                            className="p-1 border border-slate-300 rounded w-full"
-                                                        />
-                                                    ) : (
-                                                        location.name
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                                    {editingLocation?.id === location.id ? (
-                                                        <input
-                                                            type="text"
-                                                            value={editingLocation.city}
-                                                            onChange={e => setEditingLocation({ ...editingLocation, city: e.target.value })}
-                                                            className="p-1 border border-slate-300 rounded w-full"
-                                                        />
-                                                    ) : (
-                                                        location.city
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                                    {editingLocation?.id === location.id ? (
-                                                        <input
-                                                            type="text"
-                                                            value={editingLocation.seatMapUrl || ''}
-                                                            onChange={e => setEditingLocation({ ...editingLocation, seatMapUrl: e.target.value })}
-                                                            className="p-1 border border-slate-300 rounded w-full"
-                                                            placeholder="Seat Map URL"
-                                                        />
-                                                    ) : (
-                                                        <span className="truncate max-w-xs block" title={location.seatMapUrl}>{location.seatMapUrl || 'No image'}</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    {editingLocation?.id === location.id ? (
-                                                        <div className="flex justify-end space-x-2">
-                                                            <button onClick={handleUpdateLocation} className="text-green-600 hover:text-green-900">Save</button>
-                                                            <button onClick={() => setEditingLocation(null)} className="text-slate-600 hover:text-slate-900">Cancel</button>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex justify-end space-x-2">
-                                                            <button
-                                                                onClick={() => {
-                                                                    setSelectedOfficeForDesks(location.id);
-                                                                    // We might want to fetch fresh desks here
-                                                                }}
-                                                                className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-2 py-1 rounded"
-                                                            >
-                                                                Manage Desks
-                                                            </button>
-                                                            <div className="w-px h-4 bg-slate-300 mx-1 inline-block align-middle"></div>
-                                                            <button onClick={() => setEditingLocation(location)} className="text-slate-600 hover:text-indigo-900">Edit</button>
-                                                            <button onClick={() => handleDeleteLocation(location.id)} className="text-red-600 hover:text-red-900">Delete</button>
-                                                        </div>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </>
-                    )}
-                </div>
-            )}
-
-            {activeTab === 'staff' && (
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-lg font-semibold text-slate-800">Manage Staff</h3>
-                        <button
-                            onClick={() => setIsAddingStaff(true)}
-                            className="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
-                        >
-                            Add Staff
-                        </button>
-                    </div>
-
-                    {isAddingStaff && (
-                        <form onSubmit={handleCreateStaff} className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                            <h4 className="text-sm font-bold text-slate-700 mb-3">New Staff Member</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                <input
-                                    type="text"
-                                    placeholder="Full Name"
-                                    value={newStaffName}
-                                    onChange={e => setNewStaffName(e.target.value)}
-                                    className="p-2 border border-slate-300 rounded-md"
-                                    required
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Email Address"
-                                    value={newStaffEmail}
-                                    onChange={e => setNewStaffEmail(e.target.value)}
-                                    className="p-2 border border-slate-300 rounded-md"
-                                    required
-                                />
-                                <select
-                                    value={newStaffRole}
-                                    onChange={e => setNewStaffRole(Number(e.target.value) as Role)}
-                                    className="p-2 border border-slate-300 rounded-md"
-                                >
-                                    {staffRoles.map(role => (
-                                        <option key={role.id} value={role.id}>{role.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="flex justify-end space-x-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsAddingStaff(false)}
-                                    className="px-3 py-1 text-slate-600 hover:text-slate-800"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                                >
-                                    {isLoading ? 'Saving...' : 'Save'}
-                                </button>
-                            </div>
-                        </form>
-                    )}
-
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-slate-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Role</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-slate-200">
-                                {staffMembers.map(staff => (
-                                    <tr key={staff.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                                            {editingStaff?.id === staff.id ? (
-                                                <input
-                                                    type="text"
-                                                    value={editingStaff.name}
-                                                    onChange={e => setEditingStaff({ ...editingStaff, name: e.target.value })}
-                                                    className="p-1 border border-slate-300 rounded w-full"
-                                                />
-                                            ) : (
-                                                staff.name
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {editingStaff?.id === staff.id ? (
-                                                <input
-                                                    type="email"
-                                                    value={editingStaff.email}
-                                                    onChange={e => setEditingStaff({ ...editingStaff, email: e.target.value })}
-                                                    className="p-1 border border-slate-300 rounded w-full"
-                                                />
-                                            ) : (
-                                                staff.email
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {editingStaff?.id === staff.id ? (
-                                                <select
-                                                    value={editingStaff.role}
-                                                    onChange={e => setEditingStaff({ ...editingStaff, role: Number(e.target.value) as Role })}
-                                                    className="p-1 border border-slate-300 rounded w-full"
-                                                >
-                                                    {staffRoles.map(role => (
-                                                        <option key={role.id} value={role.id}>{role.name}</option>
-                                                    ))}
-                                                </select>
-                                            ) : (
-                                                staffRoles.find(r => r.id === staff.role)?.name || 'Unknown'
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {editingStaff?.id === staff.id ? (
-                                                <select
-                                                    value={editingStaff.isActive ? 'active' : 'inactive'}
-                                                    onChange={e => setEditingStaff({ ...editingStaff, isActive: e.target.value === 'active' })}
-                                                    className="p-1 border border-slate-300 rounded"
-                                                >
-                                                    <option value="active">Active</option>
-                                                    <option value="inactive">Inactive</option>
-                                                </select>
-                                            ) : (
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${staff.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                    {staff.isActive ? 'Active' : 'Inactive'}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            {editingStaff?.id === staff.id ? (
-                                                <div className="flex justify-end space-x-2">
-                                                    <button onClick={handleUpdateStaff} className="text-green-600 hover:text-green-900">Save</button>
-                                                    <button onClick={() => setEditingStaff(null)} className="text-slate-600 hover:text-slate-900">Cancel</button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex justify-end space-x-2">
-                                                    <button onClick={() => setEditingStaff(staff)} className="text-indigo-600 hover:text-indigo-900">Edit</button>
-                                                    <button onClick={() => handleDeleteStaff(staff.id)} className="text-red-600 hover:text-red-900">Delete</button>
-                                                </div>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
+      <div className="bg-white rounded-lg border border-slate-200 p-4 mt-6">
+        <div className="flex justify-between items-center mb-4">
+          <button onClick={handlePrevMonth} className="p-2 hover:bg-slate-100 rounded-full">
+            <ChevronLeftIcon className="w-5 h-5 text-slate-600" />
+          </button>
+          <span className="font-bold text-lg text-slate-800">
+            {occupancyMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+          </span>
+          <button onClick={handleNextMonth} className="p-2 hover:bg-slate-100 rounded-full">
+            <ChevronRightIcon className="w-5 h-5 text-slate-600" />
+          </button>
         </div>
+
+        <div className="grid grid-cols-7 gap-2 text-center text-sm font-medium text-slate-500 mb-2">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+            <div key={d}>{d}</div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-2">
+          {leadingBlanks.map((i) => (
+            <div key={`blank-${i}`} className="h-24 bg-slate-50 rounded-lg"></div>
+          ))}
+          {days.map((day) => {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const stat = occupancyStats.find((s) => s.date === dateStr);
+            const count = stat ? stat.count : 0;
+
+            return (
+              <div
+                key={day}
+                className="h-24 border border-slate-100 rounded-lg p-2 flex flex-col justify-between hover:bg-slate-50 transition bg-white"
+              >
+                <span className="text-sm font-medium text-slate-700">{day}</span>
+                <div className="flex items-end justify-end">
+                  {count > 0 && (
+                    <div className="flex flex-col items-end">
+                      <span className="text-xs text-slate-500 mb-1">Bookings</span>
+                      <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded-full">
+                        {count}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     );
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-slate-800">Admin Dashboard</h2>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setActiveTab('offices')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'offices'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            Offices
+          </button>
+          <button
+            onClick={() => setActiveTab('staff')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'staff'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            Staff
+          </button>
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'stats'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            Stats
+          </button>
+          <button
+            onClick={() => setActiveTab('bookings')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === 'bookings'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            Bookings
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 text-red-700 p-4 rounded-md flex justify-between items-center">
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="text-sm font-bold">
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'bookings' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-bold text-slate-800 mb-4">Booking History & Management</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+              {/* Location Selector */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="history-location-select"
+                  className="flex items-center text-sm font-medium text-slate-600"
+                >
+                  <LocationIcon className="w-5 h-5 mr-2 text-slate-400" />
+                  Location
+                </label>
+                <select
+                  id="history-location-select"
+                  value={selectedLocationId}
+                  onChange={(e) => setSelectedLocationId(e.target.value)}
+                  className="w-full p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                >
+                  {locations.map((location) => (
+                    <option key={location.id} value={location.id}>
+                      {location.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Date Picker */}
+              <div className="space-y-2 relative">
+                <label
+                  htmlFor="history-date-picker"
+                  className="flex items-center text-sm font-medium text-slate-600"
+                >
+                  <CalendarIcon className="w-5 h-5 mr-2 text-slate-400" />
+                  Date
+                </label>
+                <button
+                  id="history-date-picker"
+                  type="button"
+                  onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                  className="w-full text-left p-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                >
+                  {selectedDate
+                    ? new Date(selectedDate).toLocaleDateString(undefined, {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })
+                    : 'Select Date'}
+                </button>
+                {isCalendarOpen && (
+                  <div className="absolute top-full mt-2 z-10">
+                    <Calendar
+                      selectedDate={selectedDate}
+                      onDateSelect={(date) => {
+                        setSelectedDate(date);
+                        setIsCalendarOpen(false);
+                      }}
+                      // No minDate for history, we want to see past bookings too
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                    >
+                      Date
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                    >
+                      Time Slot
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                    >
+                      Location
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                    >
+                      Desk
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider"
+                    >
+                      Staff Member
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-200">
+                  {historyBookings.length > 0 ? (
+                    historyBookings.map((booking) => (
+                      <tr key={booking.id} className="hover:bg-slate-50 transition">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          {new Date(booking.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${
+                          booking.slot === BookingSlot.FULL_DAY
+                            ? 'bg-green-100 text-green-800'
+                            : booking.slot === BookingSlot.MORNING
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-orange-100 text-orange-800'
+                        }`}
+                          >
+                            {booking.slot}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          {getLocationName(booking.deskId)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                          {getDeskName(booking.deskId)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          {getStaffName(booking.staffMemberId)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => handleDeleteBooking(booking.id)}
+                            disabled={isDeleting === booking.id}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50 inline-flex items-center"
+                          >
+                            {isDeleting === booking.id ? (
+                              'Cancelling...'
+                            ) : (
+                              <>
+                                <TrashIcon className="w-4 h-4 mr-1" />
+                                Cancel
+                              </>
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-10 text-center text-sm text-slate-500">
+                        No bookings found for the selected criteria.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'offices' && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-slate-800">Manage Offices</h3>
+            <div className="space-x-2">
+              {selectedOfficeForDesks && (
+                <button
+                  onClick={() => setSelectedOfficeForDesks(null)}
+                  className="px-3 py-2 bg-slate-200 text-slate-700 rounded-md text-sm hover:bg-slate-300 transition"
+                >
+                  Back to Offices
+                </button>
+              )}
+              {!selectedOfficeForDesks && (
+                <button
+                  onClick={() => setIsAddingLocation(true)}
+                  className="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
+                >
+                  Add Office
+                </button>
+              )}
+            </div>
+          </div>
+
+          {selectedOfficeForDesks ? (
+            <div className="space-y-6">
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <h4 className="text-md font-bold text-slate-800 flex items-center mb-4">
+                  <LocationIcon className="w-5 h-5 mr-2 text-indigo-600" />
+                  Desks for{' '}
+                  <span className="text-indigo-600 ml-1">
+                    {locations.find((l) => l.id === selectedOfficeForDesks)?.name}
+                  </span>
+                </h4>
+
+                <button
+                  onClick={() => setIsAddingDesk(true)}
+                  className="px-3 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 transition mb-4"
+                >
+                  Add Desk
+                </button>
+
+                {isAddingDesk && (
+                  <form
+                    onSubmit={handleCreateDesk}
+                    className="mb-6 p-4 bg-white rounded-lg border border-slate-200 shadow-sm"
+                  >
+                    <h5 className="text-sm font-bold text-slate-700 mb-3">New Desk</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <input
+                        type="text"
+                        placeholder="Desk Label (e.g., D-01)"
+                        value={newDeskLabel}
+                        onChange={(e) => setNewDeskLabel(e.target.value)}
+                        className="p-2 border border-slate-300 rounded-md"
+                        required
+                      />
+                      <select
+                        value={newDeskType}
+                        onChange={(e) => setNewDeskType(e.target.value as DeskType)}
+                        className="p-2 border border-slate-300 rounded-md"
+                      >
+                        {Object.values(DeskType).map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingDesk(false)}
+                        className="px-3 py-1 text-slate-600 hover:text-slate-800"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                      >
+                        {isLoading ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                <div className="overflow-x-auto bg-white rounded-lg border border-slate-200">
+                  <table className="min-w-full divide-y divide-slate-200">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Label
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Reserved
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-slate-200">
+                      {officeDesks.length > 0 ? (
+                        officeDesks.map((desk) => (
+                          <tr key={desk.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-medium">
+                              {editingDesk?.id === desk.id ? (
+                                <input
+                                  type="text"
+                                  value={editingDesk.label}
+                                  onChange={(e) =>
+                                    setEditingDesk({ ...editingDesk, label: e.target.value })
+                                  }
+                                  className="p-1 border border-slate-300 rounded w-full"
+                                />
+                              ) : (
+                                desk.label
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                              {editingDesk?.id === desk.id ? (
+                                <select
+                                  value={editingDesk.type}
+                                  onChange={(e) =>
+                                    setEditingDesk({
+                                      ...editingDesk,
+                                      type: e.target.value as DeskType,
+                                    })
+                                  }
+                                  className="p-1 border border-slate-300 rounded w-full"
+                                >
+                                  {Object.values(DeskType).map((type) => (
+                                    <option key={type} value={type}>
+                                      {type}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium 
+                                                                ${
+                                                                  desk.type === DeskType.STANDARD
+                                                                    ? 'bg-slate-100 text-slate-700'
+                                                                    : desk.type ===
+                                                                        DeskType.STANDING
+                                                                      ? 'bg-blue-100 text-blue-700'
+                                                                      : desk.type ===
+                                                                          DeskType.MEETING_ROOM
+                                                                        ? 'bg-purple-100 text-purple-700'
+                                                                        : 'bg-orange-100 text-orange-700'
+                                                                }`}
+                                >
+                                  {desk.type}
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                              {desk.isReserved ? (
+                                <span className="text-amber-600 font-medium text-xs bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                  Reserved:{' '}
+                                  {staffMembers.find((s) => s.id === desk.reservedForStaffMemberId)
+                                    ?.name || 'Unknown'}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 text-xs">Available</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              {editingDesk?.id === desk.id ? (
+                                <div className="flex justify-end space-x-2">
+                                  <button
+                                    onClick={handleUpdateDesk}
+                                    className="text-green-600 hover:text-green-900"
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={() => setEditingDesk(null)}
+                                    className="text-slate-600 hover:text-slate-900"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex justify-end space-x-2">
+                                  <button
+                                    onClick={() => setEditingDesk(desk)}
+                                    className="text-indigo-600 hover:text-indigo-900"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteDesk(desk.id)}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-500">
+                            No desks found for this office. Add one to get started.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {isAddingLocation && (
+                <form
+                  onSubmit={handleCreateLocation}
+                  className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200"
+                >
+                  <h4 className="text-sm font-bold text-slate-700 mb-3">New Office</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <input
+                      type="text"
+                      placeholder="Office Name"
+                      value={newLocationName}
+                      onChange={(e) => setNewLocationName(e.target.value)}
+                      className="p-2 border border-slate-300 rounded-md"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="City"
+                      value={newLocationCity}
+                      onChange={(e) => setNewLocationCity(e.target.value)}
+                      className="p-2 border border-slate-300 rounded-md"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Seat Map URL (optional)"
+                      value={newLocationSeatMapUrl}
+                      onChange={(e) => setNewLocationSeatMapUrl(e.target.value)}
+                      className="p-2 border border-slate-300 rounded-md lg:col-span-2"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingLocation(false)}
+                      className="px-3 py-1 text-slate-600 hover:text-slate-800"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      {isLoading ? 'Saving...' : 'Save'}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        City
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Seat Map
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-slate-200">
+                    {locations.map((location) => (
+                      <tr key={location.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          {editingLocation?.id === location.id ? (
+                            <input
+                              type="text"
+                              value={editingLocation.name}
+                              onChange={(e) =>
+                                setEditingLocation({ ...editingLocation, name: e.target.value })
+                              }
+                              className="p-1 border border-slate-300 rounded w-full"
+                            />
+                          ) : (
+                            location.name
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          {editingLocation?.id === location.id ? (
+                            <input
+                              type="text"
+                              value={editingLocation.city}
+                              onChange={(e) =>
+                                setEditingLocation({ ...editingLocation, city: e.target.value })
+                              }
+                              className="p-1 border border-slate-300 rounded w-full"
+                            />
+                          ) : (
+                            location.city
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                          {editingLocation?.id === location.id ? (
+                            <input
+                              type="text"
+                              value={editingLocation.seatMapUrl || ''}
+                              onChange={(e) =>
+                                setEditingLocation({
+                                  ...editingLocation,
+                                  seatMapUrl: e.target.value,
+                                })
+                              }
+                              className="p-1 border border-slate-300 rounded w-full"
+                              placeholder="Seat Map URL"
+                            />
+                          ) : (
+                            <span className="truncate max-w-xs block" title={location.seatMapUrl}>
+                              {location.seatMapUrl || 'No image'}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          {editingLocation?.id === location.id ? (
+                            <div className="flex justify-end space-x-2">
+                              <button
+                                onClick={handleUpdateLocation}
+                                className="text-green-600 hover:text-green-900"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setEditingLocation(null)}
+                                className="text-slate-600 hover:text-slate-900"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex justify-end space-x-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedOfficeForDesks(location.id);
+                                  // We might want to fetch fresh desks here
+                                }}
+                                className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-2 py-1 rounded"
+                              >
+                                Manage Desks
+                              </button>
+                              <div className="w-px h-4 bg-slate-300 mx-1 inline-block align-middle"></div>
+                              <button
+                                onClick={() => setEditingLocation(location)}
+                                className="text-slate-600 hover:text-indigo-900"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteLocation(location.id)}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'staff' && (
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-slate-800">Manage Staff</h3>
+            <button
+              onClick={() => setIsAddingStaff(true)}
+              className="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition"
+            >
+              Add Staff
+            </button>
+          </div>
+
+          {isAddingStaff && (
+            <form
+              onSubmit={handleCreateStaff}
+              className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200"
+            >
+              <h4 className="text-sm font-bold text-slate-700 mb-3">New Staff Member</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={newStaffName}
+                  onChange={(e) => setNewStaffName(e.target.value)}
+                  className="p-2 border border-slate-300 rounded-md"
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  value={newStaffEmail}
+                  onChange={(e) => setNewStaffEmail(e.target.value)}
+                  className="p-2 border border-slate-300 rounded-md"
+                  required
+                />
+                <select
+                  value={newStaffRole}
+                  onChange={(e) => setNewStaffRole(Number(e.target.value) as Role)}
+                  className="p-2 border border-slate-300 rounded-md"
+                >
+                  {staffRoles.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddingStaff(false)}
+                  className="px-3 py-1 text-slate-600 hover:text-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {isLoading ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-slate-200">
+                {staffMembers.map((staff) => (
+                  <tr key={staff.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                      {editingStaff?.id === staff.id ? (
+                        <input
+                          type="text"
+                          value={editingStaff.name}
+                          onChange={(e) =>
+                            setEditingStaff({ ...editingStaff, name: e.target.value })
+                          }
+                          className="p-1 border border-slate-300 rounded w-full"
+                        />
+                      ) : (
+                        staff.name
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                      {editingStaff?.id === staff.id ? (
+                        <input
+                          type="email"
+                          value={editingStaff.email}
+                          onChange={(e) =>
+                            setEditingStaff({ ...editingStaff, email: e.target.value })
+                          }
+                          className="p-1 border border-slate-300 rounded w-full"
+                        />
+                      ) : (
+                        staff.email
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                      {editingStaff?.id === staff.id ? (
+                        <select
+                          value={editingStaff.role}
+                          onChange={(e) =>
+                            setEditingStaff({
+                              ...editingStaff,
+                              role: Number(e.target.value) as Role,
+                            })
+                          }
+                          className="p-1 border border-slate-300 rounded w-full"
+                        >
+                          {staffRoles.map((role) => (
+                            <option key={role.id} value={role.id}>
+                              {role.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        staffRoles.find((r) => r.id === staff.role)?.name || 'Unknown'
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                      {editingStaff?.id === staff.id ? (
+                        <select
+                          value={editingStaff.isActive ? 'active' : 'inactive'}
+                          onChange={(e) =>
+                            setEditingStaff({
+                              ...editingStaff,
+                              isActive: e.target.value === 'active',
+                            })
+                          }
+                          className="p-1 border border-slate-300 rounded"
+                        >
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                        </select>
+                      ) : (
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${staff.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                        >
+                          {staff.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      {editingStaff?.id === staff.id ? (
+                        <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={handleUpdateStaff}
+                            className="text-green-600 hover:text-green-900"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingStaff(null)}
+                            className="text-slate-600 hover:text-slate-900"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={() => setEditingStaff(staff)}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteStaff(staff.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default AdminScreen;

@@ -21,11 +21,13 @@ The frontend client for the WhoAbout desk booking system. Built with React, Type
 ### Installation
 
 1. Navigate to the client directory:
+
    ```bash
    cd src/booking-client
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -66,4 +68,4 @@ The application will be available at `http://localhost:5173`.
 
 ## 🧪 Testing
 
-*Currently, no frontend tests are implemented. See the main [TODO.md](../../TODO.md) for future plans.*
+_Currently, no frontend tests are implemented. See the main [TODO.md](../../TODO.md) for future plans._

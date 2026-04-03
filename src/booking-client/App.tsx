@@ -30,43 +30,45 @@ interface AppContextType {
 const BookingScreenWrapper = () => {
   const context = useOutletContext<AppContextType>();
   return <BookingScreen {...context} />;
-}
-
-
+};
 
 const AdminScreenWrapper = () => {
   const context = useOutletContext<AppContextType>();
-  return <AdminScreen
-    locations={context.locations}
-    staffMembers={context.staffMembers}
-    staffRoles={context.staffRoles}
-    desks={context.desks}
-    onDataRefresh={context.onRefresh}
-  />;
-}
+  return (
+    <AdminScreen
+      locations={context.locations}
+      staffMembers={context.staffMembers}
+      staffRoles={context.staffRoles}
+      desks={context.desks}
+      onDataRefresh={context.onRefresh}
+    />
+  );
+};
 
 const ReservedScreenWrapper = () => {
   const context = useOutletContext<AppContextType>();
   return <ReservedScreen onRefresh={context.onRefresh} />;
-}
+};
 
 const ProfileScreenWrapper = () => {
   const context = useOutletContext<AppContextType>();
   // ProfileScreen usage in original App passed: currentUser, onUpdateUser
-  // onUpdateUser function needs to be handled? 
+  // onUpdateUser function needs to be handled?
   // In original App it updated local state. AuthenticatedLayout manages that state now.
   // For now we might miss the onUpdateUser unless we hoist it.
   // But since fetching data refreshes everything, onRefresh might be enough if the update happens via API.
   // Let's pass a dummy for now or implement update.
 
   // Actually, ProfileScreen might need to re-fetch too.
-  return <ProfileScreen currentUser={context.currentUser} onUpdateUser={() => context.onRefresh()} />;
-}
+  return (
+    <ProfileScreen currentUser={context.currentUser} onUpdateUser={() => context.onRefresh()} />
+  );
+};
 
 const MyBookingsScreenWrapper = () => {
   // MyBookingsScreen fetches its own data, so we don't pass context data
   return <MyBookingsScreen />;
-}
+};
 
 const App: React.FC = () => {
   console.log('App rendering');
@@ -77,23 +79,31 @@ const App: React.FC = () => {
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/register" element={<RegisterScreen />} />
 
-        <Route element={
-          <ProtectedRoute>
-            <AuthenticatedLayout />
-          </ProtectedRoute>
-        }>
+        <Route
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<BookingScreenWrapper />} />
 
-          <Route path="admin" element={
-            <RoleProtectedRoute allowedRoles={[Role.Admin, Role.Owner]}>
-              <AdminScreenWrapper />
-            </RoleProtectedRoute>
-          } />
-          <Route path="reserved" element={
-            <RoleProtectedRoute allowedRoles={[Role.Admin, Role.Owner]}>
-              <ReservedScreenWrapper />
-            </RoleProtectedRoute>
-          } />
+          <Route
+            path="admin"
+            element={
+              <RoleProtectedRoute allowedRoles={[Role.Admin, Role.Owner]}>
+                <AdminScreenWrapper />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="reserved"
+            element={
+              <RoleProtectedRoute allowedRoles={[Role.Admin, Role.Owner]}>
+                <ReservedScreenWrapper />
+              </RoleProtectedRoute>
+            }
+          />
           <Route path="profile" element={<ProfileScreenWrapper />} />
           <Route path="my-bookings" element={<MyBookingsScreenWrapper />} />
         </Route>

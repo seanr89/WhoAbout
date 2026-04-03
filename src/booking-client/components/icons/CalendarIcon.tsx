@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface CalendarIconProps extends React.SVGProps<SVGSVGElement> {}

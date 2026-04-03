@@ -41,7 +41,6 @@ export const DESKS: Desk[] = [
   { id: 'LDN-2C', locationId: 3, label: '2C', type: DeskType.STANDING },
 ];
 
-
 const today = new Date();
 const year = today.getFullYear();
 const month = String(today.getMonth() + 1).padStart(2, '0');

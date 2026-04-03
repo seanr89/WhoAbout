@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ChairIconProps extends React.SVGProps<SVGSVGElement> {}

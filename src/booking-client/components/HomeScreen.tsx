@@ -19,7 +19,12 @@ const HomeScreen: React.FC = () => {
       monthlyPrice: '$29',
       annualPrice: '$290',
       description: 'Ideal for growing companies needing coordination.',
-      features: ['Find & book any desk', 'Priority booking', 'Team coordination', 'Advanced analytics'],
+      features: [
+        'Find & book any desk',
+        'Priority booking',
+        'Team coordination',
+        'Advanced analytics',
+      ],
       buttonText: 'Start Free Trial',
       buttonBg: 'bg-indigo-600 text-white hover:bg-indigo-700',
       popular: true,
@@ -32,7 +37,7 @@ const HomeScreen: React.FC = () => {
       features: ['All Pro features', 'Custom integrations', '24/7 dedicated support', 'SSO'],
       buttonText: 'Contact Sales',
       buttonBg: 'bg-white text-indigo-600 border border-indigo-600 hover:bg-indigo-50',
-    }
+    },
   ];
 
   return (
@@ -43,30 +48,59 @@ const HomeScreen: React.FC = () => {
             Welcome to WhoAbout
           </h1>
           <p className="mt-4 text-xl text-slate-600 max-w-3xl mx-auto">
-            The modern office desk booking system designed to streamline your hybrid work experience.
+            The modern office desk booking system designed to streamline your hybrid work
+            experience.
           </p>
         </div>
 
         <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-8 sm:p-12 text-left mb-12">
-          <h2 className="text-2xl font-bold text-slate-800 mb-4">
-            Why WhoAbout?
-          </h2>
+          <h2 className="text-2xl font-bold text-slate-800 mb-4">Why WhoAbout?</h2>
           <ul className="space-y-4 text-slate-600 mb-8">
             <li className="flex items-start">
-              <svg className="h-6 w-6 text-indigo-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="h-6 w-6 text-indigo-500 mr-3 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               <span>Easily find and book available desks in your office locations.</span>
             </li>
             <li className="flex items-start">
-              <svg className="h-6 w-6 text-indigo-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="h-6 w-6 text-indigo-500 mr-3 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               <span>Manage your bookings efficiently with a user-friendly dashboard.</span>
             </li>
             <li className="flex items-start">
-              <svg className="h-6 w-6 text-indigo-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="h-6 w-6 text-indigo-500 mr-3 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               <span>Coordinate with colleagues and view shared resources in real-time.</span>
             </li>
@@ -94,15 +128,17 @@ const HomeScreen: React.FC = () => {
             Simple, Transparent Pricing
           </h2>
           <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            Choose the perfect plan for your team's hybrid work needs. No hidden fees.
+            Choose the perfect plan for your team&apos;s hybrid work needs. No hidden fees.
           </p>
-          
+
           {/* Tabs */}
           <div className="flex justify-center mb-12">
             <div className="relative flex bg-slate-200 rounded-full p-1">
               <button
                 className={`relative w-32 py-2 text-sm font-medium rounded-full transition-colors ${
-                  activeTab === 'monthly' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                  activeTab === 'monthly'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
                 onClick={() => setActiveTab('monthly')}
               >
@@ -110,7 +146,9 @@ const HomeScreen: React.FC = () => {
               </button>
               <button
                 className={`relative w-32 py-2 text-sm font-medium rounded-full transition-colors ${
-                  activeTab === 'annually' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                  activeTab === 'annually'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
                 onClick={() => setActiveTab('annually')}
               >
@@ -124,7 +162,9 @@ const HomeScreen: React.FC = () => {
               <div
                 key={tier.name}
                 className={`flex flex-col bg-white rounded-2xl shadow-xl p-8 text-left relative ${
-                  tier.popular ? 'border-2 border-indigo-500 transform md:-translate-y-4' : 'border border-slate-200'
+                  tier.popular
+                    ? 'border-2 border-indigo-500 transform md:-translate-y-4'
+                    : 'border border-slate-200'
                 }`}
               >
                 {tier.popular && (
@@ -143,8 +183,18 @@ const HomeScreen: React.FC = () => {
                 <ul className="space-y-4 mb-8 flex-1">
                   {tier.features.map((feature, i) => (
                     <li key={i} className="flex items-start">
-                      <svg className="h-6 w-6 text-indigo-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="h-6 w-6 text-indigo-500 mr-3 shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                       <span className="text-slate-600">{feature}</span>
                     </li>

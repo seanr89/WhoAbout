@@ -39,7 +39,6 @@ export enum Role {
   Owner = 3,
 }
 
-
 export interface StaffMember {
   id: string;
   name: string;

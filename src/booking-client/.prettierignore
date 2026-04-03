@@ -1,0 +1,8 @@
+# Prettier ignore
+node_modules/
+dist/
+build/
+.history/
+.vscode/
+package-lock.json
+public/

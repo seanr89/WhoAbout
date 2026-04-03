@@ -14,9 +14,15 @@ interface BookingModalProps {
   onConfirm: (slotToBook: BookingSlot, staffMemberId: string) => void;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ desk, selectedDate, selectedSlot, availableSlots, staffMembers, onClose, onConfirm }) => {
-  if (!desk) return null;
-
+const BookingModal: React.FC<BookingModalProps> = ({
+  desk,
+  selectedDate,
+  selectedSlot,
+  availableSlots,
+  staffMembers,
+  onClose,
+  onConfirm,
+}) => {
   const [modalSlot, setModalSlot] = useState<BookingSlot>(selectedSlot);
   const [selectedStaffId, setSelectedStaffId] = useState<string>('');
 
@@ -28,6 +34,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ desk, selectedDate, selecte
       setSelectedStaffId(staffMembers[0].id);
     }
   }, [selectedSlot, desk, staffMembers]);
+
+  if (!desk) return null;
 
   return (
     <div
@@ -42,7 +50,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ desk, selectedDate, selecte
       >
         <div className="flex justify-between items-start">
           <h2 className="text-2xl font-bold text-slate-800">Confirm Booking</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl leading-none" aria-label="Close modal">&times;</button>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 text-2xl leading-none"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
         </div>
 
         <div className="mt-6 space-y-4">
@@ -57,7 +71,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ desk, selectedDate, selecte
             <CalendarIcon className="w-6 h-6 text-indigo-500 mr-4" />
             <div>
               <p className="text-sm text-slate-500">Date</p>
-              <p className="font-semibold text-slate-700">{new Date(selectedDate + 'T00:00:00').toDateString()}</p>
+              <p className="font-semibold text-slate-700">
+                {new Date(selectedDate + 'T00:00:00').toDateString()}
+              </p>
             </div>
           </div>
           <div className="p-4 bg-slate-50 rounded-lg">
@@ -71,8 +87,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ desk, selectedDate, selecte
               onChange={(e) => setModalSlot(e.target.value as BookingSlot)}
               className="bg-white w-full p-2 border border-slate-300 rounded-md font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
             >
-              {availableSlots.map(slot => (
-                <option key={slot} value={slot}>{slot}</option>
+              {availableSlots.map((slot) => (
+                <option key={slot} value={slot}>
+                  {slot}
+                </option>
               ))}
             </select>
           </div>
@@ -87,8 +105,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ desk, selectedDate, selecte
               onChange={(e) => setSelectedStaffId(e.target.value)}
               className="bg-white w-full p-2 border border-slate-300 rounded-md font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
             >
-              {staffMembers.map(staff => (
-                <option key={staff.id} value={staff.id}>{staff.name}</option>
+              {staffMembers.map((staff) => (
+                <option key={staff.id} value={staff.id}>
+                  {staff.name}
+                </option>
               ))}
             </select>
           </div>

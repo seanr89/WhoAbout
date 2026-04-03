@@ -43,22 +43,34 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, minDate
   return (
     <div className="bg-white rounded-lg shadow-2xl p-4 border border-slate-200">
       <div className="flex justify-between items-center mb-4">
-        <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-slate-100" aria-label="Previous month">
+        <button
+          onClick={handlePrevMonth}
+          className="p-2 rounded-full hover:bg-slate-100"
+          aria-label="Previous month"
+        >
           <ChevronLeftIcon className="w-5 h-5 text-slate-600" />
         </button>
         <div className="font-bold text-slate-800">
           {displayDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
         </div>
-        <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-slate-100" aria-label="Next month">
+        <button
+          onClick={handleNextMonth}
+          className="p-2 rounded-full hover:bg-slate-100"
+          aria-label="Next month"
+        >
           <ChevronRightIcon className="w-5 h-5 text-slate-600" />
         </button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-center text-sm text-slate-500 mb-2">
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => <div key={index}>{day}</div>)}
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+          <div key={index}>{day}</div>
+        ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
-        {leadingBlanks.map(blank => <div key={`blank-${blank}`}></div>)}
-        {days.map(day => {
+        {leadingBlanks.map((blank) => (
+          <div key={`blank-${blank}`}></div>
+        ))}
+        {days.map((day) => {
           const dayDate = new Date(year, month, day);
           const dayString = formatDateToString(dayDate);
           const isSelected = dayString === selectedDate;
