@@ -135,21 +135,19 @@ const HomeScreen: React.FC = () => {
           <div className="flex justify-center mb-12">
             <div className="relative flex bg-slate-200 rounded-full p-1">
               <button
-                className={`relative w-32 py-2 text-sm font-medium rounded-full transition-colors ${
-                  activeTab === 'monthly'
+                className={`relative w-32 py-2 text-sm font-medium rounded-full transition-colors ${activeTab === 'monthly'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
-                }`}
+                  }`}
                 onClick={() => setActiveTab('monthly')}
               >
                 Monthly
               </button>
               <button
-                className={`relative w-32 py-2 text-sm font-medium rounded-full transition-colors ${
-                  activeTab === 'annually'
+                className={`relative w-32 py-2 text-sm font-medium rounded-full transition-colors ${activeTab === 'annually'
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
-                }`}
+                  }`}
                 onClick={() => setActiveTab('annually')}
               >
                 Annually
@@ -161,11 +159,10 @@ const HomeScreen: React.FC = () => {
             {pricingTiers.map((tier) => (
               <div
                 key={tier.name}
-                className={`flex flex-col bg-white rounded-2xl shadow-xl p-8 text-left relative ${
-                  tier.popular
+                className={`flex flex-col bg-white rounded-2xl shadow-xl p-8 text-left relative ${tier.popular
                     ? 'border-2 border-indigo-500 transform md:-translate-y-4'
                     : 'border border-slate-200'
-                }`}
+                  }`}
               >
                 {tier.popular && (
                   <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-500 text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap">

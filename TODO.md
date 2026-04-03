@@ -20,5 +20,5 @@ This file tracks planned features, known bugs, and technical debt for the WhoAbo
 ## 🔧 Technical Debt & Refactoring
 
 - [x] **Rename "WhoAbout"**: Ensure all internal code references (namespaces, variables, comments) are updated from "NoteForge" to "WhoAbout" where appropriate.
-- [ ] **Linting & Formatting**: Add ESLint and Prettier configuration to `booking-client` to enforce code style.
+- [x] **Linting & Formatting**: Add ESLint and Prettier configuration to `booking-client` to enforce code style.
 - [ ] **Environment Variables**: Centralize and document all environment variables for both client and API in a single reference document.

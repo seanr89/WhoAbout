@@ -1,5 +1,5 @@
 
-name: Deploy Azure Web App
+name: API - Deploy
 
 env:
   AZURE_WEBAPP_NAME: officedeskapi    # set this to the name of your Azure Web App
