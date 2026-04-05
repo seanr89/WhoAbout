@@ -174,5 +174,57 @@ public static class StaffMemberEndpoints
         .WithName("DeleteStaffMember")
         .WithSummary("Delete staff member")
         .WithDescription("Deletes a staff member by their unique ID.");
+
+        // POST: /api/staffmembers/complete-setup
+        group.MapPost("/complete-setup", async ([FromBody] CompleteSetupRequest request, HttpContext httpContext, StaffMemberService service, ILoggerFactory loggerFactory) =>
+        {
+            var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
+            var userId = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var email = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
+            {
+                return Results.Unauthorized();
+            }
+
+            var existingStaff = await service.GetStaffMemberByEmailAsync(email);
+            
+            if (existingStaff != null)
+            {
+                // Update existing staff
+                existingStaff.UserId = userId;
+                if (existingStaff.FirstLoginDate == null)
+                {
+                    existingStaff.FirstLoginDate = DateTime.UtcNow;
+                }
+                existingStaff.Name = request.Name ?? existingStaff.Name;
+                await service.UpdateStaffMemberAsync(existingStaff.Id, existingStaff);
+                return Results.Ok(existingStaff);
+            }
+            else
+            {
+                // Create new staff
+                var newStaff = new StaffMember
+                {
+                    Name = request.Name ?? email.Split('@')[0],
+                    Email = email,
+                    IsActive = true,
+                    Role = Role.Employee,
+                    UserId = userId,
+                    FirstLoginDate = DateTime.UtcNow
+                };
+                var created = await service.CreateStaffMemberAsync(newStaff);
+                return Results.Created($"/api/staffmembers/{created.Id}", created);
+            }
+        })
+        .RequireAuthorization()
+        .WithName("CompleteSetup")
+        .WithSummary("Complete user setup")
+        .WithDescription("Finalizes a user's profile and sets their first login date.");
     }
+}
+
+public class CompleteSetupRequest
+{
+    public string? Name { get; set; }
 }

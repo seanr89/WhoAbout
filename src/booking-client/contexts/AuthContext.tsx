@@ -8,6 +8,7 @@ import { bookingService } from '../services/bookingService';
 interface AuthContextType {
   currentUser: User | null;
   staffMember: StaffMember | null;
+  setStaffMember: (staff: StaffMember | null) => void;
   loading: boolean;
   logout: () => Promise<void>;
 }
@@ -15,6 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   staffMember: null,
+  setStaffMember: () => {},
   loading: true,
   logout: async () => {},
 });
@@ -50,6 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     currentUser,
     staffMember,
+    setStaffMember,
     loading,
     logout,
   };

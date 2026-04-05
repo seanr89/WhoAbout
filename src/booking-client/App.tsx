@@ -3,6 +3,7 @@ import { Routes, Route, useOutletContext } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import LoginScreen from './components/LoginScreen';
 import RegisterScreen from './components/RegisterScreen';
+import FirstTimeSetupScreen from './components/FirstTimeSetupScreen';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthenticatedLayout from './components/AuthenticatedLayout';
 import BookingScreen from './components/BookingScreen';
@@ -78,6 +79,7 @@ const App: React.FC = () => {
         <Route path="/welcome" element={<HomeScreen />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/register" element={<RegisterScreen />} />
+        <Route path="/first-time-setup" element={<FirstTimeSetupScreen />} />
 
         <Route
           element={

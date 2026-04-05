@@ -59,6 +59,7 @@ interface ApiStaffMember {
   email: string;
   isActive: boolean;
   role: number;
+  firstLoginDate?: string;
 }
 
 export const bookingService = {
@@ -131,6 +132,20 @@ export const bookingService = {
       console.error('Error fetching current staff member:', error);
       return null;
     }
+  },
+
+  async completeSetup(name: string): Promise<StaffMember> {
+    const response = await fetch(`${API_BASE_URL}/api/staffmembers/complete-setup`, {
+      method: 'POST',
+      headers: await getHeaders(),
+      body: JSON.stringify({ name }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to complete setup');
+    }
+    const data: ApiStaffMember = await response.json();
+    return mapApiStaffToStaff(data);
   },
 
   async getAll(): Promise<Booking[]> {
@@ -568,5 +583,6 @@ function mapApiStaffToStaff(apiStaff: ApiStaffMember): StaffMember {
     email: apiStaff.email,
     isActive: apiStaff.isActive,
     role: apiStaff.role,
+    firstLoginDate: apiStaff.firstLoginDate,
   };
 }
