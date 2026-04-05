@@ -15,7 +15,7 @@ const AuthenticatedLayout: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser: authUser, staffMember: currentUser, logout } = useAuth(); // Firebase User & Staff Member Profile
+  const { currentUser: authUser, staffMember: currentUser, logout, isAdmin } = useAuth(); // Firebase User & Staff Member Profile
 
   const fetchData = async () => {
     try {
@@ -50,12 +50,13 @@ const AuthenticatedLayout: React.FC = () => {
     if (path.startsWith('/my-bookings')) return 'my-bookings';
 
     if (path.startsWith('/admin')) return 'admin';
+    if (path.startsWith('/owner')) return 'owner';
     if (path.startsWith('/reserved')) return 'reserved';
     if (path.startsWith('/profile')) return 'profile';
     return 'booking';
   };
 
-  const handleNavigate = (screen: 'booking' | 'admin' | 'reserved' | 'profile' | 'my-bookings') => {
+  const handleNavigate = (screen: 'booking' | 'admin' | 'owner' | 'reserved' | 'profile' | 'my-bookings') => {
     switch (screen) {
       case 'booking':
         navigate('/');
@@ -66,6 +67,9 @@ const AuthenticatedLayout: React.FC = () => {
 
       case 'admin':
         navigate('/admin');
+        break;
+      case 'owner':
+        navigate('/owner');
         break;
       case 'reserved':
         navigate('/reserved');
@@ -82,6 +86,7 @@ const AuthenticatedLayout: React.FC = () => {
         currentScreen={getCurrentScreen()}
         onNavigate={handleNavigate}
         currentUser={currentUser}
+        isAdmin={isAdmin}
         onLogout={logout}
       />
       <main className="container mx-auto p-4 sm:p-6 lg:p-8">
