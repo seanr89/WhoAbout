@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StaffMember, Role } from '../types';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProfileScreenProps {
   currentUser: StaffMember | null;
@@ -13,6 +14,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onUpdateUser
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { claims } = useAuth();
 
   useEffect(() => {
     if (currentUser) {
@@ -145,6 +147,25 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onUpdateUser
                   <span className="text-slate-900">
                     {currentUser.isActive ? 'Active' : 'Inactive'}
                   </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Database Role
+                  </label>
+                  <p className="text-slate-900 font-mono bg-slate-50 p-2 rounded border border-slate-100">
+                    {getRoleName(currentUser.role)}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Auth Token Claim Role
+                  </label>
+                  <p className="text-slate-900 font-mono bg-slate-50 p-2 rounded border border-slate-100">
+                    {claims?.role || 'None'}
+                  </p>
                 </div>
               </div>
 
