@@ -159,6 +159,24 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
     setIsCalendarOpen(false);
   };
 
+  const userBookingsToday = useMemo(() => {
+    if (!currentUser) return [];
+    return bookings.filter(b => b.staffMemberId === currentUser.id);
+  }, [bookings, currentUser]);
+
+  const userReservedDeskToday = useMemo(() => {
+    if (!currentUser) return null;
+    const reserved = desks.find(
+      (d) =>
+        d.reservedForStaffMemberId === currentUser.id &&
+        d.locationId === selectedLocationId
+    );
+    if (reserved && !releasedDeskIds.includes(reserved.id)) {
+      return reserved;
+    }
+    return null;
+  }, [desks, currentUser, selectedLocationId, releasedDeskIds]);
+
   const handleConfirmBooking = async (slotToBook: BookingSlot, staffId: string) => {
     if (!selectedDeskForBooking) return;
     try {
@@ -386,6 +404,38 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
             Showing desks for {selectedLocation?.name} on{' '}
             {new Date(selectedDate + 'T00:00:00').toDateString()} for {selectedSlot}.
           </p>
+
+          { (userBookingsToday.length > 0 || userReservedDeskToday) && (
+            <div className="mb-6 p-4 bg-indigo-50 border border-indigo-200 rounded-xl flex items-start shadow-sm animate-in fade-in slide-in-from-top-2">
+              <div className="flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h4 className="text-sm font-bold text-indigo-900">You already have bookings for this date and location:</h4>
+                <div className="mt-2 text-sm text-indigo-800 space-y-1">
+                  {userReservedDeskToday && (
+                      <div className="flex items-center space-x-2">
+                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                        <span className="font-semibold">{userReservedDeskToday.label || 'Unknown Desk'}</span>
+                        <span className="text-amber-600">(Reserved - Full Day)</span>
+                      </div>
+                  )}
+                  {userBookingsToday.map((b) => {
+                    const desk = desks.find((d) => d.id === b.deskId);
+                    return (
+                      <div key={b.id} className="flex items-center space-x-2">
+                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                        <span className="font-semibold">{(desk as any)?.name || desk?.label || 'Unknown Desk'}</span>
+                        <span className="text-indigo-600">({b.slot})</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Seat Map Modal */}
           {isSeatMapModalOpen && selectedLocation?.seatMapUrl && (

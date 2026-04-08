@@ -123,3 +123,8 @@ The project includes a `Makefile` for convenience:
 ## 📝 TODOs & Future Roadmap
 
 See [TODO.md](TODO.md) for a list of known issues, missing features, and technical debt.
+
+
+### Plan Notes - Auth
+As part of new UI, I want to implement in support to control who can view what screens, such as users with either Admin or Owner role access to be able to see the admin pages and controls.
+Additionally, include an inidividuals role level on the profile screen so they can see what it is.

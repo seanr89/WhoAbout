@@ -45,6 +45,7 @@ export interface StaffMember {
   email: string;
   isActive: boolean;
   role: Role;
+  firstLoginDate?: string;
 }
 
 export interface Booking {

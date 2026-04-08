@@ -3,13 +3,14 @@ import ChairIcon from './icons/ChairIcon';
 import { StaffMember, Role } from '../types';
 
 interface HeaderProps {
-  currentScreen: 'booking' | 'admin' | 'reserved' | 'profile' | 'my-bookings';
-  onNavigate: (screen: 'booking' | 'admin' | 'reserved' | 'profile' | 'my-bookings') => void;
+  currentScreen: 'booking' | 'admin' | 'owner' | 'reserved' | 'profile' | 'my-bookings';
+  onNavigate: (screen: 'booking' | 'admin' | 'owner' | 'reserved' | 'profile' | 'my-bookings') => void;
   currentUser: StaffMember | null;
+  isAdmin?: boolean;
   onLogout: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser, onLogout }) => {
+const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser, isAdmin, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   return (
@@ -39,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
                 Book a Desk
               </button>
 
-              {(currentUser?.role === Role.Admin || currentUser?.role === Role.Owner) && (
+              {(currentUser?.role === Role.Admin || currentUser?.role === Role.Owner || isAdmin) && (
                 <>
                   <button
                     onClick={() => onNavigate('reserved')}
@@ -61,6 +62,18 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
                   >
                     Admin
                   </button>
+                  {currentUser?.role === Role.Owner && (
+                    <button
+                      onClick={() => onNavigate('owner')}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        currentScreen === 'owner'
+                          ? 'bg-indigo-50 text-indigo-700'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      }`}
+                    >
+                      Owner
+                    </button>
+                  )}
                 </>
               )}
 
@@ -87,7 +100,7 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
                 Book
               </button>
 
-              {(currentUser?.role === Role.Admin || currentUser?.role === Role.Owner) && (
+              {(currentUser?.role === Role.Admin || currentUser?.role === Role.Owner || isAdmin) && (
                 <>
                   <button
                     onClick={() => onNavigate('reserved')}
@@ -101,6 +114,14 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
                   >
                     Admin
                   </button>
+                  {currentUser?.role === Role.Owner && (
+                    <button
+                      onClick={() => onNavigate('owner')}
+                      className={`p-2 rounded-md ${currentScreen === 'owner' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
+                    >
+                      Owner
+                    </button>
+                  )}
                 </>
               )}
 

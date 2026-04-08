@@ -7,4 +7,5 @@ public class StaffMemberDto
     public string Email { get; set; } = string.Empty;
     public bool IsActive { get; set; } = false;
     public bookings_api.Enums.Role Role { get; set; }
+    public DateTime? FirstLoginDate { get; set; }
 }

@@ -9,7 +9,7 @@ interface RoleProtectedRouteProps {
 }
 
 const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({ children, allowedRoles }) => {
-  const { staffMember, loading } = useAuth();
+  const { staffMember, loading, isAdmin } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;
@@ -20,7 +20,10 @@ const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({ children, allow
     return <Navigate to="/welcome" replace />;
   }
 
-  if (!allowedRoles.includes(staffMember.role)) {
+  const hasRequiredRole = allowedRoles.includes(staffMember.role);
+  const hasRequiredClaim = (allowedRoles.includes(Role.Admin) || allowedRoles.includes(Role.Owner)) && isAdmin;
+
+  if (!hasRequiredRole && !hasRequiredClaim) {
     // Logged in but insufficient permissions, redirect to home
     return <Navigate to="/" replace />;
   }
