@@ -1,6 +1,23 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/*.{css,scss,js,png,gif,ico,jpg,svg}"]
-  }
+    "exclude": [
+      "/*.{css,scss,js,png,gif,ico,jpg,svg}"
+    ]
+  },
+  "routes": [
+    {
+      "route": "/api/*",
+      "rewrite": "https://officedeskapi-ahfve6dmhnc3f6dq.westeurope-01.azurewebsites.net/api/*",
+      "allowedMethods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "OPTIONS",
+        "HEAD",
+        "PATCH"
+      ]
+    }
+  ]
 }
