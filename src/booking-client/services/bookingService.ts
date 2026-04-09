@@ -11,7 +11,9 @@ import {
 
 import { auth } from '../firebaseConfig';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
+//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = "https://officedeskapi-ahfve6dmhnc3f6dq.westeurope-01.azurewebsites.net";
 
 async function getHeaders() {
   const headers: Record<string, string> = {
@@ -138,7 +140,7 @@ export const bookingService = {
     const response = await fetch(`${API_BASE_URL}/api/staffmembers/complete-setup`, {
       method: 'POST',
       headers: await getHeaders(),
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name: name }),
     });
 
     if (!response.ok) {

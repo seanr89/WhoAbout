@@ -1,5 +1,4 @@
 import { Location, Desk, Booking, BookingSlot, StaffMember, StaffRole } from '../types';
-import { LOCATIONS, DESKS } from '../constants';
 import { bookingService } from './bookingService';
 
 const SIMULATED_DELAY = 500; // ms
