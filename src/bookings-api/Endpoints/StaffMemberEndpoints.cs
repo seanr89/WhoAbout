@@ -18,6 +18,53 @@ public static class StaffMemberEndpoints
             .WithTags("StaffMembers")
             .WithOpenApi();
 
+        // POST: /api/staffmembers/complete-setup
+        group.MapPost("/complete-setup", async ([FromBody] CompleteSetupRequest request, HttpContext httpContext, StaffMemberService service, ILoggerFactory loggerFactory) =>
+        {
+            //var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
+            var userId = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var email = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
+            {
+                return Results.Unauthorized();
+            }
+
+            var existingStaff = await service.GetStaffMemberByEmailAsync(email);
+
+            if (existingStaff != null)
+            {
+                // Update existing staff
+                existingStaff.UserId = userId;
+                if (existingStaff.FirstLoginDate == null)
+                {
+                    existingStaff.FirstLoginDate = DateTime.UtcNow;
+                }
+                existingStaff.Name = request.Name ?? existingStaff.Name;
+                await service.UpdateStaffMemberAsync(existingStaff.Id, existingStaff);
+                return Results.Ok(existingStaff);
+            }
+            else
+            {
+                // Create new staff
+                var newStaff = new StaffMember
+                {
+                    Name = request.Name ?? email.Split('@')[0],
+                    Email = email,
+                    IsActive = true,
+                    Role = Role.Employee,
+                    UserId = userId,
+                    FirstLoginDate = DateTime.UtcNow
+                };
+                var created = await service.CreateStaffMemberAsync(newStaff);
+                return Results.Created($"/api/staffmembers/{created.Id}", created);
+            }
+        })
+        .RequireAuthorization()
+        .WithName("CompleteSetup")
+        .WithSummary("Complete user setup")
+        .WithDescription("Finalizes a user's profile and sets their first login date.");
+
         // GET: /api/staffmembers/roles
         group.MapGet("/roles", (ILoggerFactory loggerFactory) =>
         {
@@ -109,7 +156,7 @@ public static class StaffMemberEndpoints
         .WithDescription("Retrieves the currently authenticated staff member based on their token claims.");
 
         // GET: /api/staffmembers/{id}
-        group.MapGet("/{id}", async (Guid id, StaffMemberService service, ILoggerFactory loggerFactory) =>
+        group.MapGet("/{id:guid}", async (Guid id, StaffMemberService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
             logger.LogInformation("Getting staff member with Id: {Id}", id);
@@ -140,7 +187,7 @@ public static class StaffMemberEndpoints
         .WithDescription("Creates a new staff member record.");
 
         // PUT: /api/staffmembers/{id}
-        group.MapPut("/{id}", async (Guid id, [FromBody] StaffMember staffMember, StaffMemberService service, ILoggerFactory loggerFactory) =>
+        group.MapPut("/{id:guid}", async (Guid id, [FromBody] StaffMember staffMember, StaffMemberService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
             logger.LogInformation("Updating staff member with Id: {Id}", id);
@@ -158,7 +205,7 @@ public static class StaffMemberEndpoints
         .WithDescription("Updates an existing staff member's details.");
 
         // DELETE: /api/staffmembers/{id}
-        group.MapDelete("/{id}", async (Guid id, StaffMemberService service, ILoggerFactory loggerFactory) =>
+        group.MapDelete("/{id:guid}", async (Guid id, StaffMemberService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
             logger.LogInformation("Deleting staff member with Id: {Id}", id);
@@ -174,53 +221,6 @@ public static class StaffMemberEndpoints
         .WithName("DeleteStaffMember")
         .WithSummary("Delete staff member")
         .WithDescription("Deletes a staff member by their unique ID.");
-
-        // POST: /api/staffmembers/complete-setup
-        group.MapPost("/complete-setup", async ([FromBody] CompleteSetupRequest request, HttpContext httpContext, StaffMemberService service, ILoggerFactory loggerFactory) =>
-        {
-            //var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
-            var userId = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var email = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
-            {
-                return Results.Unauthorized();
-            }
-
-            var existingStaff = await service.GetStaffMemberByEmailAsync(email);
-
-            if (existingStaff != null)
-            {
-                // Update existing staff
-                existingStaff.UserId = userId;
-                if (existingStaff.FirstLoginDate == null)
-                {
-                    existingStaff.FirstLoginDate = DateTime.UtcNow;
-                }
-                existingStaff.Name = request.Name ?? existingStaff.Name;
-                await service.UpdateStaffMemberAsync(existingStaff.Id, existingStaff);
-                return Results.Ok(existingStaff);
-            }
-            else
-            {
-                // Create new staff
-                var newStaff = new StaffMember
-                {
-                    Name = request.Name ?? email.Split('@')[0],
-                    Email = email,
-                    IsActive = true,
-                    Role = Role.Employee,
-                    UserId = userId,
-                    FirstLoginDate = DateTime.UtcNow
-                };
-                var created = await service.CreateStaffMemberAsync(newStaff);
-                return Results.Created($"/api/staffmembers/{created.Id}", created);
-            }
-        })
-        .RequireAuthorization()
-        .WithName("CompleteSetup")
-        .WithSummary("Complete user setup")
-        .WithDescription("Finalizes a user's profile and sets their first login date.");
     }
 }
 
