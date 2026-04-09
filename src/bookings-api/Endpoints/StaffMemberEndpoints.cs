@@ -59,18 +59,18 @@ public static class StaffMemberEndpoints
         group.MapGet("/me", async (HttpContext httpContext, StaffMemberService service, ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
-            
+
             // Extract user data from claims
             var claims = httpContext.User.Claims.ToList();
             var firebaseClaim = claims.FirstOrDefault(c => c.Type == "firebase")?.Value;
-            
+
             var user = new AuthenticatedUser
             {
                 UserId = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "",
                 Email = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "",
                 EmailVerified = bool.TryParse(claims.FirstOrDefault(c => c.Type == "email_verified")?.Value, out var verified) && verified,
-                Firebase = !string.IsNullOrEmpty(firebaseClaim) 
-                    ? System.Text.Json.JsonSerializer.Deserialize<FirebaseClaims>(firebaseClaim) 
+                Firebase = !string.IsNullOrEmpty(firebaseClaim)
+                    ? System.Text.Json.JsonSerializer.Deserialize<FirebaseClaims>(firebaseClaim)
                     : null
             };
 
@@ -84,7 +84,7 @@ public static class StaffMemberEndpoints
 
             logger.LogInformation("Getting staff member for User Id: {UserId}", user.UserId);
             var staffMemberByEmail = await service.GetStaffMemberByEmailAsync(user.Email);
-            
+
             if (staffMemberByEmail is null)
             {
                 logger.LogWarning("Staff member with User Id: {UserId} not found", user.UserId);
@@ -100,7 +100,7 @@ public static class StaffMemberEndpoints
                 staffMemberByEmail.UserId = user.UserId;
                 await service.UpdateStaffMemberAsync(staffMemberByEmail.Id, staffMemberByEmail);
             }
-            
+
             return Results.Ok(staffMemberByEmail);
         })
         .RequireAuthorization()
@@ -178,7 +178,7 @@ public static class StaffMemberEndpoints
         // POST: /api/staffmembers/complete-setup
         group.MapPost("/complete-setup", async ([FromBody] CompleteSetupRequest request, HttpContext httpContext, StaffMemberService service, ILoggerFactory loggerFactory) =>
         {
-            var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
+            //var logger = loggerFactory.CreateLogger("StaffMemberEndpoints");
             var userId = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var email = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
@@ -188,7 +188,7 @@ public static class StaffMemberEndpoints
             }
 
             var existingStaff = await service.GetStaffMemberByEmailAsync(email);
-            
+
             if (existingStaff != null)
             {
                 // Update existing staff

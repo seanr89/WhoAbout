@@ -428,7 +428,7 @@ export const bookingService = {
 
   async getDeskReleases(deskId: number): Promise<string[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/desks/${deskId}/releases`, {
+      const response = await fetch(`${API_BASE_URL}/api/deskreleases/${deskId}/releases`, {
         headers: await getHeaders(),
       });
       if (!response.ok) throw new Error('Failed to fetch desk releases');
@@ -441,7 +441,7 @@ export const bookingService = {
   },
 
   async createDeskRelease(deskId: number, date: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/desks/${deskId}/releases`, {
+    const response = await fetch(`${API_BASE_URL}/api/deskreleases/${deskId}/releases`, {
       method: 'POST',
       headers: await getHeaders(),
       body: JSON.stringify(new Date(date).toISOString()),
@@ -450,7 +450,7 @@ export const bookingService = {
   },
 
   async deleteDeskRelease(deskId: number, date: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/desks/${deskId}/releases/${date}`, {
+    const response = await fetch(`${API_BASE_URL}/api/deskreleases/${deskId}/releases/${date}`, {
       method: 'DELETE',
       headers: await getHeaders(),
     });
@@ -463,7 +463,7 @@ export const bookingService = {
       params.append('date', date);
       params.append('officeId', locationId);
 
-      const response = await fetch(`${API_BASE_URL}/api/desks/releases?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/api/deskreleases/releases?${params.toString()}`, {
         headers: await getHeaders(),
       });
 

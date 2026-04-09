@@ -4,12 +4,21 @@ import { useAuth } from '../contexts/AuthContext';
 import { bookingService } from '../services/bookingService';
 
 const FirstTimeSetupScreen: React.FC = () => {
-  const { currentUser, staffMember, setStaffMember } = useAuth();
+  const { currentUser, staffMember, setStaffMember, logout } = useAuth();
   const navigate = useNavigate();
   
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (err: any) {
+      setError('Failed to log out.');
+    }
+  };
 
   useEffect(() => {
     // If they already have a complete profile with a first login date, skip this screen
@@ -116,6 +125,17 @@ const FirstTimeSetupScreen: React.FC = () => {
                 className={`w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isSubmitting ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out`}
               >
                 {isSubmitting ? 'Saving...' : 'Get Started'}
+              </button>
+            </div>
+            
+            <div className="mt-4 text-center">
+              <span className="text-sm text-slate-500">Not your account? </span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none underline transition duration-150 ease-in-out"
+              >
+                Sign out
               </button>
             </div>
           </form>
