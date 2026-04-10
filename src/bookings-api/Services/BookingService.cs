@@ -162,21 +162,6 @@ public class BookingService
         return true;
     }
 
-    public async Task<List<bookings_api.Models.DTOs.DailyBookingCountDto>> GetDailyBookingCountsAsync(Guid officeId, DateTime startDate, DateTime endDate)
-    {
-        var counts = await _context.Bookings
-            .Include(b => b.Desk)
-            .Where(b => b.Desk != null && b.Desk.OfficeId == officeId && b.BookingDate >= startDate && b.BookingDate <= endDate)
-            .GroupBy(b => b.BookingDate.Date)
-            .Select(g => new bookings_api.Models.DTOs.DailyBookingCountDto
-            {
-                Date = DateOnly.FromDateTime(g.Key),
-                Count = g.Count()
-            })
-            .ToListAsync();
-
-        return counts;
-    }
 
     public async Task<List<Booking>> GetBookingsByStaffMemberIdAsync(Guid staffMemberId, DateTime? startDate = null, DateTime? endDate = null)
     {

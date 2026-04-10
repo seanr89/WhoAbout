@@ -90,13 +90,7 @@ export const api = {
     return await bookingService.deleteStaffMember(id);
   },
 
-  fetchBookingStats: async (
-    officeId: string,
-    startDate?: string,
-    endDate?: string,
-  ): Promise<import('../types').DailyBookingCount[]> => {
-    return await bookingService.getBookingStats(officeId, startDate, endDate);
-  },
+
 
   updateDesk: async (desk: Desk): Promise<Desk> => {
     return await bookingService.updateDesk(desk);

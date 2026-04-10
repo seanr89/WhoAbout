@@ -10,7 +10,6 @@ import BookingScreen from './components/BookingScreen';
 import HomeScreen from './components/HomeScreen';
 
 import AdminScreen from './components/AdminScreen';
-import ReservedScreen from './components/ReservedScreen';
 import ProfileScreen from './components/ProfileScreen';
 import MyBookingsScreen from './components/MyBookingsScreen';
 import OwnerScreen from './components/OwnerScreen';
@@ -47,10 +46,6 @@ const AdminScreenWrapper = () => {
   );
 };
 
-const ReservedScreenWrapper = () => {
-  const context = useOutletContext<AppContextType>();
-  return <ReservedScreen onRefresh={context.onRefresh} />;
-};
 
 const ProfileScreenWrapper = () => {
   const context = useOutletContext<AppContextType>();
@@ -108,14 +103,6 @@ const App: React.FC = () => {
             element={
               <RoleProtectedRoute allowedRoles={[Role.Owner]}>
                 <OwnerScreenWrapper />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="reserved"
-            element={
-              <RoleProtectedRoute allowedRoles={[Role.Admin, Role.Owner]}>
-                <ReservedScreenWrapper />
               </RoleProtectedRoute>
             }
           />

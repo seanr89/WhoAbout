@@ -177,10 +177,10 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
     return null;
   }, [desks, currentUser, selectedLocationId, releasedDeskIds]);
 
-  const handleConfirmBooking = async (slotToBook: BookingSlot, staffId: string) => {
-    if (!selectedDeskForBooking) return;
+  const handleConfirmBooking = async (slotToBook: BookingSlot) => {
+    if (!selectedDeskForBooking || !currentUser) return;
     try {
-      await api.createBooking(selectedDeskForBooking, selectedDate, slotToBook, staffId);
+      await api.createBooking(selectedDeskForBooking, selectedDate, slotToBook, currentUser.id);
       // Refresh local bookings instead of global
       await fetchFilteredBookings();
       handleCloseModal();
@@ -527,7 +527,6 @@ const BookingScreen: React.FC<BookingScreenProps> = ({
         selectedDate={selectedDate}
         selectedSlot={selectedSlotForBooking}
         availableSlots={availableSlotsForModal}
-        staffMembers={staffMembers}
         onClose={handleCloseModal}
         onConfirm={handleConfirmBooking}
       />

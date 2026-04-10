@@ -185,33 +185,7 @@ public static class BookingEndpoints
         .WithSummary("Get bookings by date")
         .WithDescription("Retrieves all bookings for a specific date.");
 
-        // GET: /api/bookings/stats
-        group.MapGet("/stats", async ([FromQuery] Guid officeId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, BookingService service, ILoggerFactory loggerFactory) =>
-        {
-            var logger = loggerFactory.CreateLogger("BookingEndpoints");
-            var start = startDate ?? DateTime.UtcNow.Date;
-            var end = endDate ?? start.AddMonths(1);
 
-            // PostgreSQL requires UTC for timestamp with time zone
-            if (start.Kind == DateTimeKind.Unspecified)
-                start = DateTime.SpecifyKind(start, DateTimeKind.Utc);
-            else if (start.Kind == DateTimeKind.Local)
-                start = start.ToUniversalTime();
-
-            if (end.Kind == DateTimeKind.Unspecified)
-                end = DateTime.SpecifyKind(end, DateTimeKind.Utc);
-            else if (end.Kind == DateTimeKind.Local)
-                end = end.ToUniversalTime();
-            
-            logger.LogInformation("Getting booking stats for OfficeId: {OfficeId} from {Start} to {End}", officeId, start, end);
-            
-            var stats = await service.GetDailyBookingCountsAsync(officeId, start, end);
-            return Results.Ok(stats);
-        })
-        .RequireAuthorization()
-        .WithName("GetBookingStats")
-        .WithSummary("Get booking statistics")
-        .WithDescription("Retrieves booking statistics for a specific office location within a date range.");
 
         // GET: /api/bookings/staff/{id}
         group.MapGet("/staff/{id}", async (Guid id, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, BookingService service, ILoggerFactory loggerFactory) =>

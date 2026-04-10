@@ -57,7 +57,3 @@ export interface Booking {
   slot: BookingSlot;
 }
 
-export interface DailyBookingCount {
-  date: string;
-  count: number;
-}

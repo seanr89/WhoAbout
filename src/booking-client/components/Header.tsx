@@ -3,8 +3,8 @@ import ChairIcon from './icons/ChairIcon';
 import { StaffMember, Role } from '../types';
 
 interface HeaderProps {
-  currentScreen: 'booking' | 'admin' | 'owner' | 'reserved' | 'profile' | 'my-bookings';
-  onNavigate: (screen: 'booking' | 'admin' | 'owner' | 'reserved' | 'profile' | 'my-bookings') => void;
+  currentScreen: 'booking' | 'admin' | 'owner' | 'profile' | 'my-bookings';
+  onNavigate: (screen: 'booking' | 'admin' | 'owner' | 'profile' | 'my-bookings') => void;
   currentUser: StaffMember | null;
   isAdmin?: boolean;
   onLogout: () => void;
@@ -42,16 +42,7 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
 
               {(currentUser?.role === Role.Admin || currentUser?.role === Role.Owner || isAdmin) && (
                 <>
-                  <button
-                    onClick={() => onNavigate('reserved')}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      currentScreen === 'reserved'
-                        ? 'bg-indigo-50 text-indigo-700'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                    }`}
-                  >
-                    Reserved
-                  </button>
+
                   <button
                     onClick={() => onNavigate('admin')}
                     className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -102,12 +93,7 @@ const Header: React.FC<HeaderProps> = ({ currentScreen, onNavigate, currentUser,
 
               {(currentUser?.role === Role.Admin || currentUser?.role === Role.Owner || isAdmin) && (
                 <>
-                  <button
-                    onClick={() => onNavigate('reserved')}
-                    className={`p-2 rounded-md ${currentScreen === 'reserved' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}
-                  >
-                    Reserved
-                  </button>
+
                   <button
                     onClick={() => onNavigate('admin')}
                     className={`p-2 rounded-md ${currentScreen === 'admin' ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500'}`}

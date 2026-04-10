@@ -5,15 +5,14 @@ import {
   Desk,
   DeskType,
   StaffMember,
-  DailyBookingCount,
   StaffRole,
 } from '../types';
 
 import { auth } from '../firebaseConfig';
 
 
-//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-const API_BASE_URL = "https://officedeskapi-ahfve6dmhnc3f6dq.westeurope-01.azurewebsites.net";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+//const API_BASE_URL = "https://officedeskapi-ahfve6dmhnc3f6dq.westeurope-01.azurewebsites.net";
 
 async function getHeaders() {
   const headers: Record<string, string> = {
@@ -348,23 +347,6 @@ export const bookingService = {
       headers: await getHeaders(),
     });
     return response.ok;
-  },
-
-  async getBookingStats(
-    officeId: string,
-    startDate?: string,
-    endDate?: string,
-  ): Promise<DailyBookingCount[]> {
-    const params = new URLSearchParams();
-    params.append('officeId', officeId);
-    if (startDate) params.append('startDate', startDate);
-    if (endDate) params.append('endDate', endDate);
-
-    const response = await fetch(`${API_BASE_URL}/api/bookings/stats?${params.toString()}`, {
-      headers: await getHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to fetch booking stats');
-    return await response.json();
   },
 
   async updateDesk(desk: Desk): Promise<Desk> {

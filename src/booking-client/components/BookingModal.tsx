@@ -9,9 +9,8 @@ interface BookingModalProps {
   selectedDate: string;
   selectedSlot: BookingSlot;
   availableSlots: BookingSlot[];
-  staffMembers: StaffMember[];
   onClose: () => void;
-  onConfirm: (slotToBook: BookingSlot, staffMemberId: string) => void;
+  onConfirm: (slotToBook: BookingSlot) => void;
 }
 
 const BookingModal: React.FC<BookingModalProps> = ({
@@ -19,21 +18,16 @@ const BookingModal: React.FC<BookingModalProps> = ({
   selectedDate,
   selectedSlot,
   availableSlots,
-  staffMembers,
   onClose,
   onConfirm,
 }) => {
   const [modalSlot, setModalSlot] = useState<BookingSlot>(selectedSlot);
-  const [selectedStaffId, setSelectedStaffId] = useState<string>('');
 
   useEffect(() => {
     // When the modal is re-opened for a new desk or with a new initial slot,
     // reset its internal state to match the prop.
     setModalSlot(selectedSlot);
-    if (staffMembers.length > 0) {
-      setSelectedStaffId(staffMembers[0].id);
-    }
-  }, [selectedSlot, desk, staffMembers]);
+  }, [selectedSlot, desk]);
 
   if (!desk) return null;
 
@@ -94,24 +88,6 @@ const BookingModal: React.FC<BookingModalProps> = ({
               ))}
             </select>
           </div>
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <label htmlFor="staff-select" className="flex items-center text-sm text-slate-500 mb-2">
-              <span className="w-5 h-5 mr-2 text-indigo-500 font-bold text-center">@</span>
-              Staff Member
-            </label>
-            <select
-              id="staff-select"
-              value={selectedStaffId}
-              onChange={(e) => setSelectedStaffId(e.target.value)}
-              className="bg-white w-full p-2 border border-slate-300 rounded-md font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-            >
-              {staffMembers.map((staff) => (
-                <option key={staff.id} value={staff.id}>
-                  {staff.name}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
 
         <div className="mt-8 flex justify-end space-x-3">
@@ -123,10 +99,9 @@ const BookingModal: React.FC<BookingModalProps> = ({
             Cancel
           </button>
           <button
-            onClick={() => onConfirm(modalSlot, selectedStaffId)}
+            onClick={() => onConfirm(modalSlot)}
             type="button"
-            disabled={!selectedStaffId}
-            className={`px-4 py-2 text-white rounded-md font-semibold transition-colors shadow-sm ${!selectedStaffId ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+            className="px-4 py-2 text-white rounded-md font-semibold transition-colors shadow-sm bg-indigo-600 hover:bg-indigo-700"
           >
             Confirm Booking
           </button>

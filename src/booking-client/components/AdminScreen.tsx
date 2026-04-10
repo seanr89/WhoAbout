@@ -3,7 +3,6 @@ import {
   Location,
   StaffMember,
   Booking,
-  DailyBookingCount,
   Desk,
   BookingSlot,
   Role,
@@ -16,6 +15,7 @@ import LocationIcon from './icons/LocationIcon';
 import CalendarIcon from './icons/CalendarIcon';
 import Calendar from './Calendar';
 import TrashIcon from './icons/TrashIcon';
+import ReservedScreen from './ReservedScreen';
 
 interface AdminScreenProps {
   locations: Location[];
@@ -32,7 +32,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
   desks,
   onDataRefresh,
 }) => {
-  const [activeTab, setActiveTab] = useState<'offices' | 'staff' | 'stats' | 'bookings'>('offices');
+  const [activeTab, setActiveTab] = useState<'offices' | 'staff' | 'bookings' | 'reserved'>('offices');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,19 +58,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
   const [newStaffRole, setNewStaffRole] = useState<Role>(Role.Employee);
   const [isAddingStaff, setIsAddingStaff] = useState(false);
 
-  // Stats State
-  const [statsStaffId, setStatsStaffId] = useState<string>('');
-  const [statsStartDate, setStatsStartDate] = useState<string>('');
-  const [statsEndDate, setStatsEndDate] = useState<string>('');
-  const [userStats, setUserStats] = useState<{
-    totalBookings: number;
-    avgBookingsPerWeek: string;
-  } | null>(null);
 
-  // Occupancy Stats State
-  const [occupancyLocationId, setOccupancyLocationId] = useState<string>(locations[0]?.id || '');
-  const [occupancyMonth, setOccupancyMonth] = useState<Date>(new Date());
-  const [occupancyStats, setOccupancyStats] = useState<DailyBookingCount[]>([]);
 
   // History / Bookings State
   const [selectedLocationId, setSelectedLocationId] = useState<string>(locations[0]?.id || '');
@@ -118,59 +106,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
     }
   }, [selectedOfficeForDesks]);
 
-  React.useEffect(() => {
-    if (activeTab === 'stats' && occupancyLocationId) {
-      const startOfMonth = new Date(occupancyMonth.getFullYear(), occupancyMonth.getMonth(), 1);
-      const endOfMonth = new Date(occupancyMonth.getFullYear(), occupancyMonth.getMonth() + 1, 0);
 
-      const startStr = `${startOfMonth.getFullYear()}-${String(startOfMonth.getMonth() + 1).padStart(2, '0')}-${String(startOfMonth.getDate()).padStart(2, '0')}`;
-      const endStr = `${endOfMonth.getFullYear()}-${String(endOfMonth.getMonth() + 1).padStart(2, '0')}-${String(endOfMonth.getDate()).padStart(2, '0')}`;
-
-      const fetchStats = async () => {
-        try {
-          const stats = await api.fetchBookingStats(occupancyLocationId, startStr, endStr);
-          setOccupancyStats(stats);
-        } catch (err) {
-          console.error('Failed to fetch occupancy stats', err);
-        }
-      };
-      fetchStats();
-    }
-  }, [activeTab, occupancyLocationId, occupancyMonth]);
-
-  // Fetch User Stats
-  React.useEffect(() => {
-    if (activeTab === 'stats' && statsStaffId && statsStartDate && statsEndDate) {
-      const fetchUserStats = async () => {
-        try {
-          const bookings = await api.fetchBookingsByStaffId(
-            statsStaffId,
-            statsStartDate,
-            statsEndDate,
-          );
-
-          const totalBookings = bookings.length;
-          const start = new Date(statsStartDate);
-          const end = new Date(statsEndDate);
-          const timeDiff = end.getTime() - start.getTime();
-          const daysDiff = timeDiff / (1000 * 3600 * 24);
-          const weeksDiff = Math.max(1, Math.ceil(daysDiff / 7));
-          const avgBookingsPerWeek = totalBookings / weeksDiff;
-
-          setUserStats({
-            totalBookings,
-            avgBookingsPerWeek: avgBookingsPerWeek.toFixed(1),
-          });
-        } catch (err) {
-          console.error('Failed to fetch user stats', err);
-          setUserStats(null);
-        }
-      };
-      fetchUserStats();
-    } else {
-      setUserStats(null);
-    }
-  }, [activeTab, statsStaffId, statsStartDate, statsEndDate]);
 
   // Fetch History Bookings
   const fetchHistory = React.useCallback(async () => {
@@ -392,69 +328,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
     return locations.find((l) => l.id === desk?.locationId)?.name || 'Unknown Location';
   };
 
-  const renderOccupancyCalendar = () => {
-    const year = occupancyMonth.getFullYear();
-    const month = occupancyMonth.getMonth();
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-    const leadingBlanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
-
-    const handlePrevMonth = () => setOccupancyMonth(new Date(year, month - 1, 1));
-    const handleNextMonth = () => setOccupancyMonth(new Date(year, month + 1, 1));
-
-    return (
-      <div className="bg-white rounded-lg border border-slate-200 p-4 mt-6">
-        <div className="flex justify-between items-center mb-4">
-          <button onClick={handlePrevMonth} className="p-2 hover:bg-slate-100 rounded-full">
-            <ChevronLeftIcon className="w-5 h-5 text-slate-600" />
-          </button>
-          <span className="font-bold text-lg text-slate-800">
-            {occupancyMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-          </span>
-          <button onClick={handleNextMonth} className="p-2 hover:bg-slate-100 rounded-full">
-            <ChevronRightIcon className="w-5 h-5 text-slate-600" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-7 gap-2 text-center text-sm font-medium text-slate-500 mb-2">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-            <div key={d}>{d}</div>
-          ))}
-        </div>
-        <div className="grid grid-cols-7 gap-2">
-          {leadingBlanks.map((i) => (
-            <div key={`blank-${i}`} className="h-24 bg-slate-50 rounded-lg"></div>
-          ))}
-          {days.map((day) => {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const stat = occupancyStats.find((s) => s.date === dateStr);
-            const count = stat ? stat.count : 0;
-
-            return (
-              <div
-                key={day}
-                className="h-24 border border-slate-100 rounded-lg p-2 flex flex-col justify-between hover:bg-slate-50 transition bg-white"
-              >
-                <span className="text-sm font-medium text-slate-700">{day}</span>
-                <div className="flex items-end justify-end">
-                  {count > 0 && (
-                    <div className="flex flex-col items-end">
-                      <span className="text-xs text-slate-500 mb-1">Bookings</span>
-                      <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded-full">
-                        {count}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="space-y-6">
@@ -463,43 +337,40 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
         <div className="flex space-x-2">
           <button
             onClick={() => setActiveTab('offices')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'offices'
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'offices'
                 ? 'bg-indigo-600 text-white'
                 : 'bg-white text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             Offices
           </button>
           <button
             onClick={() => setActiveTab('staff')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'staff'
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'staff'
                 ? 'bg-indigo-600 text-white'
                 : 'bg-white text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             Staff
           </button>
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'stats'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            Stats
-          </button>
+
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'bookings'
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'bookings'
                 ? 'bg-indigo-600 text-white'
                 : 'bg-white text-slate-600 hover:bg-slate-50'
-            }`}
+              }`}
           >
             Bookings
+          </button>
+          <button
+            onClick={() => setActiveTab('reserved')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'reserved'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white text-slate-600 hover:bg-slate-50'
+              }`}
+          >
+            Reserved
           </button>
         </div>
       </div>
@@ -511,6 +382,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
             Dismiss
           </button>
         </div>
+      )}
+
+      {activeTab === 'reserved' && (
+        <ReservedScreen onRefresh={onDataRefresh} />
       )}
 
       {activeTab === 'bookings' && (
@@ -558,11 +433,11 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
                 >
                   {selectedDate
                     ? new Date(selectedDate).toLocaleDateString(undefined, {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
                     : 'Select Date'}
                 </button>
                 {isCalendarOpen && (
@@ -573,7 +448,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
                         setSelectedDate(date);
                         setIsCalendarOpen(false);
                       }}
-                      // No minDate for history, we want to see past bookings too
+                    // No minDate for history, we want to see past bookings too
                     />
                   </div>
                 )}
@@ -634,13 +509,12 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                           <span
                             className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${
-                          booking.slot === BookingSlot.FULL_DAY
-                            ? 'bg-green-100 text-green-800'
-                            : booking.slot === BookingSlot.MORNING
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-orange-100 text-orange-800'
-                        }`}
+                        ${booking.slot === BookingSlot.FULL_DAY
+                                ? 'bg-green-100 text-green-800'
+                                : booking.slot === BookingSlot.MORNING
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-orange-100 text-orange-800'
+                              }`}
                           >
                             {booking.slot}
                           </span>
@@ -831,17 +705,16 @@ const AdminScreen: React.FC<AdminScreenProps> = ({
                               ) : (
                                 <span
                                   className={`px-2 py-1 rounded-full text-xs font-medium 
-                                                                ${
-                                                                  desk.type === DeskType.STANDARD
-                                                                    ? 'bg-slate-100 text-slate-700'
-                                                                    : desk.type ===
-                                                                        DeskType.STANDING
-                                                                      ? 'bg-blue-100 text-blue-700'
-                                                                      : desk.type ===
-                                                                          DeskType.MEETING_ROOM
-                                                                        ? 'bg-purple-100 text-purple-700'
-                                                                        : 'bg-orange-100 text-orange-700'
-                                                                }`}
+                                                                ${desk.type === DeskType.STANDARD
+                                      ? 'bg-slate-100 text-slate-700'
+                                      : desk.type ===
+                                        DeskType.STANDING
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : desk.type ===
+                                          DeskType.MEETING_ROOM
+                                          ? 'bg-purple-100 text-purple-700'
+                                          : 'bg-orange-100 text-orange-700'
+                                    }`}
                                 >
                                   {desk.type}
                                 </span>
