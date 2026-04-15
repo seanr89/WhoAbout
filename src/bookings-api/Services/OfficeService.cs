@@ -13,6 +13,10 @@ public class OfficeService
         _context = context;
     }
 
+    /// <summary>
+    /// Gets all offices.
+    /// </summary>
+    /// <returns>List of offices records with desk information</returns>
     public async Task<List<Office>> GetAllOfficesAsync()
     {
         return await _context.Offices
@@ -20,6 +24,11 @@ public class OfficeService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Gets an office by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the office to get.</param>
+    /// <returns>Office record with desk information</returns>
     public async Task<Office?> GetOfficeByIdAsync(Guid id)
     {
         return await _context.Offices
@@ -45,7 +54,7 @@ public class OfficeService
         existingOffice.Name = office.Name;
         existingOffice.Location = office.Location;
         existingOffice.SeatMapUrl = office.SeatMapUrl;
-        
+
         await _context.SaveChangesAsync();
         return existingOffice;
     }

@@ -16,10 +16,10 @@ public static class HealthCheckEndpoints
             .WithTags("Health")
             .WithOpenApi();
 
-        group.MapHealthChecks("/")
-            .WithName("GetHealth")
-            .WithSummary("Get service health")
-            .WithDescription("Provides an endpoint to check the overall health of the application.");
+        // group.MapHealthChecks("/")
+        //     .WithName("GetHealth")
+        //     .WithSummary("Get service health")
+        //     .WithDescription("Provides an endpoint to check the overall health of the application.");
 
         // Simple health check ping
         app.MapGet("/healthcheck", () => Results.Ok("Healthy"))
