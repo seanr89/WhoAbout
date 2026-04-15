@@ -91,6 +91,22 @@ const FirstTimeSetupScreen: React.FC = () => {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-slate-100">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+                Email Address
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  disabled
+                  value={currentUser?.email || ''}
+                  className="appearance-none block w-full px-3 py-2 border border-slate-200 bg-slate-50 text-slate-500 rounded-md shadow-sm sm:text-sm cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            <div>
               <label htmlFor="name" className="block text-sm font-medium text-slate-700">
                 Full Name
               </label>
