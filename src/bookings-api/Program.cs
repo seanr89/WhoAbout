@@ -77,7 +77,7 @@ app.MapApiEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
-    var setup = scope.ServiceProvider.GetRequiredService<IDbInitializationSetup>();
+    var setup = scope.ServiceProvider.GetRequiredService<DbInitializationSetup>();
     await setup.InitializeDatabaseAsync();
 }
 
