@@ -7,7 +7,7 @@ This file tracks planned features, known bugs, and technical debt for the WhoAbo
 - [ ] **Profile Updates**: Logic for updating user profiles in `ProfileScreen` is incomplete or needs verification (see comments in `App.tsx`). Ensure updates reflect immediately in the UI without a full reload.
 - [ ] **Health Checks**: The commented-out `app.MapHealthChecks` in `Program.cs` suggests standard health checks are not fully implemented. Review and enable proper health checks.
 - [ ] **Error Handling**: Standardize API error responses across all endpoints.
-- [ ] **OpenAPI Config**: Address `// Learn more about configuring OpenAPI...` in `Program.cs` and ensure Swagger/OpenAPI documentation is fully configured and accurate.
+- [x] **OpenAPI Config**: Address `// Learn more about configuring OpenAPI...` in `Program.cs` and ensure Swagger/OpenAPI documentation is fully configured and accurate.
 
 ## ✨ New Features
 

@@ -9,9 +9,10 @@ public static class ServicesExtensions
         services.AddScoped<DeskService>();
         services.AddScoped<BookingService>();
         services.AddScoped<StaffMemberService>();
+        services.AddScoped<IAuthClaimService, AuthClaimService>();
         services.AddScoped<DeskReleaseService>();
-        services.AddScoped<IDbInitializationSetup, DbInitializationSetup>();
-        
+        services.AddScoped<DbInitializationSetup>();
+
         return services;
     }
 }

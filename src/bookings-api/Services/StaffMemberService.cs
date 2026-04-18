@@ -7,10 +7,12 @@ namespace bookings_api.Services;
 public class StaffMemberService
 {
     private readonly AppDbContext _context;
+    private readonly IAuthClaimService _authClaimService;
 
-    public StaffMemberService(AppDbContext context)
+    public StaffMemberService(AppDbContext context, IAuthClaimService authClaimService)
     {
         _context = context;
+        _authClaimService = authClaimService;
     }
 
     public async Task<List<StaffMember>> GetAllStaffMembersAsync()
@@ -37,6 +39,12 @@ public class StaffMemberService
     {
         _context.StaffMembers.Add(staffMember);
         await _context.SaveChangesAsync();
+
+        if (!string.IsNullOrEmpty(staffMember.UserId))
+        {
+            await _authClaimService.SetUserRoleAsync(staffMember.UserId, staffMember.Role.ToString());
+        }
+
         return staffMember;
     }
 
@@ -51,8 +59,16 @@ public class StaffMemberService
         existingStaffMember.Name = staffMember.Name;
         existingStaffMember.Email = staffMember.Email;
         existingStaffMember.IsActive = staffMember.IsActive;
-        
+        existingStaffMember.Role = staffMember.Role;
+        existingStaffMember.UserId = staffMember.UserId; // Ensure UserId is updated if it was passed
+
         await _context.SaveChangesAsync();
+
+        if (!string.IsNullOrEmpty(existingStaffMember.UserId))
+        {
+            await _authClaimService.SetUserRoleAsync(existingStaffMember.UserId, existingStaffMember.Role.ToString());
+        }
+
         return existingStaffMember;
     }
 
@@ -62,6 +78,11 @@ public class StaffMemberService
         if (staffMember == null)
         {
             return false;
+        }
+
+        if (!string.IsNullOrEmpty(staffMember.UserId))
+        {
+            await _authClaimService.RemoveUserRoleAsync(staffMember.UserId);
         }
 
         _context.StaffMembers.Remove(staffMember);

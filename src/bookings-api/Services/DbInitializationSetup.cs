@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace bookings_api.Services;
 
-public class DbInitializationSetup(AppDbContext context, ILogger<DbInitializationSetup> logger) : IDbInitializationSetup
+public class DbInitializationSetup(AppDbContext context, ILogger<DbInitializationSetup> logger)
 {
     private readonly AppDbContext _context = context;
     private readonly ILogger<DbInitializationSetup> _logger = logger;
