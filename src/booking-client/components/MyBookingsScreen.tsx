@@ -38,19 +38,34 @@ const MyBookingsScreen: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const [bookings, desks, me, locs] = await Promise.all([
+      const [bookings, me, locs] = await Promise.all([
         bookingService.getMyBookings(),
-        bookingService.getDesks(),
         bookingService.getMe(),
         bookingService.getLocations(),
       ]);
 
       setMyBookings(bookings);
-      setAllDesks(desks);
       setLocations(locs);
 
       if (me) {
-        const reserved = desks.filter((d) => d.reservedForStaffMemberId === me.id);
+        const deskIdsToFetch = Array.from(new Set(bookings.map((b) => b.deskId)));
+        const desksArray = await Promise.all(
+          deskIdsToFetch.map(id => bookingService.getDeskById(id))
+        );
+        const fetchedDesks = desksArray.filter(d => d !== null) as Desk[];
+        let reservedForUser: Desk[] = [];
+        const desksByLoc = await Promise.all(
+          locs.map(loc => bookingService.getDesksByOffice(loc.id))
+        );
+        const allCompanyDesks = desksByLoc.flat();
+        reservedForUser = allCompanyDesks.filter(d => d.reservedForStaffMemberId === me.id);
+        for(const d of reservedForUser) {
+          if(!fetchedDesks.some(fd => fd.id === d.id)) {
+            fetchedDesks.push(d);
+          }
+        }
+        setAllDesks(fetchedDesks);
+        const reserved = reservedForUser;
         setMyReservedDesks(reserved);
 
         const releasesMap = new Map<number, string[]>();

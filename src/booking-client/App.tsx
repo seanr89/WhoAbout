@@ -19,7 +19,6 @@ import { Location, Desk, Booking, StaffMember, Role } from './types';
 // Context interface for Outlet
 interface AppContextType {
   locations: Location[];
-  desks: Desk[];
   staffMembers: StaffMember[];
   staffRoles: import('./types').StaffRole[];
   currentUser: StaffMember | null;
@@ -40,7 +39,6 @@ const AdminScreenWrapper = () => {
       locations={context.locations}
       staffMembers={context.staffMembers}
       staffRoles={context.staffRoles}
-      desks={context.desks}
       onDataRefresh={context.onRefresh}
     />
   );

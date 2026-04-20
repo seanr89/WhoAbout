@@ -3,6 +3,7 @@ using bookings_api.Models;
 using bookings_api.Services;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using Moq;
 
 namespace bookings_api.tests;
 
@@ -21,7 +22,8 @@ public class StaffMemberServiceTests
     {
         // Arrange
         using var context = GetInMemoryDbContext();
-        var service = new StaffMemberService(context);
+        var mockAuthService = new Mock<IAuthClaimService>();
+        var service = new StaffMemberService(context, mockAuthService.Object);
 
         context.StaffMembers.AddRange(
             new StaffMember { Id = Guid.NewGuid(), Name = "Staff 1", Email = "staff1@test.com" },
@@ -41,7 +43,8 @@ public class StaffMemberServiceTests
     {
         // Arrange
         using var context = GetInMemoryDbContext();
-        var service = new StaffMemberService(context);
+        var mockAuthService = new Mock<IAuthClaimService>();
+        var service = new StaffMemberService(context, mockAuthService.Object);
         var staffId = Guid.NewGuid();
         var staff = new StaffMember { Id = staffId, Name = "Staff 1", Email = "staff1@test.com" };
 
@@ -62,7 +65,8 @@ public class StaffMemberServiceTests
     {
         // Arrange
         using var context = GetInMemoryDbContext();
-        var service = new StaffMemberService(context);
+        var mockAuthService = new Mock<IAuthClaimService>();
+        var service = new StaffMemberService(context, mockAuthService.Object);
         var staff = new StaffMember { Name = "New Staff", Email = "new@test.com" };
 
         // Act
@@ -80,7 +84,8 @@ public class StaffMemberServiceTests
     {
         // Arrange
         using var context = GetInMemoryDbContext();
-        var service = new StaffMemberService(context);
+        var mockAuthService = new Mock<IAuthClaimService>();
+        var service = new StaffMemberService(context, mockAuthService.Object);
         var staffId = Guid.NewGuid();
         var staff = new StaffMember { Id = staffId, Name = "Staff 1", Email = "staff1@test.com" };
 
@@ -106,7 +111,8 @@ public class StaffMemberServiceTests
     {
         // Arrange
         using var context = GetInMemoryDbContext();
-        var service = new StaffMemberService(context);
+        var mockAuthService = new Mock<IAuthClaimService>();
+        var service = new StaffMemberService(context, mockAuthService.Object);
         var staffId = Guid.NewGuid();
         var staff = new StaffMember { Id = staffId, Name = "Staff 1", Email = "staff1@test.com" };
 

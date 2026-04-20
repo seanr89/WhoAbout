@@ -13,24 +13,6 @@ public static class DeskEndpoints
             .WithTags("Desks")
             .WithOpenApi();
 
-        group.MapGet("/", async (DeskService service) =>
-        {
-            var desks = await service.GetAllDesksAsync();
-            var dtos = desks.Select(d => new DeskDto
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Type = d.Type,
-                OfficeId = d.OfficeId,
-                ReservedForStaffMemberId = d.ReservedForStaffMemberId
-            });
-            return Results.Ok(dtos);
-        })
-        .RequireAuthorization()
-        .WithName("GetAllDesks")
-        .WithSummary("Get all desks")
-        .WithDescription("Retrieves a list of all desks across all offices.");
-
         group.MapGet("/{id}", async (int id, DeskService service) =>
         {
             var desk = await service.GetDeskByIdAsync(id);

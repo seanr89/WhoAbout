@@ -17,27 +17,6 @@ public static class BookingEndpoints
             .WithTags("Bookings")
             .WithOpenApi();
 
-        // GET: /api/bookings
-        group.MapGet("/", async (BookingService service, ILoggerFactory loggerFactory) =>
-        {
-            var logger = loggerFactory.CreateLogger("BookingEndpoints");
-            //logger.LogInformation("Getting all bookings");
-            var bookings = await service.GetAllBookingsAsync();
-            var dtos = bookings.Select(b => new BookingDto
-            {
-                Id = b.Id,
-                DeskId = b.DeskId,
-                StaffMemberId = b.StaffMemberId,
-                Date = b.BookingDate,
-                BookingType = (int)b.BookingType
-            });
-            return Results.Ok(dtos);
-        })
-        .RequireAuthorization()
-        .WithName("GetAllBookings")
-        .WithSummary("Get all bookings")
-        .WithDescription("Retrieves a list of all existing bookings.");
-
         // GET: /api/bookings/{id}
         group.MapGet("/{id}", async (int id, BookingService service, ILoggerFactory loggerFactory) =>
         {
