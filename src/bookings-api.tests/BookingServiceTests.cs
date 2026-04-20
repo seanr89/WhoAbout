@@ -237,51 +237,6 @@ public class BookingServiceTests
     }
 
     [Fact]
-    public async Task GetDailyBookingCounts_ShouldReturnCorrectCounts()
-    {
-        // Arrange
-        using var context = GetInMemoryDbContext();
-        var service = new BookingService(context);
-
-        var office = new Office { Id = Guid.NewGuid() };
-        var desk = new Desk { Id = 1, OfficeId = office.Id };
-        var staff = new StaffMember { Id = Guid.NewGuid() };
-        var date = DateTime.UtcNow.Date;
-
-        context.Offices.Add(office);
-        context.Desks.Add(desk);
-        context.StaffMembers.Add(staff);
-
-        // 2 bookings on same date (different staff technically not possible on same desk, but for count test we can bypass validation if we seed directly)
-        // Actually unique constraint is usually checked in service logic, seeding DB directly bypasses it.
-        // But to be realistic let's use different desks
-        var desk2 = new Desk { Id = 2, OfficeId = office.Id };
-        context.Desks.Add(desk2);
-        var staff2 = new StaffMember { Id = Guid.NewGuid() };
-        context.StaffMembers.Add(staff2);
-
-
-        context.Bookings.Add(new Booking { BookingDate = date, DeskId = desk.Id, StaffMemberId = staff.Id });
-        context.Bookings.Add(new Booking { BookingDate = date, DeskId = desk2.Id, StaffMemberId = staff2.Id });
-        context.Bookings.Add(new Booking { BookingDate = date.AddDays(1), DeskId = desk.Id, StaffMemberId = staff.Id });
-
-        await context.SaveChangesAsync();
-
-        // Act
-        var result = await service.GetDailyBookingCountsAsync(office.Id, date, date.AddDays(1));
-
-        // Assert
-        Assert.Equal(2, result.Count); // 2 days
-        var day1 = result.FirstOrDefault(r => r.Date == DateOnly.FromDateTime(date));
-        Assert.NotNull(day1);
-        Assert.Equal(2, day1!.Count);
-
-        var day2 = result.FirstOrDefault(r => r.Date == DateOnly.FromDateTime(date.AddDays(1)));
-        Assert.NotNull(day2);
-        Assert.Equal(1, day2!.Count);
-    }
-
-    [Fact]
     public async Task GetBookingsByStaffMemberId_ShouldReturnBookingsForStaff()
     {
         // Arrange

@@ -26,13 +26,11 @@ const ReservedScreen: React.FC<ReservedScreenProps> = ({ onRefresh }) => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [locs, dks, staff] = await Promise.all([
+      const [locs, staff] = await Promise.all([
         api.fetchLocations(),
-        api.fetchDesks(),
         api.fetchStaffMembers(),
       ]);
       setLocations(locs);
-      setDesks(dks);
       setStaffMembers(staff);
       if (locs.length > 0 && !selectedLocationId) {
         setSelectedLocationId(locs[0].id);
@@ -45,7 +43,24 @@ const ReservedScreen: React.FC<ReservedScreenProps> = ({ onRefresh }) => {
     }
   };
 
-  const filteredDesks = desks.filter((d) => d.locationId === selectedLocationId);
+  useEffect(() => {
+    const fetchDesks = async () => {
+      if (!selectedLocationId) return;
+      setIsLoading(true);
+      try {
+        const dks = await api.fetchDesksByOffice(selectedLocationId);
+        setDesks(dks);
+      } catch (err) {
+        setError('Failed to load desks');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDesks();
+  }, [selectedLocationId]);
+
+  const filteredDesks = desks;
 
   const handleOpenModal = (desk: Desk) => {
     setSelectedDesk(desk);

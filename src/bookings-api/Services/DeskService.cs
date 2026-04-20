@@ -13,13 +13,6 @@ public class DeskService
         _context = context;
     }
 
-    public async Task<List<Desk>> GetAllDesksAsync()
-    {
-        return await _context.Desks
-            .Include(d => d.Office)
-            .ToListAsync();
-    }
-
     public async Task<Desk?> GetDeskByIdAsync(int id)
     {
         return await _context.Desks

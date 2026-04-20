@@ -7,7 +7,6 @@ import { useAuth } from '../contexts/AuthContext';
 
 const AuthenticatedLayout: React.FC = () => {
   const [locations, setLocations] = useState<Location[]>([]);
-  const [desks, setDesks] = useState<Desk[]>([]);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [staffRoles, setStaffRoles] = useState<StaffRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,14 +20,12 @@ const AuthenticatedLayout: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const [locationsData, desksData, staffMembersData, rolesData] = await Promise.all([
+      const [locationsData, staffMembersData, rolesData] = await Promise.all([
         api.fetchLocations(),
-        api.fetchDesks(),
         api.fetchStaffMembers(),
         api.fetchStaffRoles(),
       ]);
       setLocations(locationsData);
-      setDesks(desksData);
       setStaffMembers(staffMembersData);
       setStaffRoles(rolesData);
     } catch (err) {
@@ -93,7 +90,6 @@ const AuthenticatedLayout: React.FC = () => {
         <Outlet
           context={{
             locations,
-            desks,
             staffMembers,
             staffRoles,
             currentUser,

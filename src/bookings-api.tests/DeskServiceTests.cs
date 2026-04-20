@@ -17,28 +17,6 @@ public class DeskServiceTests
     }
 
     [Fact]
-    public async Task GetAllDesks_ShouldReturnAllDesks()
-    {
-        // Arrange
-        using var context = GetInMemoryDbContext();
-        var service = new DeskService(context);
-
-        var office = new Office { Id = Guid.NewGuid(), Name = "Office 1", Location = "Location 1" };
-        context.Offices.Add(office);
-        context.Desks.AddRange(
-            new Desk { Id = 1, Name = "Desk 1", OfficeId = office.Id },
-            new Desk { Id = 2, Name = "Desk 2", OfficeId = office.Id }
-        );
-        await context.SaveChangesAsync();
-
-        // Act
-        var result = await service.GetAllDesksAsync();
-
-        // Assert
-        Assert.Equal(2, result.Count);
-    }
-
-    [Fact]
     public async Task GetDeskById_ShouldReturnDesk_WhenDeskExists()
     {
         // Arrange

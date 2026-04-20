@@ -13,13 +13,6 @@ public class BookingService
         _context = context;
     }
 
-    public async Task<List<Booking>> GetAllBookingsAsync()
-    {
-        return await _context.Bookings
-            .Include(b => b.Desk)
-            .ToListAsync();
-    }
-
     public async Task<List<Booking>> GetBookingsByDateAsync(DateTime date)
     {
         // Normalized to UTC date range

@@ -78,17 +78,18 @@ export const bookingService = {
     }
   },
 
-  async getDesks(): Promise<Desk[]> {
+  async getDeskById(id: number): Promise<Desk | null> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/desks`, {
+      const response = await fetch(`${API_BASE_URL}/api/desks/${id}`, {
         headers: await getHeaders(),
       });
-      if (!response.ok) throw new Error('Failed to fetch desks');
-      const data: ApiDesk[] = await response.json();
-      return data.map(mapApiDeskToDesk);
+      if (response.status === 404) return null;
+      if (!response.ok) throw new Error('Failed to fetch desk');
+      const data: ApiDesk = await response.json();
+      return mapApiDeskToDesk(data);
     } catch (error) {
-      console.error('Error fetching desks:', error);
-      return [];
+      console.error(`Error fetching desk ${id}:`, error);
+      return null;
     }
   },
 
@@ -147,23 +148,6 @@ export const bookingService = {
     }
     const data: ApiStaffMember = await response.json();
     return mapApiStaffToStaff(data);
-  },
-
-  async getAll(): Promise<Booking[]> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/bookings`, {
-        headers: await getHeaders(),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch bookings');
-      }
-      const data: ApiBooking[] = await response.json();
-
-      return data.map(mapApiBookingToClient);
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
-      return [];
-    }
   },
 
   async getMyBookings(): Promise<Booking[]> {

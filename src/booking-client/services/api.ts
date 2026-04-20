@@ -9,13 +9,8 @@ export const api = {
     return await bookingService.getLocations();
   },
 
-  fetchDesks: async (): Promise<Desk[]> => {
-    console.log('api.fetchDesks');
-    return await bookingService.getDesks();
-  },
-
-  fetchBookings: async (): Promise<Booking[]> => {
-    return await bookingService.getAll();
+  fetchDeskById: async (id: number): Promise<Desk | null> => {
+    return await bookingService.getDeskById(id);
   },
 
   fetchBookingsByStaffId: async (
